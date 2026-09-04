@@ -1,12 +1,15 @@
 package com.jelly.farmhelperv2.gui;
 
+import cc.polyfrost.oneconfig.config.core.OneKeyBind;
 import com.jelly.farmhelperv2.FarmHelper;
 import com.jelly.farmhelperv2.config.FarmHelperConfig;
 import com.jelly.farmhelperv2.util.LogUtils;
 import com.jelly.farmhelperv2.util.PlayerUtils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.util.MathHelper;
+import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -16,14 +19,19 @@ import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
 /**
- * Full FarmX settings for Android / GL4ES — every important config option without OneConfig.
+ * Full FarmX settings for Android / GL4ES — keybinds, typed yaw/pitch, and all config options.
  */
 public class FarmXMobileGui extends GuiScreen {
     private static final String[] PAGE_NAMES = {
-            "Farming", "Rotation", "Crop Utils", "Rewarp & Spawn",
+            "Keybinds", "Farming", "Rotation", "Crop Utils", "Rewarp & Spawn",
             "Failsafe", "Detection", "Delays Rows", "Delays Rot/Rewarp", "Misc"
     };
     private int page = 0;
+    /** Which keybind button is waiting for a key press; 0 = none. */
+    private int listeningKeybind = 0;
+
+    private GuiTextField pitchField;
+    private GuiTextField yawField;
 
     private static final int ID_PREV = 900;
     private static final int ID_NEXT = 901;
@@ -37,7 +45,17 @@ public class FarmXMobileGui extends GuiScreen {
     };
     private static final String[] SOUND_LABELS = {"Sound: Orb", "Sound: Anvil"};
 
-    // Button IDs
+    // Keybinds
+    private static final int ID_KB_TOGGLE = 200;
+    private static final int ID_KB_GUI = 201;
+    private static final int ID_KB_CANCEL_FS = 202;
+    private static final int ID_KB_DEBUG = 203;
+    private static final int ID_KB_CLEAR_TOGGLE = 204;
+    private static final int ID_KB_CLEAR_GUI = 205;
+    private static final int ID_KB_CLEAR_CANCEL = 206;
+    private static final int ID_KB_CLEAR_DEBUG = 207;
+
+    // Farming
     private static final int ID_MACRO = 1;
     private static final int ID_ALWAYS_W = 2;
     private static final int ID_HOLD_LMB = 3;
@@ -46,15 +64,15 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_DONT_FIX = 6;
     private static final int ID_AUTO_TOOL = 7;
 
+    // Rotation
     private static final int ID_C_PITCH = 10;
     private static final int ID_C_YAW = 11;
     private static final int ID_SET_BOTH = 12;
     private static final int ID_SET_PITCH = 13;
     private static final int ID_SET_YAW = 14;
-    private static final int ID_P_M = 15;
-    private static final int ID_P_P = 16;
-    private static final int ID_Y_M = 17;
-    private static final int ID_Y_P = 18;
+    private static final int ID_APPLY_PITCH = 15;
+    private static final int ID_APPLY_YAW = 16;
+    private static final int ID_APPLY_BOTH = 17;
 
     private static final int ID_HB_CROP = 20;
     private static final int ID_HB_NW = 21;
@@ -156,18 +174,31 @@ public class FarmXMobileGui extends GuiScreen {
     @Override
     public void initGui() {
         this.buttonList.clear();
+        Keyboard.enableRepeatEvents(true);
+        pitchField = null;
+        yawField = null;
+
         int cx = this.width / 2 - 100;
         int y = 32;
         int g = 18;
         int half = 98;
-        int third = 64;
 
         this.buttonList.add(new GuiButton(ID_PREV, this.width / 2 - 105, this.height - 44, 70, 20, "< Prev"));
         this.buttonList.add(new GuiButton(ID_NEXT, this.width / 2 - 30, this.height - 44, 70, 20, "Next >"));
         this.buttonList.add(new GuiButton(ID_SAVE, this.width / 2 + 45, this.height - 44, 60, 20, "Save"));
 
         switch (page) {
-            case 0:
+            case 0: // Keybinds
+                btn(ID_KB_TOGGLE, cx, y, 160, listeningLabel(ID_KB_TOGGLE, "Toggle Macro", FarmHelperConfig.toggleMacro));
+                btn(ID_KB_CLEAR_TOGGLE, this.width / 2 + 65, y, 35, "Clr"); y += g;
+                btn(ID_KB_GUI, cx, y, 160, listeningLabel(ID_KB_GUI, "Open GUI", FarmHelperConfig.openGuiKeybind));
+                btn(ID_KB_CLEAR_GUI, this.width / 2 + 65, y, 35, "Clr"); y += g;
+                btn(ID_KB_CANCEL_FS, cx, y, 160, listeningLabel(ID_KB_CANCEL_FS, "Cancel Failsafe", FarmHelperConfig.cancelFailsafeKeybind));
+                btn(ID_KB_CLEAR_CANCEL, this.width / 2 + 65, y, 35, "Clr"); y += g;
+                btn(ID_KB_DEBUG, cx, y, 160, listeningLabel(ID_KB_DEBUG, "Debug", FarmHelperConfig.debugKeybind));
+                btn(ID_KB_CLEAR_DEBUG, this.width / 2 + 65, y, 35, "Clr");
+                break;
+            case 1: // Farming
                 btn(ID_MACRO, cx, y, 200, macroLabel()); y += g;
                 btn(ID_ALWAYS_W, cx, y, 200, on("Always Hold W", FarmHelperConfig.alwaysHoldW)); y += g;
                 btn(ID_HOLD_LMB, cx, y, 200, on("Hold LMB Row Change", FarmHelperConfig.holdLeftClickWhenChangingRow)); y += g;
@@ -176,32 +207,37 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_DONT_FIX, cx, y, 200, on("Don't Fix After Warp", FarmHelperConfig.dontFixAfterWarping)); y += g;
                 btn(ID_AUTO_TOOL, cx, y, 200, on("Auto Switch Tool", FarmHelperConfig.autoSwitchTool));
                 break;
-            case 1:
+            case 2: // Rotation — typed values
                 btn(ID_C_PITCH, cx, y, 200, on("Custom Pitch", FarmHelperConfig.customPitch)); y += g;
-                btn(ID_C_YAW, cx, y, 200, on("Custom Yaw", FarmHelperConfig.customYaw)); y += g;
-                btn(ID_SET_BOTH, cx, y, 200, "Set Both From Look"); y += g;
+                btn(ID_C_YAW, cx, y, 200, on("Custom Yaw", FarmHelperConfig.customYaw)); y += g + 12;
+                pitchField = new GuiTextField(0, this.fontRendererObj, cx, y, 130, 18);
+                pitchField.setMaxStringLength(12);
+                pitchField.setText(fmt(FarmHelperConfig.customPitchLevel));
+                btn(ID_APPLY_PITCH, this.width / 2 + 35, y - 1, 65, "Set Pitch"); y += g + 12;
+                yawField = new GuiTextField(1, this.fontRendererObj, cx, y, 130, 18);
+                yawField.setMaxStringLength(12);
+                yawField.setText(fmt(FarmHelperConfig.customYawLevel));
+                btn(ID_APPLY_YAW, this.width / 2 + 35, y - 1, 65, "Set Yaw"); y += g + 6;
+                btn(ID_APPLY_BOTH, cx, y, 200, "Apply Both Typed Values"); y += g;
+                btn(ID_SET_BOTH, cx, y, 200, "Fill From Current Look"); y += g;
                 btn(ID_SET_PITCH, this.width / 2 - 105, y, half, "Pitch From Look");
-                btn(ID_SET_YAW, this.width / 2 + 7, y, half, "Yaw From Look"); y += g;
-                btn(ID_P_M, this.width / 2 - 105, y, half, "Pitch -1");
-                btn(ID_P_P, this.width / 2 + 7, y, half, "Pitch +1"); y += g;
-                btn(ID_Y_M, this.width / 2 - 105, y, half, "Yaw -5");
-                btn(ID_Y_P, this.width / 2 + 7, y, half, "Yaw +5");
+                btn(ID_SET_YAW, this.width / 2 + 7, y, half, "Yaw From Look");
                 break;
-            case 2:
+            case 3:
                 btn(ID_HB_CROP, cx, y, 200, on("Bigger Crop Hitboxes", FarmHelperConfig.increasedCrops)); y += g;
                 btn(ID_HB_NW, cx, y, 200, on("Bigger NW Hitboxes", FarmHelperConfig.increasedNetherWarts)); y += g;
                 btn(ID_HB_COCOA, cx, y, 200, on("Bigger Cocoa Hitboxes", FarmHelperConfig.increasedCocoaBeans)); y += g;
                 btn(ID_HB_MUSH, cx, y, 200, on("Bigger Mushroom Hitboxes", FarmHelperConfig.increasedMushrooms)); y += g;
                 btn(ID_PING_CACTUS, cx, y, 200, on("Pingless Cactus", FarmHelperConfig.pinglessCactus));
                 break;
-            case 3:
+            case 4:
                 btn(ID_SET_SPAWN, cx, y, 200, "Set Spawn (current pos)"); y += g;
                 btn(ID_RESET_SPAWN, cx, y, 200, "Reset Spawn"); y += g + 2;
                 btn(ID_ADD_RW, cx, y, 200, "Add Rewarp Here"); y += g;
                 btn(ID_REM_RW, this.width / 2 - 105, y, half, "Remove Closest");
                 btn(ID_REM_ALL_RW, this.width / 2 + 7, y, half, "Remove All");
                 break;
-            case 4:
+            case 5:
                 btn(ID_FS_ACTION, cx, y, 200, FarmHelperConfig.failsafeAction ? "Failsafe: Disable" : "Failsafe: React"); y += g;
                 btn(ID_FS_SOUND, cx, y, 200, on("Failsafe Sound", FarmHelperConfig.enableFailsafeSound)); y += g;
                 btn(ID_FS_SOUND_TYPE, cx, y, 200, soundLabel()); y += g;
@@ -214,7 +250,7 @@ public class FarmXMobileGui extends GuiScreen {
                 pair(ID_FS_STOP_M, ID_FS_STOP_P, y, "StopDelay " + FarmHelperConfig.failsafeStopDelay + "ms"); y += g;
                 pair(ID_FS_RDELAY_M, ID_FS_RDELAY_P, y, "RestartDelay " + FarmHelperConfig.restartAfterFailSafeDelay + "m");
                 break;
-            case 5:
+            case 6:
                 pair(ID_DET_LAG_M, ID_DET_LAG_P, y, "TP Lag Tol " + fmt(FarmHelperConfig.teleportLagTolerance)); y += g;
                 pair(ID_DET_WIN_M, ID_DET_WIN_P, y, "Detect Window " + FarmHelperConfig.detectionTimeWindow + "ms"); y += g;
                 pair(ID_DET_PITCH_M, ID_DET_PITCH_P, y, "Pitch Sens " + fmt(FarmHelperConfig.pitchSensitivity)); y += g;
@@ -226,14 +262,14 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_DESYNC_ON, cx, y, 200, on("Desync Check", FarmHelperConfig.checkDesync)); y += g;
                 pair(ID_DESYNC_M, ID_DESYNC_P, y, "Desync Pause " + FarmHelperConfig.desyncPauseDelay + "ms");
                 break;
-            case 6:
+            case 7:
                 pair(ID_ROW_T_M, ID_ROW_T_P, y, "Row Delay " + fmt(FarmHelperConfig.timeBetweenChangingRows) + "ms"); y += g;
                 pair(ID_ROW_R_M, ID_ROW_R_P, y, "Row Random +" + fmt(FarmHelperConfig.randomTimeBetweenChangingRows) + "ms"); y += g;
                 btn(ID_ROW_JACOB, cx, y, 200, on("Custom Row Delays Jacob", FarmHelperConfig.customRowChangeDelaysDuringJacob)); y += g;
                 pair(ID_ROW_JT_M, ID_ROW_JT_P, y, "Jacob Row " + fmt(FarmHelperConfig.timeBetweenChangingRowsDuringJacob) + "ms"); y += g;
                 pair(ID_ROW_JR_M, ID_ROW_JR_P, y, "Jacob Row Rand +" + fmt(FarmHelperConfig.randomTimeBetweenChangingRowsDuringJacob) + "ms");
                 break;
-            case 7:
+            case 8:
                 pair(ID_ROT_T_M, ID_ROT_T_P, y, "Rot Time " + fmt(FarmHelperConfig.rotationTime) + "ms"); y += g;
                 pair(ID_ROT_R_M, ID_ROT_R_P, y, "Rot Random +" + fmt(FarmHelperConfig.rotationTimeRandomness) + "ms"); y += g;
                 btn(ID_ROT_JACOB, cx, y, 200, on("Custom Rot Delays Jacob", FarmHelperConfig.customRotationDelaysDuringJacob)); y += g;
@@ -246,7 +282,7 @@ public class FarmXMobileGui extends GuiScreen {
                 pair(ID_RW_T_M, ID_RW_T_P, y, "Rewarp Delay " + fmt(FarmHelperConfig.rewarpDelay) + "ms"); y += g;
                 pair(ID_RW_R_M, ID_RW_R_P, y, "Rewarp Rand +" + fmt(FarmHelperConfig.rewarpDelayRandomness) + "ms");
                 break;
-            case 8:
+            case 9:
             default:
                 btn(ID_ANTISTUCK, cx, y, 200, on("Anti Stuck", FarmHelperConfig.tmpAntiStuckEnabled)); y += g;
                 pair(ID_AS_TRIES_M, ID_AS_TRIES_P, y, "AntiStuck Tries " + FarmHelperConfig.antiStuckTriesUntilRewarp); y += g;
@@ -276,20 +312,44 @@ public class FarmXMobileGui extends GuiScreen {
         this.buttonList.add(new GuiButton(idMinus, this.width / 2 - 105, y, 20, 20, "-"));
         this.buttonList.add(new GuiButton(idPlus, this.width / 2 + 85, y, 20, 20, "+"));
         this.buttonList.add(new GuiButton(-1, this.width / 2 - 82, y, 164, 20, label));
-        // center label button is non-functional (id -1 ignored)
+    }
+
+    @Override
+    public void updateScreen() {
+        if (pitchField != null) pitchField.updateCursorCounter();
+        if (yawField != null) yawField.updateCursorCounter();
+    }
+
+    @Override
+    public void onGuiClosed() {
+        Keyboard.enableRepeatEvents(false);
+        listeningKeybind = 0;
     }
 
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         this.drawCenteredString(this.fontRendererObj, "FarmX — " + PAGE_NAMES[page], this.width / 2, 8, 0xFFFFFF);
-        if (page == 1) {
+        if (page == 0) {
+            String tip = listeningKeybind != 0
+                    ? "§ePress a key now… (ESC cancel)"
+                    : "Tap a bind, then press the key. Clr = unset.";
+            this.drawCenteredString(this.fontRendererObj, tip, this.width / 2, this.height - 66, 0xAAAAAA);
+        } else if (page == 2) {
+            if (pitchField != null) {
+                this.drawString(this.fontRendererObj, "Type pitch (-90..90):", this.width / 2 - 100, pitchField.yPosition - 10, 0xAAAAAA);
+                pitchField.drawTextBox();
+            }
+            if (yawField != null) {
+                this.drawString(this.fontRendererObj, "Type yaw (-180..180):", this.width / 2 - 100, yawField.yPosition - 10, 0xAAAAAA);
+                yawField.drawTextBox();
+            }
             this.drawCenteredString(this.fontRendererObj,
-                    String.format(Locale.US, "Pitch %s %.1f | Yaw %s %.1f",
+                    String.format(Locale.US, "Active: pitch %s %.1f | yaw %s %.1f",
                             FarmHelperConfig.customPitch ? "ON" : "OFF", FarmHelperConfig.customPitchLevel,
                             FarmHelperConfig.customYaw ? "ON" : "OFF", FarmHelperConfig.customYawLevel),
                     this.width / 2, this.height - 66, 0x55FF55);
-        } else if (page == 3) {
+        } else if (page == 4) {
             String spawn = PlayerUtils.isSpawnLocationSet()
                     ? ("Spawn " + FarmHelperConfig.spawnPosX + "," + FarmHelperConfig.spawnPosY + "," + FarmHelperConfig.spawnPosZ)
                     : "Spawn not set";
@@ -303,20 +363,92 @@ public class FarmXMobileGui extends GuiScreen {
     }
 
     @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        if (page == 2) {
+            if (pitchField != null) pitchField.mouseClicked(mouseX, mouseY, mouseButton);
+            if (yawField != null) yawField.mouseClicked(mouseX, mouseY, mouseButton);
+        }
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (listeningKeybind != 0) {
+            if (keyCode == Keyboard.KEY_ESCAPE) {
+                listeningKeybind = 0;
+                initGui();
+                return;
+            }
+            OneKeyBind bind = keybindFor(listeningKeybind);
+            if (bind != null) {
+                bind.clearKeys();
+                if (keyCode != Keyboard.KEY_NONE) {
+                    bind.addKey(keyCode);
+                }
+                save();
+                LogUtils.sendSuccess("Keybind set to " + bind.getDisplay());
+            }
+            listeningKeybind = 0;
+            initGui();
+            return;
+        }
+
+        if (page == 2) {
+            if (pitchField != null && pitchField.isFocused()) {
+                pitchField.textboxKeyTyped(typedChar, keyCode);
+                if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER) {
+                    applyPitchFromField();
+                }
+                return;
+            }
+            if (yawField != null && yawField.isFocused()) {
+                yawField.textboxKeyTyped(typedChar, keyCode);
+                if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_NUMPADENTER) {
+                    applyYawFromField();
+                }
+                return;
+            }
+        }
+
+        if (keyCode == Keyboard.KEY_ESCAPE) {
+            saveAndClose();
+            return;
+        }
+        super.keyTyped(typedChar, keyCode);
+    }
+
+    @Override
     protected void actionPerformed(GuiButton button) throws IOException {
         if (button.id < 0) return;
         switch (button.id) {
             case ID_PREV:
+                applyFieldsIfNeeded();
+                listeningKeybind = 0;
                 page = (page + PAGE_NAMES.length - 1) % PAGE_NAMES.length;
                 initGui();
                 return;
             case ID_NEXT:
+                applyFieldsIfNeeded();
+                listeningKeybind = 0;
                 page = (page + 1) % PAGE_NAMES.length;
                 initGui();
                 return;
             case ID_SAVE:
+                applyFieldsIfNeeded();
                 saveAndClose();
                 return;
+
+            case ID_KB_TOGGLE:
+            case ID_KB_GUI:
+            case ID_KB_CANCEL_FS:
+            case ID_KB_DEBUG:
+                listeningKeybind = button.id;
+                initGui();
+                break;
+            case ID_KB_CLEAR_TOGGLE: clearBind(FarmHelperConfig.toggleMacro); break;
+            case ID_KB_CLEAR_GUI: clearBind(FarmHelperConfig.openGuiKeybind); break;
+            case ID_KB_CLEAR_CANCEL: clearBind(FarmHelperConfig.cancelFailsafeKeybind); break;
+            case ID_KB_CLEAR_DEBUG: clearBind(FarmHelperConfig.debugKeybind); break;
 
             case ID_MACRO:
                 FarmHelperConfig.macroType = (FarmHelperConfig.macroType + 1) % MACRO_LABELS.length;
@@ -331,13 +463,12 @@ public class FarmXMobileGui extends GuiScreen {
 
             case ID_C_PITCH: FarmHelperConfig.customPitch = !FarmHelperConfig.customPitch; button.displayString = on("Custom Pitch", FarmHelperConfig.customPitch); break;
             case ID_C_YAW: FarmHelperConfig.customYaw = !FarmHelperConfig.customYaw; button.displayString = on("Custom Yaw", FarmHelperConfig.customYaw); break;
-            case ID_SET_BOTH: setLook(true, true); initGui(); break;
-            case ID_SET_PITCH: setLook(true, false); initGui(); break;
-            case ID_SET_YAW: setLook(false, true); initGui(); break;
-            case ID_P_M: FarmHelperConfig.customPitchLevel = clampPitch(FarmHelperConfig.customPitchLevel - 1); FarmHelperConfig.customPitch = true; initGui(); break;
-            case ID_P_P: FarmHelperConfig.customPitchLevel = clampPitch(FarmHelperConfig.customPitchLevel + 1); FarmHelperConfig.customPitch = true; initGui(); break;
-            case ID_Y_M: FarmHelperConfig.customYawLevel = normYaw(FarmHelperConfig.customYawLevel - 5); FarmHelperConfig.customYaw = true; initGui(); break;
-            case ID_Y_P: FarmHelperConfig.customYawLevel = normYaw(FarmHelperConfig.customYawLevel + 5); FarmHelperConfig.customYaw = true; initGui(); break;
+            case ID_APPLY_PITCH: applyPitchFromField(); initGui(); break;
+            case ID_APPLY_YAW: applyYawFromField(); initGui(); break;
+            case ID_APPLY_BOTH: applyPitchFromField(); applyYawFromField(); initGui(); break;
+            case ID_SET_BOTH: setLook(true, true); fillFieldsFromConfig(); initGui(); break;
+            case ID_SET_PITCH: setLook(true, false); fillFieldsFromConfig(); initGui(); break;
+            case ID_SET_YAW: setLook(false, true); fillFieldsFromConfig(); initGui(); break;
 
             case ID_HB_CROP: FarmHelperConfig.increasedCrops = !FarmHelperConfig.increasedCrops; button.displayString = on("Bigger Crop Hitboxes", FarmHelperConfig.increasedCrops); break;
             case ID_HB_NW: FarmHelperConfig.increasedNetherWarts = !FarmHelperConfig.increasedNetherWarts; button.displayString = on("Bigger NW Hitboxes", FarmHelperConfig.increasedNetherWarts); break;
@@ -444,6 +575,73 @@ public class FarmXMobileGui extends GuiScreen {
         }
     }
 
+    private String listeningLabel(int id, String name, OneKeyBind bind) {
+        if (listeningKeybind == id) {
+            return name + ": §ePRESS KEY…";
+        }
+        String display = bind.getDisplay();
+        if (display == null || display.isEmpty() || "NONE".equalsIgnoreCase(display)) {
+            display = "UNSET";
+        }
+        return name + ": " + display;
+    }
+
+    private OneKeyBind keybindFor(int id) {
+        switch (id) {
+            case ID_KB_TOGGLE: return FarmHelperConfig.toggleMacro;
+            case ID_KB_GUI: return FarmHelperConfig.openGuiKeybind;
+            case ID_KB_CANCEL_FS: return FarmHelperConfig.cancelFailsafeKeybind;
+            case ID_KB_DEBUG: return FarmHelperConfig.debugKeybind;
+            default: return null;
+        }
+    }
+
+    private void clearBind(OneKeyBind bind) {
+        bind.clearKeys();
+        save();
+        LogUtils.sendSuccess("Keybind cleared");
+        listeningKeybind = 0;
+        initGui();
+    }
+
+    private void applyFieldsIfNeeded() {
+        if (page == 2) {
+            applyPitchFromField();
+            applyYawFromField();
+        }
+    }
+
+    private void applyPitchFromField() {
+        if (pitchField == null) return;
+        try {
+            float v = Float.parseFloat(pitchField.getText().trim());
+            FarmHelperConfig.customPitchLevel = clampPitch(v);
+            FarmHelperConfig.customPitch = true;
+            save();
+            LogUtils.sendSuccess("Pitch set to " + FarmHelperConfig.customPitchLevel);
+        } catch (NumberFormatException e) {
+            LogUtils.sendError("Invalid pitch. Type a number like 2.5 or -30");
+        }
+    }
+
+    private void applyYawFromField() {
+        if (yawField == null) return;
+        try {
+            float v = Float.parseFloat(yawField.getText().trim());
+            FarmHelperConfig.customYawLevel = normYaw(v);
+            FarmHelperConfig.customYaw = true;
+            save();
+            LogUtils.sendSuccess("Yaw set to " + FarmHelperConfig.customYawLevel);
+        } catch (NumberFormatException e) {
+            LogUtils.sendError("Invalid yaw. Type a number like 90 or -45");
+        }
+    }
+
+    private void fillFieldsFromConfig() {
+        if (pitchField != null) pitchField.setText(fmt(FarmHelperConfig.customPitchLevel));
+        if (yawField != null) yawField.setText(fmt(FarmHelperConfig.customYawLevel));
+    }
+
     private void adjF(DoubleSupplier get, DoubleConsumer set, double delta, double min, double max) {
         set.accept(MathHelper.clamp_float((float) (get.getAsDouble() + delta), (float) min, (float) max));
         initGui();
@@ -510,6 +708,6 @@ public class FarmXMobileGui extends GuiScreen {
 
     private static String fmt(float v) {
         if (Math.abs(v - Math.round(v)) < 0.001f) return String.valueOf(Math.round(v));
-        return String.format(Locale.US, "%.1f", v);
+        return String.format(Locale.US, "%.2f", v);
     }
 }
