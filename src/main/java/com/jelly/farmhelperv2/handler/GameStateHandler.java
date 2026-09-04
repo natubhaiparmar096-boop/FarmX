@@ -5,7 +5,6 @@ import com.jelly.farmhelperv2.event.*;
 import com.jelly.farmhelperv2.failsafe.FailsafeManager;
 import com.jelly.farmhelperv2.failsafe.impl.CobwebFailsafe;
 import com.jelly.farmhelperv2.failsafe.impl.DirtFailsafe;
-import com.jelly.farmhelperv2.failsafe.impl.JacobFailsafe;
 import com.jelly.farmhelperv2.util.*;
 import com.jelly.farmhelperv2.util.helper.Clock;
 import com.jelly.farmhelperv2.util.helper.Timer;
@@ -581,9 +580,6 @@ public class GameStateHandler {
     }
 
     public boolean inJacobContest() {
-        if (FailsafeManager.getInstance().triggeredFailsafe.isPresent() && FailsafeManager.getInstance().triggeredFailsafe.get().equals(JacobFailsafe.getInstance())) {
-            return isInJacobContest;
-        }
         if (FarmHelperConfig.jacobContestCurrentCropsOnly) {
             if (jacobsContestCrop.isPresent()) {
                 return isInJacobContest && jacobsContestCrop.get() == MacroHandler.getInstance().getCrop();

@@ -196,8 +196,6 @@ public class MacroHandler {
         FeatureManager.getInstance().disableAll();
         FeatureManager.getInstance().resetAllStates();
         FailsafeManager.getInstance().resetAfterMacroDisable();
-        if (UngrabMouse.getInstance().isToggled())
-            UngrabMouse.getInstance().stop();
         disableCurrentMacro();
         setCurrentMacro(Optional.empty());
     }
@@ -211,11 +209,6 @@ public class MacroHandler {
             beforeTeleportationPos = Optional.empty();
             macroingTimer.pause();
             analyticsTimer.pause();
-            if (scheduler && Freelook.getInstance().isRunning()) {
-                Freelook.getInstance().stop();
-            }
-            if (Scheduler.getInstance().isFarming())
-                Scheduler.getInstance().pause();
             if (!BPSTracker.getInstance().isPaused)
                 BPSTracker.getInstance().pause();
         });
@@ -239,7 +232,6 @@ public class MacroHandler {
             macroingTimer.resume();
             analyticsTimer.resume();
             afterRewarpDelay.reset();
-//            Scheduler.getInstance().resume(); - gets enabled in featuremanager
             FeatureManager.getInstance().resume();
         });
     }

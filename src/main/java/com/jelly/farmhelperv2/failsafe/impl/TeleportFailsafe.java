@@ -72,7 +72,7 @@ public class TeleportFailsafe extends Failsafe {
 
     @Override
     public boolean shouldAltTab() {
-        return FailsafeNotificationsPage.autoAltTabOnTeleportationFailsafe;
+        return false;
     }
 
     @Override

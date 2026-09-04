@@ -61,7 +61,7 @@ public class RotationFailsafe extends Failsafe {
 
     @Override
     public boolean shouldAltTab() {
-        return FailsafeNotificationsPage.autoAltTabOnRotationFailsafe;
+        return false;
     }
 
     @Override

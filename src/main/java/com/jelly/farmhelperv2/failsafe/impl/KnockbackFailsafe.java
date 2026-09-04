@@ -62,7 +62,7 @@ public class KnockbackFailsafe extends Failsafe {
 
     @Override
     public boolean shouldAltTab() {
-        return FailsafeNotificationsPage.autoAltTabOnKnockbackFailsafe;
+        return false;
     }
 
     @Override

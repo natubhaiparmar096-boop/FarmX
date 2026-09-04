@@ -114,33 +114,7 @@ public class FailsafeUtils {
     }
 
     public static void captureClip() {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                ArrayList<Integer> keys = FarmHelperConfig.captureClipKeybind.getKeyBinds();
-                if (hasUndefinedKey(keys)) {
-                    LogUtils.sendError("Failed to capture a clip! Keybind is either not set or invalid!");
-                    return;
-                }
-                Robot robot = new Robot();
-                keys.forEach(key -> {
-                    robot.keyPress(KeyCodeConverter.convertToAwtKeyCode(key));
-                });
-                robot.delay(250);
-                keys.forEach(key -> {
-                    robot.keyRelease(KeyCodeConverter.convertToAwtKeyCode(key));
-                });
-            } catch (AWTException e) {
-                System.out.println("Failed to use Robot, got exception: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
-    }
-
-    private static boolean hasUndefinedKey(ArrayList<Integer> keys) {
-        for (int key : keys)
-            if (KeyCodeConverter.convertToAwtKeyCode(key) == KeyEvent.VK_UNDEFINED)
-                return true;
-        return false;
+        // Clip capturing removed for simple FarmX
     }
 
     public void sendNotification(String text, TrayIcon.MessageType type) {

@@ -60,7 +60,7 @@ public class BedrockCageFailsafe extends Failsafe {
 
     @Override
     public boolean shouldAltTab() {
-        return FailsafeNotificationsPage.autoAltTabOnBedrockCageFailsafe;
+        return false;
     }
 
     @Override

@@ -59,7 +59,7 @@ public class DirtFailsafe extends Failsafe {
 
     @Override
     public boolean shouldAltTab() {
-        return FailsafeNotificationsPage.autoAltTabOnDirtFailsafe;
+        return false;
     }
 
     @Override

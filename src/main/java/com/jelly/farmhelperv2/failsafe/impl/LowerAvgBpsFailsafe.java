@@ -55,7 +55,7 @@ public class LowerAvgBpsFailsafe extends Failsafe {
 
     @Override
     public boolean shouldAltTab() {
-        return FailsafeNotificationsPage.autoAltTabOnLowerAverageBPS;
+        return false;
     }
 
     @Override

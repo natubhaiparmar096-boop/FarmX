@@ -14,8 +14,6 @@ import com.jelly.farmhelperv2.failsafe.Failsafe;
 import com.jelly.farmhelperv2.failsafe.FailsafeManager;
 import com.jelly.farmhelperv2.failsafe.impl.BedrockCageFailsafe;
 import com.jelly.farmhelperv2.failsafe.impl.DirtFailsafe;
-import com.jelly.farmhelperv2.feature.impl.*;
-import com.jelly.farmhelperv2.feature.impl.Proxy.ProxyType;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.GameStateHandler.BuffState;
 import com.jelly.farmhelperv2.handler.MacroHandler;
@@ -45,10 +43,6 @@ public class FarmHelperConfig extends Config {
     private transient static final String GENERAL = "General";
     private transient static final String MISCELLANEOUS = "Miscellaneous";
     private transient static final String FAILSAFE = "Failsafe";
-    private transient static final String SCHEDULER = "Scheduler";
-    private transient static final String JACOBS_CONTEST = "Jacob's Contest";
-    private transient static final String AUTO_GOD_POT = "Auto God Pot";
-    private transient static final String AUTO_SPRAYONATOR = "Auto Sprayonator";
     private transient static final String DELAYS = "Delays";
     private transient static final String HUD = "HUD";
     private transient static final String DEBUG = "Debug";
@@ -59,17 +53,10 @@ public class FarmHelperConfig extends Config {
 
     public static List<Rewarp> rewarpList = new ArrayList<>();
 
-    //<editor-fold desc="PROXY">
-    public static boolean proxyEnabled = false;
-    public static String proxyAddress = "";
-    public static String proxyUsername = "";
-    public static String proxyPassword = "";
-    public static ProxyType proxyType = ProxyType.HTTP;
-    //</editor-fold>
-
+    
     //<editor-fold desc="GENERAL">
     @Info(
-            text = "DO NOT lock slot 7 in the hotbar if you're using any gui related features, such as Auto God Pot, Auto Cookie",
+            text = "DO NOT lock slot 7 in the hotbar if you're using any gui related features, such as inventory GUIs",
             category = GENERAL,
             type = InfoType.WARNING,
             size = 2
@@ -267,34 +254,11 @@ public class FarmHelperConfig extends Config {
 
     public static OneKeyBind openGuiKeybind = new OneKeyBind(Keyboard.KEY_F);
     @KeyBind(
-            name = "Freelook", category = MISCELLANEOUS, subcategory = "Keybinds",
-            description = "Locks rotation, lets you freely look", size = 2
-    )
-    public static OneKeyBind freelookKeybind = new OneKeyBind(Keyboard.KEY_L);
-    @Info(
-            text = "Freelook doesn't work properly with Oringo!", type = InfoType.WARNING,
-            category = MISCELLANEOUS, subcategory = "Keybinds"
-    )
-    private int freelookWarning;
-    @KeyBind(
             name = "Cancel failsafe", category = MISCELLANEOUS, subcategory = "Keybinds",
             description = "Cancels failsafe and continues macroing", size = 2
     )
     public static OneKeyBind cancelFailsafeKeybind = new OneKeyBind(Keyboard.KEY_NONE);
 
-    //</editor-fold>
-
-    //<editor-fold desc="Plot Cleaning Helper">
-    @KeyBind(
-            name = "Plot Cleaning Helper", category = MISCELLANEOUS, subcategory = "Plot Cleaning Helper",
-            description = "Toggles the plot cleaning helper on/off", size = 2
-    )
-    public static OneKeyBind plotCleaningHelperKeybind = new OneKeyBind(Keyboard.KEY_P);
-    @Switch(
-            name = "Automatically choose a tool to destroy the block", category = MISCELLANEOUS, subcategory = "Plot Cleaning Helper",
-            description = "Automatically chooses the best tool to destroy the block"
-    )
-    public static boolean autoChooseTool = false;
     //</editor-fold>
 
     //<editor-fold desc="Miscellaneous">
@@ -311,27 +275,11 @@ public class FarmHelperConfig extends Config {
     public static boolean changeWindowTitle = true;
 
     @Switch(
-            name = "Auto Cookie", category = MISCELLANEOUS, subcategory = "Miscellaneous",
-            description = "Automatically purchases and consumes a booster cookie"
-    )
-    public static boolean autoCookie = false;
-    @Switch(
             name = "Hold left click when changing row", category = MISCELLANEOUS, subcategory = "Miscellaneous",
             description = "Hold left click when change row"
     )
     public static boolean holdLeftClickWhenChangingRow = true;
 
-    @Switch(
-            name = "Auto Ungrab Mouse", category = MISCELLANEOUS, subcategory = "Miscellaneous",
-            description = "Automatically ungrabs your mouse, so you can safely alt-tab"
-    )
-    public static boolean autoUngrabMouse = true;
-
-    @Switch(
-            name = "PiP Mode", category = MISCELLANEOUS, subcategory = "Miscellaneous",
-            description = "Enables Picture-in-Picture mode, hold middle mouse while macroing to move the game window"
-    )
-    public static boolean pipMode = false;
     @Switch(
             name = "Anti Stuck Enabled (Disabled by default for now)", category = MISCELLANEOUS, subcategory = "Miscellaneous",
             description = "Enables the anti stuck feature"
@@ -345,26 +293,7 @@ public class FarmHelperConfig extends Config {
     public static int antiStuckTriesUntilRewarp = 5;
     //</editor-fold>
 
-    //<editor-fold desc="Performance Mod">
-    @Switch(
-            name = "Performance Mode", category = MISCELLANEOUS, subcategory = "Performance Mode",
-            description = "Set render distance to 2, set max fps to 15 and doesn't render crops"
-    )
-    public static boolean performanceMode = false;
-
-    @Switch(name = "Fast Render", category = MISCELLANEOUS, subcategory = "Performance Mode",
-            description = "Using new fast render method to increase performance"
-    )
-    public static boolean fastRender = true;
-
-    @Number(
-            name = "Max FPS", category = MISCELLANEOUS, subcategory = "Performance Mode",
-            description = "The maximum FPS to set when performance mode is enabled",
-            min = 10, max = 60
-    )
-    public static int performanceModeMaxFPS = 20;
-    //</editor-fold>
-
+    
     //<editor-fold desc="Crop Utils">
     @Switch(
             name = "Increase Cocoa Hitboxes", category = MISCELLANEOUS, subcategory = "Crop Utils",
@@ -407,10 +336,6 @@ public class FarmHelperConfig extends Config {
             description = "Enable on-screen failsafe notifications")
     public static boolean popUpNotifications = true;
 
-    @Switch(name = "Auto Alt-Tab", category = FAILSAFE, subcategory = "General",
-            description = "Switch to game window when failsafe triggers")
-    public static boolean autoAltTab = false;
-
     @DualOption(
             name = "Failsafe Action",
             category = FAILSAFE, subcategory = "General",
@@ -428,18 +353,6 @@ public class FarmHelperConfig extends Config {
     @Switch(name = "Auto Warp on World Change", category = FAILSAFE, subcategory = "Auto Actions",
             description = "Warp to garden after server reboot or update, disconnects if disabled")
     public static boolean autoWarpOnWorldChange = true;
-
-    @Switch(name = "Auto Evacuate on Server Reboot", category = FAILSAFE, subcategory = "Auto Actions",
-            description = "Leave island during server reboot or update")
-    public static boolean autoEvacuateOnServerReboot = true;
-
-    @Switch(name = "Auto Reconnect", category = FAILSAFE, subcategory = "Auto Actions",
-            description = "Automatically reconnect after disconnect")
-    public static boolean autoReconnect = true;
-
-    @Switch(name = "Pause on Guest Arrival", category = FAILSAFE, subcategory = "Auto Actions",
-            description = "Pause macro when a guest joins your island")
-    public static boolean pauseOnGuestArrival = false;
 
     // Detection Sensitivity
     @Slider(name = "Teleport Lag Tolerance", category = FAILSAFE, subcategory = "Detection",
@@ -482,58 +395,6 @@ public class FarmHelperConfig extends Config {
             min = 5, max = 15)
     public static float minBpsThreshold = 10f;
 
-    // Custom Reactions
-    @Info(
-            text = "You need to place the .movement files in .minecraft/farmhelper/movrec",
-            type = InfoType.WARNING,
-            category = FAILSAFE,
-            subcategory = "Custom Reactions",
-            size = 2
-    )
-    public static boolean customReactionsWarning1;
-
-    @Info(
-            text = "It will fall back to the default recordings if the folder is missing or there are no files in it.",
-            type = InfoType.WARNING,
-            category = FAILSAFE,
-            subcategory = "Custom Reactions",
-            size = 2
-    )
-    public static boolean customReactionsWarning2;
-
-    @Info(
-            text = "You need to restart the game after changing the files.",
-            type = InfoType.WARNING,
-            category = FAILSAFE,
-            subcategory = "Custom Reactions",
-            size = 2
-    )
-    public static boolean customReactionsWarning3;
-
-    @Info(
-            text = "You need to provide files for each check.",
-            type = InfoType.WARNING,
-            category = FAILSAFE,
-            subcategory = "Custom Reactions",
-            size = 2
-    )
-    public static boolean customReactionsWarning4;
-
-    @Info(
-            text = "Default recordings at: https://github.com/JellyLabScripts/FarmHelper/tree/master/src/main/resources/farmhelper/movrec",
-            type = InfoType.WARNING,
-            category = FAILSAFE,
-            subcategory = "Custom Reactions",
-            size = 2
-    )
-    public static boolean customReactionsWarning5;
-
-    @Switch(name = "Enable Custom Reactions", category = FAILSAFE,
-            subcategory = "Custom Reactions",
-            description = "Enable custom failsafe reactions"
-    )
-    public static boolean enableCustomReactions = false;
-
     // Failsafe Testing
     @Button(name = "Test Failsafe", category = FAILSAFE, subcategory = "Testing",
             description = "Simulate a failsafe trigger",
@@ -561,11 +422,8 @@ public class FarmHelperConfig extends Config {
                     "Cobweb",
                     "Dirt",
                     "Disconnect",
-                    "Evacuate",
                     "Full Inventory",
-                    "Guest Visit",
                     "Item Change",
-                    "Jacob",
                     "Knockback",
                     "Lower Average BPS",
                     "Rotation",
@@ -576,57 +434,7 @@ public class FarmHelperConfig extends Config {
 
     //</editor-fold>
 
-    //<editor-fold desc="Clip Capturing">
-
-    @Switch(
-            name = "Capture Clip After Failsafe", category = FAILSAFE, subcategory = "Clip Capturing",
-            description = "Captures a clip after triggering failsafe by pressing a key combination"
-    )
-    public static boolean captureClipAfterFailsafe = false;
-    @Switch(
-            name = "Capture Clip After Getting Banned (Replay Buffer Only)", category = FAILSAFE, subcategory = "Clip Capturing",
-            description = "Captures a clip after getting banned by pressing a key combination"
-    )
-    public static boolean captureClipAfterGettingBanned = false;
-    @DualOption(
-            name = "Clip Capturing Type", category = FAILSAFE, subcategory = "Clip Capturing",
-            description = "The clip capturing type to use",
-            left = "Replay Buffer",
-            right = "Recording"
-    )
-    public static boolean clipCapturingType = false;
-    @KeyBind(
-            name = "Keybind",
-            category = FAILSAFE, subcategory = "Clip Capturing",
-            description = "Captures a clip after triggering failsafe"
-    )
-    public static OneKeyBind captureClipKeybind = new OneKeyBind(Keyboard.KEY_NONE);
-    @Slider(
-            name = "Clip Capturing Delay (in seconds)", category = FAILSAFE, subcategory = "Clip Capturing",
-            description = "The delay to capture a clip after triggering failsafe (in seconds)",
-            min = 10, max = 200
-    )
-    public static int captureClipDelay = 30;
-
-    @Info(
-            text = "You need to use either ShadowPlay, OBS, Medal.tv or any alternative with Replay Buffer, then configure it to capture clips!",
-            type = InfoType.WARNING,
-            category = FAILSAFE,
-            subcategory = "Clip Capturing",
-            size = 2
-    )
-    public static boolean captureClipWarning;
-    @Info(
-            text = "Remember to use key combinations instead of single keys!",
-            type = InfoType.WARNING,
-            category = FAILSAFE,
-            subcategory = "Clip Capturing",
-            size = 2
-    )
-    public static boolean captureClipWarning2;
-
-    //</editor-fold>
-
+    
     //<editor-fold desc="Failsafes conf page">
     @Page(
             name = "Failsafe Notifications", category = FAILSAFE, subcategory = "Failsafe Notifications", location = PageLocation.BOTTOM,
@@ -713,15 +521,6 @@ public class FarmHelperConfig extends Config {
 
     //</editor-fold>
 
-    //<editor-fold desc="Reconnect Delay">
-    @Number(
-            name = "Delay Before Reconnecting", category = FAILSAFE, subcategory = "Restart After FailSafe",
-            description = "The delay before reconnecting after leaving (in seconds)",
-            min = 1, max = 20, size = 2
-    )
-    public static int delayBeforeReconnecting = 5;
-    //</editor-fold>
-
 
 
     //<editor-fold desc="Failsafe Messages">
@@ -738,271 +537,10 @@ public class FarmHelperConfig extends Config {
     //</editor-fold>
     //</editor-fold>
 
-    //<editor-fold desc="SCHEDULER">
-    //<editor-fold desc="Scheduler">
-    @Switch(
-            name = "Enable Scheduler", category = SCHEDULER, subcategory = "Scheduler", size = OptionSize.DUAL,
-            description = "Farms for X amount of minutes then takes a break for X amount of minutes"
-    )
-    public static boolean enableScheduler = true;
-    @Slider(
-            name = "Farming time (in minutes)", category = SCHEDULER, subcategory = "Scheduler",
-            description = "How long to farm",
-            min = 1, max = 300, step = 1
-    )
-    public static int schedulerFarmingTime = 60;
-    @Slider(
-            name = "Farming time randomness (in minutes)", category = SCHEDULER, subcategory = "Scheduler",
-            description = "How much randomness to add to the farming time",
-            min = 0, max = 15, step = 1
-    )
-    public static int schedulerFarmingTimeRandomness = 5;
-    @Slider(
-            name = "Break time (in minutes)", category = SCHEDULER, subcategory = "Scheduler",
-            description = "How long to take a break",
-            min = 1, max = 120, step = 1
-    )
-    public static int schedulerBreakTime = 5;
-    @Slider(
-            name = "Break time randomness (in minutes)", category = SCHEDULER, subcategory = "Scheduler",
-            description = "How much randomness to add to the break time",
-            min = 0, max = 15, step = 1
-    )
-    public static int schedulerBreakTimeRandomness = 5;
-    @Switch(
-            name = "Pause the scheduler during Jacob's Contest", category = SCHEDULER, subcategory = "Scheduler",
-            description = "Pauses and delays the scheduler during Jacob's Contest"
-    )
-    public static boolean pauseSchedulerDuringJacobsContest = true;
-    @Switch(
-            name = "Open inventory on scheduler breaks", category = SCHEDULER, subcategory = "Scheduler",
-            description = "Opens inventory on scheduler breaks"
-    )
-    public static boolean openInventoryOnSchedulerBreaks = true;
-    @Switch(
-            name = "Disconnect during break", category = SCHEDULER, subcategory = "Scheduler",
-            description = "Logs out of game and logs back in after break ends"
-    )
-    public static boolean schedulerDisconnectDuringBreak = false;
-    @Switch(
-            name = "Wait Until Rewarp Point for break", category = SCHEDULER, subcategory = "Scheduler",
-            description = "Waits until player is standing on rewarp point to take break"
-    )
-    public static boolean schedulerWaitUntilRewarp = false;
-    @Switch(
-            name = "Reset Scheduler on Macro Disabled", category = SCHEDULER, subcategory = "Scheduler",
-            description = "Resets Scheduler When macro is disabled"
-    )
-    public static boolean schedulerResetOnDisable = true;
-    @Button(
-            name = "Reset Scheduler", category = SCHEDULER, subcategory = "Scheduler",
-            text = "Reset Scheduler", description = "Resets Scheduler (Only works when macro is of)"
-    )
-    public Runnable schedulerReset = () -> {
-        if (!MacroHandler.getInstance().isMacroToggled()) {
-            boolean old = FarmHelperConfig.schedulerResetOnDisable;
-            FarmHelperConfig.schedulerResetOnDisable = true;
-            Scheduler.getInstance().stop();
-            FarmHelperConfig.schedulerResetOnDisable = old;
-        }
-    };
-    //</editor-fold>
-
-    //<editor-fold desc="Leave timer">
-    @Switch(
-            name = "Enable leave timer", category = SCHEDULER, subcategory = "Leave Timer",
-            description = "Leaves the server after the timer has ended"
-    )
-    public static boolean leaveTimer = false;
-    @Slider(
-            name = "Leave time", category = SCHEDULER, subcategory = "Leave Timer",
-            description = "The time to leave the server (in minutes)",
-            min = 15, max = 720, step = 5
-    )
-    public static int leaveTime = 60;
-    //</editor-fold>
-    //</editor-fold>
-
-    //<editor-fold desc="JACOB'S CONTEST">
-
-    //<editor-fold desc="Pet Swapper">
-    @Switch(
-            name = "Swap pet during Jacob's contest", category = JACOBS_CONTEST, subcategory = "Pet Swapper",
-            description = "Swaps pet to the selected pet during Jacob's contest. Selects the first one from the pet list."
-    )
-    public static boolean enablePetSwapper = false;
-
-    @Slider(
-            name = "Pet Swap Delay", category = JACOBS_CONTEST, subcategory = "Pet Swapper",
-            description = "The delay between clicking GUI during swapping the pet (in milliseconds)",
-            min = 200, max = 3000
-    )
-    public static int petSwapperDelay = 1000;
-    @Text(
-            name = "Pet Name", placeholder = "Type your pet name here",
-            category = JACOBS_CONTEST, subcategory = "Pet Swapper"
-    )
-    public static String petSwapperName = "";
-    //</editor-fold>
-
-    @Switch(
-            name = "Enable Jacob Failsafes", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "Stops farming once a crop threshold has been met"
-    )
-    public static boolean enableJacobFailsafes = false;
-    @DualOption(
-            name = "Jacob Failsafe Action", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The action to take when a failsafe has been triggered",
-            left = "Leave",
-            right = "Pause"
-    )
-    public static boolean jacobFailsafeAction = true;
-    @Slider(
-            name = "Nether Wart Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The nether wart cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobNetherWartCap = 800000;
-    @Slider(
-            name = "Potato Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The potato cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobPotatoCap = 830000;
-    @Slider(
-            name = "Carrot Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The carrot cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobCarrotCap = 860000;
-    @Slider(
-            name = "Wheat Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The wheat cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobWheatCap = 265000;
-    @Slider(
-            name = "Sugar Cane Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The sugar cane cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobSugarCaneCap = 575000;
-    @Slider(
-            name = "Mushroom Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The mushroom cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobMushroomCap = 250000;
-    @Slider(
-            name = "Melon Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The melon cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobMelonCap = 1234000;
-
-    @Slider(
-            name = "Pumpkin Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The pumpkin cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobPumpkinCap = 240000;
-
-    @Slider(
-            name = "Cocoa Beans Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The cocoa beans cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobCocoaBeansCap = 725000;
-    @Slider(
-            name = "Cactus Cap", category = JACOBS_CONTEST, subcategory = "Jacob's Contest",
-            description = "The cactus cap",
-            min = 10000, max = 2000000, step = 10000
-    )
-    public static int jacobCactusCap = 470000;
-
-    //</editor-fold>
-
-    //<editor-fold desc="God Pot">
-    @Switch(
-            name = "Auto God Pot", category = AUTO_GOD_POT, subcategory = "God Pot",
-            description = "Automatically purchases and consumes a God Pot", size = 2
-    )
-    public static boolean autoGodPot = false;
-
-    @Switch(
-            name = "Get God Pot from Backpack", category = AUTO_GOD_POT, subcategory = "God Pot", size = 2
-    )
-    public static boolean autoGodPotFromBackpack = true;
-
-    @DualOption(
-            name = "Storage Type", category = AUTO_GOD_POT, subcategory = "God Pot",
-            description = "The storage type to get god pots from",
-            left = "Backpack",
-            right = "Ender Chest"
-    )
-    public static boolean autoGodPotStorageType = true;
-
-    @Number(
-            name = "Backpack Number", category = AUTO_GOD_POT, subcategory = "God Pot",
-            description = "The backpack number, that contains god pots",
-            min = 1, max = 18
-    )
-    public static int autoGodPotBackpackNumber = 1;
-
-    @Switch(
-            name = "Buy God Pot using Bits", category = AUTO_GOD_POT, subcategory = "God Pot"
-    )
-    public static boolean autoGodPotFromBits = false;
-
-    @Switch(
-            name = "Get God Pot from Auction House", category = AUTO_GOD_POT, subcategory = "God Pot",
-            description = "If the user doesn't have a cookie, it will go to the hub and buy from AH"
-    )
-    public static boolean autoGodPotFromAH = false;
-
-    @Info(
-            text = "Priority getting God Pot is: Backpack -> Bits -> AH",
-            type = InfoType.INFO, size = 2, category = AUTO_GOD_POT, subcategory = "God Pot"
-    )
-    private static int godPotInfo;
-
-    //</editor-fold>
-
-    //<editor-fold desc="Auto Sprayonator">
-    @Switch(
-            name = "Auto Sprayonator", category = AUTO_SPRAYONATOR, subcategory = "Auto Sprayonator"
-    )
-    public static boolean autoSprayonator = false;
-
-    @Dropdown(
-            name = "Type", category = AUTO_SPRAYONATOR, subcategory = "Auto Sprayonator",
-            description = "Item to spray plot with",
-            options = {
-                    "Fine Flour (+20 Farming Fortune)",
-                    "Compost (Earthworm & Mosquito)",
-                    "Honey Jar (Moth & Cricket)",
-                    "Dung (Beetle & Fly)",
-                    "Plant Matter (Locust & Slug)",
-                    "Tasty Cheese (Rat & Mite)"
-            }
-    )
-    public static int autoSprayonatorSprayMaterial = 0;
-
-    @Slider(
-            name = "Additional Delay", category = AUTO_SPRAYONATOR, subcategory = "Auto Sprayonator",
-            description = "Additional delay between actions (in milliseconds)",
-            min = 0, max = 5000, step = 1
-    )
-    public static int autoSprayonatorAdditionalDelay = 500;
-
-
-    @Slider(
-            name = "Time to wait after entering plot before starting", category = AUTO_SPRAYONATOR, subcategory = "Auto Sprayonator",
-            min = 0, max = 5000, step = 100
-    )
-    public static int autoSprayonatorStartDelay = 0;
-    //</editor-fold>
-
+    
+    
+    
+    
     //<editor-fold desc="DELAYS">
     //<editor-fold desc="Changing Rows">
     @Slider(
@@ -1099,22 +637,7 @@ public class FarmHelperConfig extends Config {
     public static float macroGuiDelayRandomness = 350f;
     //</editor-fold>
 
-    //<editor-fold desc="Plot Cleaning Time">
-    @Slider(
-            name = "Plot Cleaning Helper Rotation Time", category = DELAYS, subcategory = "Plot Cleaning Helper",
-            description = "The time it takes to rotate the player",
-            min = 20f, max = 500f
-    )
-    public static float plotCleaningHelperRotationTime = 50;
-    @Slider(
-            name = "Additional random Plot Cleaning Helper Rotation Time", category = DELAYS, subcategory = "Plot Cleaning Helper",
-            description = "The maximum random time added to the delay time it takes to rotate the player (in milliseconds)",
-            min = 0f, max = 500f
-    )
-
-    public static float plotCleaningHelperRotationTimeRandomness = 50;
-    //</editor-fold>
-
+    
     //<editor-fold desc="Rewarp Time">
     @Slider(
             name = "Rewarp Delay", category = DELAYS, subcategory = "Rewarp",
@@ -1290,12 +813,6 @@ public class FarmHelperConfig extends Config {
         this.addDependency("customPitchLevel", "customPitch");
         this.addDependency("customYawLevel", "customYaw");
 
-
-        this.addDependency("petSwapperDelay", "enablePetSwapper");
-        this.addDependency("petSwapperName", "enablePetSwapper");
-
-        this.addDependency("autoUngrabMouse", "This feature doesn't work properly on Mac OS!", () -> !Minecraft.isRunningOnMac);
-
         this.addDependency("desyncPauseDelay", "checkDesync");
         this.addDependency("failsafeMcSoundSelected", "enableFailsafeSound");
         this.addDependency("maxOutMinecraftSounds", "enableFailsafeSound");
@@ -1306,23 +823,6 @@ public class FarmHelperConfig extends Config {
         this.addDependency("restartAfterFailSafeDelay", "enableRestartAfterFailSafe");
         this.addDependency("alwaysTeleportToGarden", "enableRestartAfterFailSafe");
 
-        this.addDependency("schedulerFarmingTime", "enableScheduler");
-        this.addDependency("schedulerFarmingTimeRandomness", "enableScheduler");
-        this.addDependency("schedulerBreakTime", "enableScheduler");
-        this.addDependency("schedulerBreakTimeRandomness", "enableScheduler");
-        this.addDependency("pauseSchedulerDuringJacobsContest", "enableScheduler");
-
-        this.addDependency("jacobNetherWartCap", "enableJacobFailsafes");
-        this.addDependency("jacobPotatoCap", "enableJacobFailsafes");
-        this.addDependency("jacobCarrotCap", "enableJacobFailsafes");
-        this.addDependency("jacobWheatCap", "enableJacobFailsafes");
-        this.addDependency("jacobSugarCaneCap", "enableJacobFailsafes");
-        this.addDependency("jacobMushroomCap", "enableJacobFailsafes");
-        this.addDependency("jacobMelonCap", "enableJacobFailsafes");
-        this.addDependency("jacobPumpkinCap", "enableJacobFailsafes");
-        this.addDependency("jacobCocoaBeansCap", "enableJacobFailsafes");
-        this.addDependency("jacobCactusCap", "enableJacobFailsafes");
-        this.addDependency("jacobFailsafeAction", "enableJacobFailsafes");
 
 
 
@@ -1343,12 +843,7 @@ public class FarmHelperConfig extends Config {
         this.addDependency("fastBreakRandomizationChance", "fastBreak");
         this.addDependency("disableFastBreakDuringJacobsContest", "fastBreak");
 
-        this.addDependency("autoGodPotFromBackpack", "autoGodPot");
-        this.addDependency("autoGodPotFromBits", "autoGodPot");
-        this.addDependency("autoGodPotFromAH", "autoGodPot");
 
-        this.hideIf("autoGodPotBackpackNumber", () -> !autoGodPotFromBackpack);
-        this.hideIf("autoGodPotStorageType", () -> !autoGodPotFromBackpack);
 
 
         this.addDependency("antiStuckTriesUntilRewarp", "enableAntiStuck");
@@ -1358,9 +853,6 @@ public class FarmHelperConfig extends Config {
 
         this.addDependency("averageBPSDrop", "enableBpsCheck");
 
-        this.addDependency("captureClipKeybind", "", () -> captureClipAfterFailsafe || captureClipAfterGettingBanned);
-        this.addDependency("clipCapturingType", "", () -> captureClipAfterFailsafe || captureClipAfterGettingBanned);
-        this.addDependency("captureClipDelay", "", () -> captureClipAfterFailsafe || captureClipAfterGettingBanned);
 
 
         this.addDependency("timeBetweenChangingRowsDuringJacob", "customRowChangeDelaysDuringJacob");
@@ -1370,7 +862,6 @@ public class FarmHelperConfig extends Config {
 
 
 
-        this.addDependency("leaveTime", "leaveTimer");
 
 
         this.hideIf("shownWelcomeGUI", () -> true);
@@ -1381,8 +872,6 @@ public class FarmHelperConfig extends Config {
         registerKeyBind(toggleMacro, () -> MacroHandler.getInstance().toggleMacro());
         registerKeyBind(debugKeybind, () -> {
         });
-        registerKeyBind(freelookKeybind, () -> Freelook.getInstance().toggle());
-        registerKeyBind(plotCleaningHelperKeybind, () -> PlotCleaningHelper.getInstance().toggle());
         registerKeyBind(cancelFailsafeKeybind, () -> {
             if (FailsafeManager.getInstance().getChooseEmergencyDelay().isScheduled()) {
                 FailsafeManager.getInstance().stopFailsafes();
@@ -1488,9 +977,6 @@ public class FarmHelperConfig extends Config {
         return (long) (macroGuiDelay + (float) Math.random() * macroGuiDelayRandomness);
     }
 
-    public static long getRandomPlotCleaningHelperRotationTime() {
-        return (long) (plotCleaningHelperRotationTime + (float) Math.random() * plotCleaningHelperRotationTimeRandomness);
-    }
 
     public static long getRandomRewarpDelay() {
         return (long) (rewarpDelay + (float) Math.random() * rewarpDelayRandomness);

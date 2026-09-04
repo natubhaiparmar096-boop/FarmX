@@ -53,7 +53,7 @@ public class WorldChangeFailsafe extends Failsafe {
 
     @Override
     public boolean shouldAltTab() {
-        return FailsafeNotificationsPage.autoAltTabOnWorldChangeFailsafe;
+        return false;
     }
 
     @Override

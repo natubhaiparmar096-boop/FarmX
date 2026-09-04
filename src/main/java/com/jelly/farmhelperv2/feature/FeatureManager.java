@@ -25,22 +25,9 @@ public class FeatureManager {
     public List<IFeature> fillFeatures() {
         List<IFeature> featuresList = Arrays.asList(
                 AntiStuck.getInstance(),
-                AutoCookie.getInstance(),
-                AutoGodPot.getInstance(),
-                AutoReconnect.getInstance(),
                 BPSTracker.getInstance(),
                 DesyncChecker.getInstance(),
-                Freelook.getInstance(),
-                LagDetector.getInstance(),
-                LeaveTimer.getInstance(),
-                PerformanceMode.getInstance(),
-                AutoSprayonator.getInstance(),
-                PetSwapper.getInstance(),
-                PlotCleaningHelper.getInstance(),
-                Scheduler.getInstance(),
-                UngrabMouse.getInstance(),
-                PiPMode.getInstance(),
-                AutoWardrobe.instance
+                LagDetector.getInstance()
         );
         features.addAll(featuresList);
         return features;
@@ -83,18 +70,6 @@ public class FeatureManager {
     }
 
     public boolean shouldIgnoreFalseCheck() {
-        if (AutoCookie.getInstance().isRunning() && !AutoCookie.getInstance().shouldCheckForFailsafes()) {
-            return true;
-        }
-        if (AutoGodPot.getInstance().isRunning() && !AutoGodPot.getInstance().shouldCheckForFailsafes()) {
-            return true;
-        }
-        if (AutoReconnect.getInstance().isRunning() && !AutoReconnect.getInstance().shouldCheckForFailsafes()) {
-            return true;
-        }
-        if (PlotCleaningHelper.getInstance().isRunning() && !PlotCleaningHelper.getInstance().shouldCheckForFailsafes()) {
-            return true;
-        }
         return false;
     }
 
@@ -114,7 +89,6 @@ public class FeatureManager {
                 LogUtils.sendDebug("Enabled feature: " + feature.getName());
             }
         });
-
     }
 
     public void disableCurrentlyRunning(IFeature sender) {

@@ -10,7 +10,6 @@ import com.jelly.farmhelperv2.config.FarmHelperConfig;
 import com.jelly.farmhelperv2.event.MillisecondEvent;
 import com.jelly.farmhelperv2.failsafe.FailsafeManager;
 import com.jelly.farmhelperv2.feature.FeatureManager;
-import com.jelly.farmhelperv2.feature.impl.MovRecPlayer;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.handler.RotationHandler;
@@ -86,11 +85,6 @@ public class FarmHelper {
             LogUtils.sendNotification("Farm Helper", "You've got BlurMC installed in your mods folder! This can break features that need to work with inventories!", 15000);
             LogUtils.sendError("You've got §6§lBlurMC §cinstalled in your mods folder! This can break features that need to work with inventories!");
         }
-        if (Minecraft.isRunningOnMac && FarmHelperConfig.autoUngrabMouse) {
-            FarmHelperConfig.autoUngrabMouse = false;
-            LogUtils.sendNotification("Farm Helper", "Auto Ungrab Mouse feature doesn't work properly on Mac OS. It has been disabled automatically.", 15000);
-            LogUtils.sendError("Auto Ungrab Mouse feature doesn't work properly on Mac OS. It has been disabled automatically.");
-        }
         if (FarmHelperConfig.configVersion == 3 && FarmHelperConfig.macroType > 7) {
             FarmHelperConfig.macroType += 1; // Added cocoa bean macro with trapdoors
         }
@@ -105,7 +99,6 @@ public class FarmHelper {
         MinecraftForge.EVENT_BUS.register(GameStateHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(MacroHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(TickTask.getInstance());
-        MinecraftForge.EVENT_BUS.register(MovRecPlayer.getInstance());
         MinecraftForge.EVENT_BUS.register(AudioManager.getInstance());
         MinecraftForge.EVENT_BUS.register(RotationHandler.getInstance());
         MinecraftForge.EVENT_BUS.register(FlyPathFinderExecutor.getInstance());

@@ -6,7 +6,6 @@ import com.jelly.farmhelperv2.event.BlockChangeEvent;
 import com.jelly.farmhelperv2.event.ReceivePacketEvent;
 import com.jelly.farmhelperv2.failsafe.impl.*;
 import com.jelly.farmhelperv2.feature.FeatureManager;
-import com.jelly.farmhelperv2.feature.impl.Scheduler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.handler.RotationHandler;
 import com.jelly.farmhelperv2.macro.AbstractMacro;
@@ -24,7 +23,6 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import org.lwjgl.opengl.Display;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -106,11 +104,8 @@ public class FailsafeManager {
                         CobwebFailsafe.getInstance(),
                         DirtFailsafe.getInstance(),
                         DisconnectFailsafe.getInstance(),
-                        EvacuateFailsafe.getInstance(),
                         FullInventoryFailsafe.getInstance(),
-                        GuestVisitFailsafe.getInstance(),
                         ItemChangeFailsafe.getInstance(),
-                        JacobFailsafe.getInstance(),
                         KnockbackFailsafe.getInstance(),
                         LowerAvgBpsFailsafe.getInstance(),
                         RotationFailsafe.getInstance(),
@@ -224,16 +219,6 @@ public class FailsafeManager {
                     AudioManager.getInstance().playSound();
                 }
 
-                if (FarmHelperConfig.autoAltTab && failsafe.shouldAltTab()) {
-                    FailsafeUtils.bringWindowToFront();
-                }
-                Multithreading.schedule(() -> {
-                    if (FarmHelperConfig.autoAltTab && failsafe.shouldAltTab() && !Display.isActive()) {
-                        FailsafeUtils.bringWindowToFrontUsingRobot();
-                        System.out.println("Bringing window to front using Robot because Winapi failed as usual.");
-                    }
-                }, 750, TimeUnit.MILLISECONDS);
-
                 LogUtils.sendFailsafeMessage(tempFailsafe.getType().label, failsafe.shouldTagEveryone());
                 if (failsafe.shouldSendNotification())
                     FailsafeUtils.getInstance().sendNotification(StringUtils.stripControlCodes(tempFailsafe.getType().label), TrayIcon.MessageType.WARNING);
@@ -268,18 +253,7 @@ public class FailsafeManager {
         chooseEmergencyDelay.reset();
         hadEmergency = true;
         LogUtils.sendDebug("[Failsafe] Emergency chosen: " + StringUtils.stripControlCodes(triggeredFailsafe.get().getType().name()));
-        FeatureManager.getInstance().disableCurrentlyRunning(Scheduler.getInstance());
-        Scheduler.getInstance().pause();
-        if (FarmHelperConfig.captureClipAfterFailsafe && !FarmHelperConfig.captureClipKeybind.getKeyBinds().isEmpty()) {
-            if (FarmHelperConfig.clipCapturingType) {
-                FailsafeUtils.captureClip();
-                LogUtils.sendDebug("[Failsafe] Recording clip!");
-            }
-            Multithreading.schedule(() -> {
-                FailsafeUtils.captureClip();
-                LogUtils.sendDebug("[Failsafe] Clip captured!");
-            }, FarmHelperConfig.captureClipDelay, TimeUnit.SECONDS);
-        }
+        FeatureManager.getInstance().disableCurrentlyRunning(null);
     }
 
     @SubscribeEvent
@@ -335,9 +309,6 @@ public class FailsafeManager {
             RenderUtils.drawCenterTopText(text, event, Color.ORANGE);
         } else if (triggeredFailsafe.isPresent()
                 && !FarmHelperConfig.streamerMode
-                && !triggeredFailsafe.get().equals(EvacuateFailsafe.getInstance())
-                && !triggeredFailsafe.get().equals(GuestVisitFailsafe.getInstance())
-                && !triggeredFailsafe.get().equals(JacobFailsafe.getInstance())
         ) {
             ArrayList<String> textLines = new ArrayList<>();
             textLines.add("§6" + StringUtils.stripControlCodes(triggeredFailsafe.get().getType().name()).replace("_", " "));
@@ -425,12 +396,8 @@ public class FailsafeManager {
         ITEM_CHANGE_CHECK("Your §lITEM HAS CHANGED§r§d!"),
         WORLD_CHANGE_CHECK("Your §lWORLD HAS CHANGED§r§d!"),
         BEDROCK_CAGE_CHECK("You've been §lBEDROCK CAGED§r§d by a staff member!"),
-        EVACUATE("Server is restarting! Evacuate!"),
         DISCONNECT("You've been §lDISCONNECTED§r§d from the server!"),
-        LOWER_AVERAGE_BPS("Your BPS is lower than average!"),
-        JACOB("You've extended the §lJACOB COUNTER§r§d!"),
-        GUEST_VISIT("You've been §lVISITED§r§d by "
-                + (!GuestVisitFailsafe.getInstance().lastGuestName.isEmpty() ? GuestVisitFailsafe.getInstance().lastGuestName : "a guest") + "!");
+        LOWER_AVERAGE_BPS("Your BPS is lower than average!");
 
         final String label;
 

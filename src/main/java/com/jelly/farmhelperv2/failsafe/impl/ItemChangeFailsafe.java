@@ -53,7 +53,7 @@ public class ItemChangeFailsafe extends Failsafe {
 
     @Override
     public boolean shouldAltTab() {
-        return FailsafeNotificationsPage.autoAltTabOnItemChangeFailsafe;
+        return false;
     }
 
     @Override
