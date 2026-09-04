@@ -1,29 +1,27 @@
 package com.jelly.farmhelperv2.util;
 
-import com.jelly.farmhelperv2.config.FarmHelperConfig;
-import com.jelly.farmhelperv2.util.helper.KeyCodeConverter;
-import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.WinDef;
-import com.sun.jna.platform.win32.WinUser;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.SystemUtils;
-import org.lwjgl.opengl.Display;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Objects;
 
+/**
+ * Desktop failsafe notifications / window focus. Fully no-op on mobile (GL4ES / Zalith / Pojav).
+ * Windows WinAPI is loaded only via reflection so Android class-loading never touches JNA.
+ */
 public class FailsafeUtils {
     private static FailsafeUtils instance;
     private final TrayIcon trayIcon;
 
     public FailsafeUtils() {
-        if (!SystemUtils.IS_OS_WINDOWS) {
+        if (PlatformUtils.isMobile() || !SystemUtils.IS_OS_WINDOWS) {
             trayIcon = null;
             return;
         }
@@ -31,17 +29,22 @@ public class FailsafeUtils {
         try {
             image = ImageIO.read(Objects.requireNonNull(getClass().getResource("/farmhelper/icon-mod/icon.png")));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            trayIcon = null;
+            return;
         }
-        trayIcon = new TrayIcon(image, "Farm Helper Failsafe Notification");
-        trayIcon.setImageAutoSize(true);
-        trayIcon.setToolTip("Farm Helper Failsafe Notification");
-        SystemTray tray = SystemTray.getSystemTray();
+        TrayIcon icon = new TrayIcon(image, "Farm Helper Failsafe Notification");
+        icon.setImageAutoSize(true);
+        icon.setToolTip("Farm Helper Failsafe Notification");
         try {
-            tray.add(trayIcon);
-        } catch (AWTException e) {
+            if (SystemTray.isSupported()) {
+                SystemTray.getSystemTray().add(icon);
+            }
+        } catch (Throwable e) {
             e.printStackTrace();
+            trayIcon = null;
+            return;
         }
+        trayIcon = icon;
     }
 
     public static FailsafeUtils getInstance() {
@@ -52,65 +55,82 @@ public class FailsafeUtils {
     }
 
     public static void bringWindowToFront() {
+        if (PlatformUtils.isMobile()) {
+            return;
+        }
         if (SystemUtils.IS_OS_WINDOWS) {
             bringWindowToFrontUsingWinApi();
-            System.out.println("Bringing window to front using WinApi.");
         } else {
             bringWindowToFrontUsingRobot();
-            System.out.println("Bringing window to front using Robot.");
         }
     }
 
     public static void bringWindowToFrontUsingWinApi() {
+        if (PlatformUtils.isMobile() || !SystemUtils.IS_OS_WINDOWS) {
+            return;
+        }
         try {
-            User32 user32 = User32.INSTANCE;
-            WinDef.HWND hWnd = user32.FindWindow(null, Display.getTitle());
+            Class<?> user32Class = Class.forName("com.sun.jna.platform.win32.User32");
+            Field instanceField = user32Class.getField("INSTANCE");
+            Object user32 = instanceField.get(null);
+            Method findWindow = user32Class.getMethod("FindWindow", String.class, String.class);
+            Method isWindowVisible = user32Class.getMethod("IsWindowVisible", Class.forName("com.sun.jna.platform.win32.WinDef$HWND"));
+            Method showWindow = user32Class.getMethod("ShowWindow", Class.forName("com.sun.jna.platform.win32.WinDef$HWND"), int.class);
+            Method setForegroundWindow = user32Class.getMethod("SetForegroundWindow", Class.forName("com.sun.jna.platform.win32.WinDef$HWND"));
+            Method setFocus = user32Class.getMethod("SetFocus", Class.forName("com.sun.jna.platform.win32.WinDef$HWND"));
+
+            String title = safeDisplayTitle();
+            Object hWnd = findWindow.invoke(user32, null, title);
             if (hWnd == null) {
-                System.out.println("Window not found.");
                 bringWindowToFrontUsingRobot();
                 return;
             }
-            if (!user32.IsWindowVisible(hWnd)) {
-                user32.ShowWindow(hWnd, WinUser.SW_RESTORE);
-                System.out.println("Window is not visible, restoring.");
+            Class<?> winUser = Class.forName("com.sun.jna.platform.win32.WinUser");
+            int swRestore = winUser.getField("SW_RESTORE").getInt(null);
+            int swShow = winUser.getField("SW_SHOW").getInt(null);
+            if (!(Boolean) isWindowVisible.invoke(user32, hWnd)) {
+                showWindow.invoke(user32, hWnd, swRestore);
             }
-            user32.ShowWindow(hWnd, WinUser.SW_SHOW);
-            user32.SetForegroundWindow(hWnd);
-            user32.SetFocus(hWnd);
-        } catch (Exception e) {
-            System.out.println("Failed to restore the game window.");
-            e.printStackTrace();
-            System.out.println("Trying to bring window to front using Robot instead.");
+            showWindow.invoke(user32, hWnd, swShow);
+            setForegroundWindow.invoke(user32, hWnd);
+            setFocus.invoke(user32, hWnd);
+        } catch (Throwable e) {
+            System.out.println("Failed to restore the game window via WinAPI: " + e.getMessage());
             bringWindowToFrontUsingRobot();
         }
     }
 
     public static void bringWindowToFrontUsingRobot() {
-        SwingUtilities.invokeLater(() -> {
-            int TAB_KEY = Minecraft.isRunningOnMac ? KeyEvent.VK_META : KeyEvent.VK_ALT;
-            try {
-                Robot robot = new Robot();
-                int i = 0;
-                while (!Display.isActive()) {
-                    i++;
-                    robot.keyPress(TAB_KEY);
-                    for (int j = 0; j < i; j++) {
-                        robot.keyPress(KeyEvent.VK_TAB);
+        if (PlatformUtils.isMobile()) {
+            return;
+        }
+        try {
+            java.awt.EventQueue.invokeLater(() -> {
+                int tabKey = Minecraft.isRunningOnMac ? KeyEvent.VK_META : KeyEvent.VK_ALT;
+                try {
+                    Robot robot = new Robot();
+                    int i = 0;
+                    while (!safeDisplayIsActive()) {
+                        i++;
+                        robot.keyPress(tabKey);
+                        for (int j = 0; j < i; j++) {
+                            robot.keyPress(KeyEvent.VK_TAB);
+                            robot.delay(100);
+                            robot.keyRelease(KeyEvent.VK_TAB);
+                        }
+                        robot.keyRelease(tabKey);
                         robot.delay(100);
-                        robot.keyRelease(KeyEvent.VK_TAB);
+                        if (i > 25) {
+                            return;
+                        }
                     }
-                    robot.keyRelease(TAB_KEY);
-                    robot.delay(100);
-                    if (i > 25) {
-                        System.out.println("Failed to bring window to front.");
-                        return;
-                    }
+                } catch (Throwable e) {
+                    System.out.println("Failed to use Robot: " + e.getMessage());
                 }
-            } catch (AWTException e) {
-                System.out.println("Failed to use Robot, got exception: " + e.getMessage());
-                e.printStackTrace();
-            }
-        });
+            });
+        } catch (Throwable e) {
+            System.out.println("Failed to schedule Robot: " + e.getMessage());
+        }
     }
 
     public static void captureClip() {
@@ -118,6 +138,9 @@ public class FailsafeUtils {
     }
 
     public void sendNotification(String text, TrayIcon.MessageType type) {
+        if (PlatformUtils.isMobile()) {
+            return;
+        }
         try {
             if (SystemUtils.IS_OS_WINDOWS) {
                 windows(text, type);
@@ -126,40 +149,52 @@ public class FailsafeUtils {
             } else if (SystemUtils.IS_OS_LINUX) {
                 linux(text);
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
     }
 
     private void windows(String text, TrayIcon.MessageType type) {
-        if (SystemTray.isSupported()) {
+        if (trayIcon != null && SystemTray.isSupported()) {
             try {
                 trayIcon.displayMessage("Farm Helper", text, type);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
             }
-        } else {
-            System.out.println("SystemTray is not supported");
         }
     }
 
     private void mac(String text) {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("osascript", "-e", "display notification \"" + text + "\" with title \"FarmHelper\"");
         try {
-            processBuilder.start();
+            new ProcessBuilder("osascript", "-e", "display notification \"" + text + "\" with title \"FarmHelper\"").start();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void linux(String text) {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("notify-send", "-a", "Farm Helper", text);
         try {
-            processBuilder.start();
+            new ProcessBuilder("notify-send", "-a", "Farm Helper", text).start();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static String safeDisplayTitle() {
+        try {
+            Class<?> display = Class.forName("org.lwjgl.opengl.Display");
+            return (String) display.getMethod("getTitle").invoke(null);
+        } catch (Throwable e) {
+            return "Minecraft 1.8.9";
+        }
+    }
+
+    private static boolean safeDisplayIsActive() {
+        try {
+            Class<?> display = Class.forName("org.lwjgl.opengl.Display");
+            return (Boolean) display.getMethod("isActive").invoke(null);
+        } catch (Throwable e) {
+            return true;
         }
     }
 }

@@ -10,6 +10,7 @@ import com.jelly.farmhelperv2.feature.IFeature;
 import com.jelly.farmhelperv2.feature.impl.*;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
+import com.jelly.farmhelperv2.util.PlatformUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 
@@ -18,6 +19,14 @@ import java.util.List;
 public class DebugHUD extends TextHud {
     public DebugHUD() {
         super(true, 1f, 10f, 0.5f, false, false, 0, 2, 2, new OneColor(0, 0, 0, 0), false, 0, new OneColor(0, 0, 0, 0));
+    }
+
+    @Override
+    protected boolean shouldShow() {
+        if (PlatformUtils.isMobile()) {
+            return false;
+        }
+        return super.shouldShow();
     }
 
     @Override

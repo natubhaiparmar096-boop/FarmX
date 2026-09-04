@@ -8,6 +8,7 @@ import com.jelly.farmhelperv2.failsafe.FailsafeManager;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.util.LogUtils;
+import com.jelly.farmhelperv2.util.PlatformUtils;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
@@ -37,6 +38,9 @@ public class StatusHUD extends TextHud {
 
     @Override
     protected boolean shouldShow() {
+        if (PlatformUtils.isMobile()) {
+            return false;
+        }
         if (!super.shouldShow()) {
             return false;
         }

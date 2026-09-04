@@ -4,6 +4,7 @@ import com.jelly.farmhelperv2.config.FarmHelperConfig;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.util.LogUtils;
+import com.jelly.farmhelperv2.util.PlatformUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -113,10 +114,17 @@ public class MixinMinecraft {
 
     @Redirect(method = "setIngameFocus", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/Display;isActive()Z", remap = false))
     public boolean isActive() {
+        if (PlatformUtils.isMobile()) {
+            return true;
+        }
         System.out.println("Trying to set in game focus. Macro Toggled: " + MacroHandler.getInstance().isMacroToggled());
         if (MacroHandler.getInstance().isMacroToggled()) {
             return true;
         }
-        return Display.isActive();
+        try {
+            return Display.isActive();
+        } catch (Throwable t) {
+            return true;
+        }
     }
 }

@@ -14,6 +14,7 @@ import com.jelly.farmhelperv2.failsafe.Failsafe;
 import com.jelly.farmhelperv2.failsafe.FailsafeManager;
 import com.jelly.farmhelperv2.failsafe.impl.BedrockCageFailsafe;
 import com.jelly.farmhelperv2.failsafe.impl.DirtFailsafe;
+import com.jelly.farmhelperv2.gui.FarmXMobileGui;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.GameStateHandler.BuffState;
 import com.jelly.farmhelperv2.handler.MacroHandler;
@@ -21,6 +22,7 @@ import com.jelly.farmhelperv2.hud.DebugHUD;
 import com.jelly.farmhelperv2.hud.StatusHUD;
 import com.jelly.farmhelperv2.util.BlockUtils;
 import com.jelly.farmhelperv2.util.LogUtils;
+import com.jelly.farmhelperv2.util.PlatformUtils;
 import com.jelly.farmhelperv2.util.PlayerUtils;
 import com.jelly.farmhelperv2.util.helper.AudioManager;
 import lombok.Getter;
@@ -846,7 +848,7 @@ public class FarmHelperConfig extends Config {
 
 
 
-        this.addDependency("antiStuckTriesUntilRewarp", "enableAntiStuck");
+        this.addDependency("antiStuckTriesUntilRewarp", "tmpAntiStuckEnabled");
 
 
 
@@ -868,7 +870,12 @@ public class FarmHelperConfig extends Config {
 
         this.hideIf("configVersion", () -> true);
 
-        registerKeyBind(openGuiKeybind, this::openGui);
+        if (PlatformUtils.isMobile()) {
+            // OneConfig NanoVG HUDs/GUI crash under GL4ES; use vanilla FarmXMobileGui instead.
+            registerKeyBind(openGuiKeybind, () -> Minecraft.getMinecraft().displayGuiScreen(new FarmXMobileGui()));
+        } else {
+            registerKeyBind(openGuiKeybind, this::openGui);
+        }
         registerKeyBind(toggleMacro, () -> MacroHandler.getInstance().toggleMacro());
         registerKeyBind(debugKeybind, () -> {
         });

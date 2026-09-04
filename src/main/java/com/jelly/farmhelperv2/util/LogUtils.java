@@ -43,13 +43,33 @@ public class LogUtils {
     }
 
     public static void sendNotification(String title, String message, float duration) {
-        if (!FarmHelperConfig.streamerMode)
+        if (FarmHelperConfig.streamerMode) {
+            return;
+        }
+        if (PlatformUtils.isMobile()) {
+            sendWarning(title + ": " + message);
+            return;
+        }
+        try {
             Notifications.INSTANCE.send(title, message, duration);
+        } catch (Throwable t) {
+            System.out.println("[Farm Helper] " + title + ": " + message);
+        }
     }
 
     public static void sendNotification(String title, String message) {
-        if (!FarmHelperConfig.streamerMode)
+        if (FarmHelperConfig.streamerMode) {
+            return;
+        }
+        if (PlatformUtils.isMobile()) {
+            sendWarning(title + ": " + message);
+            return;
+        }
+        try {
             Notifications.INSTANCE.send(title, message);
+        } catch (Throwable t) {
+            System.out.println("[Farm Helper] " + title + ": " + message);
+        }
     }
 
     public static void sendFailsafeMessage(String message) {

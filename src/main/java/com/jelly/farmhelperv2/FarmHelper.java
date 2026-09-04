@@ -13,6 +13,7 @@ import com.jelly.farmhelperv2.feature.FeatureManager;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.handler.RotationHandler;
+import com.jelly.farmhelperv2.hud.MobileStatusOverlay;
 import com.jelly.farmhelperv2.pathfinder.FlyPathFinderExecutor;
 import com.jelly.farmhelperv2.util.*;
 import com.jelly.farmhelperv2.util.helper.AudioManager;
@@ -58,13 +59,18 @@ public class FarmHelper {
         mc.gameSettings.pauseOnLostFocus = false;
         mc.gameSettings.gammaSetting = 1000;
         isDebug = java.lang.management.ManagementFactory.getRuntimeMXBean().getInputArguments().toString().contains("-agentlib:jdwp");
-        if (!FarmHelperConfig.streamerMode && FarmHelperConfig.changeWindowTitle)
-            Display.setTitle("Farm Helper 〔v" + VERSION + "〕 " + (!isDebug ? "Bing Chilling" : "wazzup dev?") + " ☛ " + Minecraft.getMinecraft().getSession().getUsername());
+        if (!PlatformUtils.isMobile() && !FarmHelperConfig.streamerMode && FarmHelperConfig.changeWindowTitle) {
+            try {
+                Display.setTitle("Farm Helper 〔v" + VERSION + "〕 " + (!isDebug ? "Bing Chilling" : "wazzup dev?") + " ☛ " + Minecraft.getMinecraft().getSession().getUsername());
+            } catch (Throwable ignored) {
+            }
+        }
         FailsafeUtils.getInstance();
         PlotUtils.init();
 
         ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-        executorService.scheduleAtFixedRate(() -> MinecraftForge.EVENT_BUS.post(new MillisecondEvent()), 0, 1, TimeUnit.MILLISECONDS);
+        long msPeriod = PlatformUtils.isMobile() ? 50L : 1L;
+        executorService.scheduleAtFixedRate(() -> MinecraftForge.EVENT_BUS.post(new MillisecondEvent()), 0, msPeriod, TimeUnit.MILLISECONDS);
         BaritoneAPI.getProvider().getPrimaryBaritone().getGameEventHandler().registerEventListener(new BaritoneEventListener());
     }
 
@@ -104,6 +110,7 @@ public class FarmHelper {
         MinecraftForge.EVENT_BUS.register(FlyPathFinderExecutor.getInstance());
         MinecraftForge.EVENT_BUS.register(new TablistUtils());
         MinecraftForge.EVENT_BUS.register(new ScoreboardUtils());
+        MinecraftForge.EVENT_BUS.register(MobileStatusOverlay.getInstance());
     }
 
     private void initializeFields() {
