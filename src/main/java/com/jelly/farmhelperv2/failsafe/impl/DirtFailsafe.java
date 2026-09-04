@@ -7,7 +7,6 @@ import com.jelly.farmhelperv2.event.BlockChangeEvent;
 import com.jelly.farmhelperv2.failsafe.Failsafe;
 import com.jelly.farmhelperv2.failsafe.FailsafeManager;
 import com.jelly.farmhelperv2.feature.impl.LagDetector;
-import com.jelly.farmhelperv2.feature.impl.MovRecPlayer;
 import com.jelly.farmhelperv2.handler.BaritoneHandler;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
@@ -115,7 +114,6 @@ public class DirtFailsafe extends Failsafe {
                     dirtOnLeft = false;
                 LogUtils.sendDebug("[Failsafe] Dirt on left: " + dirtOnLeft);
                 LogUtils.sendDebug("[Failsafe] Yaw difference: " + AngleUtils.getClosest());
-                MovRecPlayer.setYawDifference(AngleUtils.getClosest());
                 FailsafeManager.getInstance().swapItemDuringRecording = Math.random() < 0.2;
                 positionBeforeReacting = mc.thePlayer.getPosition();
                 rotationBeforeReacting = new Rotation(mc.thePlayer.prevRotationYaw, mc.thePlayer.prevRotationPitch);
@@ -124,15 +122,9 @@ public class DirtFailsafe extends Failsafe {
                 break;
             case PLAY_RECORDING:
                 if (blocksRemoved()) break;
-                if (dirtOnLeft)
-                    MovRecPlayer.getInstance().playRandomRecording("DIRT_CHECK_Left_Start_");
-                else
-                    MovRecPlayer.getInstance().playRandomRecording("DIRT_CHECK_Right_Start_");
                 dirtCheckState = DirtCheckState.WAIT_BEFORE_SENDING_MESSAGE;
                 break;
             case WAIT_BEFORE_SENDING_MESSAGE:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 if (!FarmHelperConfig.sendFailsafeMessage) {
                     dirtCheckState = DirtCheckState.KEEP_PLAYING;
                     FailsafeManager.getInstance().scheduleRandomDelay(300, 600);
@@ -153,16 +145,12 @@ public class DirtFailsafe extends Failsafe {
                 FailsafeManager.getInstance().scheduleRandomDelay(randomMessage.length() * 150L, 1000);
                 break;
             case SEND_MESSAGE:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 LogUtils.sendDebug("[Failsafe] Chosen message: " + randomMessage);
                 mc.thePlayer.sendChatMessage("/ac " + randomMessage);
                 dirtCheckState = DirtCheckState.KEEP_PLAYING;
                 FailsafeManager.getInstance().scheduleRandomDelay(500, 1000);
                 break;
             case KEEP_PLAYING:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 if (FailsafeManager.getInstance().swapItemDuringRecording && Math.random() > 0.6)
                     FailsafeManager.getInstance().swapItemDuringRecording = false;
                 if (blocksRemoved()) break;
@@ -186,7 +174,6 @@ public class DirtFailsafe extends Failsafe {
                 }
                 if (maxReactions > 0) {
                     LogUtils.sendDebug("[Failsafe] Playing recording: " + tempRecordingName);
-                    MovRecPlayer.getInstance().playRandomRecording(tempRecordingName);
                     maxReactions--;
                 } else {
                     FlyPathFinderExecutor.getInstance().findPath(new Vec3(positionBeforeReacting.getX() + 0.5, positionBeforeReacting.getY() + 3, positionBeforeReacting.getZ() + 0.5), true, true);
@@ -195,8 +182,6 @@ public class DirtFailsafe extends Failsafe {
                 FailsafeManager.getInstance().scheduleRandomDelay(500, 1000);
                 break;
             case GO_BACK_START:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 if (FailsafeManager.getInstance().swapItemDuringRecording)
                     FailsafeManager.getInstance().swapItemDuringRecording = false;
                 if (FlyPathFinderExecutor.getInstance().isRunning())

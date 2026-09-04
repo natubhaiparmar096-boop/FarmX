@@ -6,7 +6,6 @@ import com.jelly.farmhelperv2.config.page.FailsafeNotificationsPage;
 import com.jelly.farmhelperv2.failsafe.Failsafe;
 import com.jelly.farmhelperv2.failsafe.FailsafeManager;
 import com.jelly.farmhelperv2.feature.FeatureManager;
-import com.jelly.farmhelperv2.feature.impl.MovRecPlayer;
 import com.jelly.farmhelperv2.handler.BaritoneHandler;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
@@ -75,20 +74,16 @@ public class CobwebFailsafe extends Failsafe {
                 MacroHandler.getInstance().pauseMacro();
                 if (rotationBeforeReacting == null)
                     rotationBeforeReacting = new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
-                MovRecPlayer.setYawDifference(AngleUtils.getClosest(rotationBeforeReacting.getYaw()));
                 positionBeforeReacting = mc.thePlayer.getPosition();
                 cobwebCheckState = CobwebCheckState.PLAY_RECORDING;
                 FailsafeManager.getInstance().scheduleRandomDelay(500, 500);
                 break;
             case PLAY_RECORDING:
                 if (cobwebsRemoved()) break;
-                MovRecPlayer.getInstance().playRandomRecording("ROTATION_CHECK_Start_");
                 cobwebCheckState = CobwebCheckState.WAIT_BEFORE_SENDING_MESSAGE_1;
                 FailsafeManager.getInstance().scheduleRandomDelay(2000, 3000);
                 break;
             case WAIT_BEFORE_SENDING_MESSAGE_1:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 if (!FarmHelperConfig.sendFailsafeMessage) {
                     cobwebCheckState = CobwebCheckState.ROTATE_TO_POS_BEFORE;
                     FailsafeManager.getInstance().scheduleRandomDelay(300, 600);
@@ -129,13 +124,10 @@ public class CobwebFailsafe extends Failsafe {
                 if (cobwebsRemoved()) break;
                 if (rotation.isRotating())
                     break;
-                MovRecPlayer.getInstance().playRandomRecording("ROTATION_CHECK_Continue_");
                 cobwebCheckState = CobwebCheckState.WAIT_BEFORE_SENDING_MESSAGE_2;
                 FailsafeManager.getInstance().scheduleRandomDelay(2000, 3000);
                 break;
             case WAIT_BEFORE_SENDING_MESSAGE_2:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 if (!FarmHelperConfig.sendFailsafeMessage || Math.random() < 0.3) {
                     cobwebCheckState = CobwebCheckState.GO_BACK_START;
                     FailsafeManager.getInstance().scheduleRandomDelay(300, 600);
@@ -157,8 +149,6 @@ public class CobwebFailsafe extends Failsafe {
                 FailsafeManager.getInstance().scheduleRandomDelay(500, 1000);
                 break;
             case GO_BACK_START:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 if (mc.thePlayer.getPosition().distanceSq(positionBeforeReacting) < 2) {
                     cobwebCheckState = CobwebCheckState.ROTATE_TO_POS_BEFORE_2;
                     break;

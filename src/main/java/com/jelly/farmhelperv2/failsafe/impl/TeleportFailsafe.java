@@ -10,7 +10,6 @@ import com.jelly.farmhelperv2.failsafe.FailsafeManager;
 import com.jelly.farmhelperv2.feature.FeatureManager;
 import com.jelly.farmhelperv2.feature.impl.AntiStuck;
 import com.jelly.farmhelperv2.feature.impl.LagDetector;
-import com.jelly.farmhelperv2.feature.impl.MovRecPlayer;
 import com.jelly.farmhelperv2.handler.BaritoneHandler;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
@@ -251,18 +250,14 @@ public class TeleportFailsafe extends Failsafe {
                     rotationBeforeReacting = new Rotation(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch);
                 if (positionBeforeReacting == null)
                     positionBeforeReacting = mc.thePlayer.getPosition();
-                MovRecPlayer.setYawDifference(AngleUtils.getClosest(rotationBeforeReacting.getYaw()));
                 teleportCheckState = TeleportCheckState.LOOK_AROUND;
                 FailsafeManager.getInstance().scheduleRandomDelay(500, 500);
                 break;
             case LOOK_AROUND:
-                MovRecPlayer.getInstance().playRandomRecording("TELEPORT_CHECK_Start_");
                 teleportCheckState = TeleportCheckState.WAIT_BEFORE_SENDING_MESSAGE_1;
                 FailsafeManager.getInstance().scheduleRandomDelay(2000, 3000);
                 break;
             case WAIT_BEFORE_SENDING_MESSAGE_1:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 if (!FarmHelperConfig.sendFailsafeMessage) {
                     teleportCheckState = TeleportCheckState.ROTATE_TO_POS_BEFORE;
                     FailsafeManager.getInstance().scheduleRandomDelay(300, 600);
@@ -313,17 +308,12 @@ public class TeleportFailsafe extends Failsafe {
                 } else if (mc.thePlayer.getActivePotionEffects() != null
                         && mc.thePlayer.getActivePotionEffects().stream().anyMatch(potionEffect -> potionEffect.getPotionID() == 8)
                         && Math.random() < 0.2) {
-                    MovRecPlayer.getInstance().playRandomRecording("TELEPORT_CHECK_JumpBoost_");
                 } else if (mc.thePlayer.capabilities.allowFlying && BlockUtils.isAboveHeadClear() && Math.random() < 0.3) {
-                    MovRecPlayer.getInstance().playRandomRecording("TELEPORT_CHECK_Fly_");
                 } else {
-                    MovRecPlayer.getInstance().playRandomRecording("TELEPORT_CHECK_OnGround_");
                 }
                 FailsafeManager.getInstance().scheduleRandomDelay(500, 1000);
                 break;
             case WAIT_BEFORE_SENDING_MESSAGE_2:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 if (!FarmHelperConfig.sendFailsafeMessage) {
                     teleportCheckState = TeleportCheckState.GO_BACK_START;
                     FailsafeManager.getInstance().scheduleRandomDelay(500, 1000);
@@ -345,8 +335,6 @@ public class TeleportFailsafe extends Failsafe {
                 FailsafeManager.getInstance().scheduleRandomDelay(500, 1000);
                 break;
             case GO_BACK_START:
-                if (MovRecPlayer.getInstance().isRunning())
-                    break;
                 if (FailsafeManager.getInstance().swapItemDuringRecording)
                     FailsafeManager.getInstance().swapItemDuringRecording = false;
                 if (mc.thePlayer.getPosition().distanceSq(positionBeforeReacting) < 2) {

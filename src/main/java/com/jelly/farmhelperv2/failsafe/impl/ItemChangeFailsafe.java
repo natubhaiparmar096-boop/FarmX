@@ -5,7 +5,6 @@ import com.jelly.farmhelperv2.config.page.FailsafeNotificationsPage;
 import com.jelly.farmhelperv2.event.ReceivePacketEvent;
 import com.jelly.farmhelperv2.failsafe.Failsafe;
 import com.jelly.farmhelperv2.failsafe.FailsafeManager;
-import com.jelly.farmhelperv2.feature.impl.MovRecPlayer;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.util.KeyBindUtils;
 import com.jelly.farmhelperv2.util.LogUtils;
@@ -99,11 +98,9 @@ public class ItemChangeFailsafe extends Failsafe {
                 FailsafeManager.getInstance().scheduleRandomDelay(500, 500);
                 break;
             case LOOK_AROUND:
-                MovRecPlayer.getInstance().playRandomRecording("ITEM_CHANGE_");
                 itemChangeState = ItemChangeState.SWAP_BACK_ITEM;
                 break;
             case SWAP_BACK_ITEM:
-                if (MovRecPlayer.getInstance().isRunning()) return;
                 itemChangeState = ItemChangeState.END;
                 FailsafeManager.getInstance().scheduleRandomDelay(500, 1000);
                 break;
