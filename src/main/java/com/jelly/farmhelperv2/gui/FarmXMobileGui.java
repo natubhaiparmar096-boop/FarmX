@@ -6,15 +6,15 @@ import com.jelly.farmhelperv2.util.LogUtils;
 import com.jelly.farmhelperv2.util.PlayerUtils;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.util.MathHelper;
 
 import java.io.IOException;
 
 /**
- * Multi-page vanilla settings for Android / GL4ES. Same setup actions as OneConfig
- * (rewarp, spawn, farming toggles) without NanoVG.
+ * Multi-page vanilla settings for Android / GL4ES. Includes custom yaw/pitch setup.
  */
 public class FarmXMobileGui extends GuiScreen {
-    private static final String[] PAGE_NAMES = {"Farming", "Rewarp & Spawn", "Failsafe", "Misc"};
+    private static final String[] PAGE_NAMES = {"Farming", "Rotation", "Rewarp & Spawn", "Failsafe", "Misc"};
     private int page = 0;
 
     private static final int ID_PREV = 100;
@@ -27,6 +27,17 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_HOLD_LMB = 3;
     private static final int ID_ROTATE_WARP = 5;
     private static final int ID_ROTATE_DROP = 6;
+
+    // Rotation / custom yaw-pitch
+    private static final int ID_CUSTOM_PITCH = 40;
+    private static final int ID_CUSTOM_YAW = 41;
+    private static final int ID_SET_PITCH_LOOK = 42;
+    private static final int ID_SET_YAW_LOOK = 43;
+    private static final int ID_SET_BOTH_LOOK = 44;
+    private static final int ID_PITCH_MINUS = 45;
+    private static final int ID_PITCH_PLUS = 46;
+    private static final int ID_YAW_MINUS = 47;
+    private static final int ID_YAW_PLUS = 48;
 
     // Rewarp & Spawn
     private static final int ID_SET_SPAWN = 10;
@@ -91,6 +102,22 @@ public class FarmXMobileGui extends GuiScreen {
                 this.buttonList.add(new GuiButton(ID_ROTATE_DROP, cx, y, 200, 20, toggleLabel("Rotate After Drop", FarmHelperConfig.rotateAfterDrop)));
                 break;
             case 1:
+                this.buttonList.add(new GuiButton(ID_CUSTOM_PITCH, cx, y, 200, 20, toggleLabel("Custom Pitch", FarmHelperConfig.customPitch)));
+                y += gap;
+                this.buttonList.add(new GuiButton(ID_CUSTOM_YAW, cx, y, 200, 20, toggleLabel("Custom Yaw", FarmHelperConfig.customYaw)));
+                y += gap;
+                this.buttonList.add(new GuiButton(ID_SET_BOTH_LOOK, cx, y, 200, 20, "Set Both From Current Look"));
+                y += gap;
+                this.buttonList.add(new GuiButton(ID_SET_PITCH_LOOK, this.width / 2 - 105, y, half, 20, "Pitch From Look"));
+                this.buttonList.add(new GuiButton(ID_SET_YAW_LOOK, this.width / 2 + 7, y, half, 20, "Yaw From Look"));
+                y += gap;
+                this.buttonList.add(new GuiButton(ID_PITCH_MINUS, this.width / 2 - 105, y, half, 20, "Pitch -1"));
+                this.buttonList.add(new GuiButton(ID_PITCH_PLUS, this.width / 2 + 7, y, half, 20, "Pitch +1"));
+                y += gap;
+                this.buttonList.add(new GuiButton(ID_YAW_MINUS, this.width / 2 - 105, y, half, 20, "Yaw -5"));
+                this.buttonList.add(new GuiButton(ID_YAW_PLUS, this.width / 2 + 7, y, half, 20, "Yaw +5"));
+                break;
+            case 2:
                 this.buttonList.add(new GuiButton(ID_SET_SPAWN, cx, y, 200, 20, "Set Spawn (current pos)"));
                 y += gap;
                 this.buttonList.add(new GuiButton(ID_RESET_SPAWN, cx, y, 200, 20, "Reset Spawn"));
@@ -100,7 +127,7 @@ public class FarmXMobileGui extends GuiScreen {
                 this.buttonList.add(new GuiButton(ID_REMOVE_REWARP, this.width / 2 - 105, y, half, 20, "Remove Closest"));
                 this.buttonList.add(new GuiButton(ID_REMOVE_ALL_REWARPS, this.width / 2 + 7, y, half, 20, "Remove All"));
                 break;
-            case 2:
+            case 3:
                 this.buttonList.add(new GuiButton(ID_FAILSAFE_SOUND, cx, y, 200, 20, toggleLabel("Failsafe Sound", FarmHelperConfig.enableFailsafeSound)));
                 y += gap;
                 this.buttonList.add(new GuiButton(ID_RESTART_AFTER, cx, y, 200, 20, toggleLabel("Restart After Failsafe", FarmHelperConfig.enableRestartAfterFailSafe)));
@@ -109,7 +136,7 @@ public class FarmXMobileGui extends GuiScreen {
                 y += gap;
                 this.buttonList.add(new GuiButton(ID_AUTO_WARP_WORLD, cx, y, 200, 20, toggleLabel("Auto Warp Garden", FarmHelperConfig.alwaysTeleportToGarden)));
                 break;
-            case 3:
+            case 4:
             default:
                 this.buttonList.add(new GuiButton(ID_ANTI_STUCK, cx, y, 200, 20, toggleLabel("Anti Stuck", FarmHelperConfig.tmpAntiStuckEnabled)));
                 y += gap;
@@ -131,17 +158,25 @@ public class FarmXMobileGui extends GuiScreen {
         this.drawDefaultBackground();
         this.drawCenteredString(this.fontRendererObj, "FarmX — " + PAGE_NAMES[page], this.width / 2, 12, 0xFFFFFF);
         if (page == 1) {
+            this.drawCenteredString(this.fontRendererObj,
+                    String.format("Pitch %s %.1f  |  Yaw %s %.1f",
+                            FarmHelperConfig.customPitch ? "ON" : "OFF", FarmHelperConfig.customPitchLevel,
+                            FarmHelperConfig.customYaw ? "ON" : "OFF", FarmHelperConfig.customYawLevel),
+                    this.width / 2, this.height - 72, 0x55FF55);
+            this.drawCenteredString(this.fontRendererObj, "Look where you want, then Set From Look  |  /fhrot",
+                    this.width / 2, this.height - 60, 0xAAAAAA);
+        } else if (page == 2) {
             String spawn = PlayerUtils.isSpawnLocationSet()
                     ? ("Spawn: " + FarmHelperConfig.spawnPosX + ", " + FarmHelperConfig.spawnPosY + ", " + FarmHelperConfig.spawnPosZ
                     + "  yaw=" + (int) FarmHelperConfig.spawnYaw)
                     : "Spawn: not set";
             this.drawCenteredString(this.fontRendererObj, spawn, this.width / 2, this.height - 72, 0x55FF55);
             this.drawCenteredString(this.fontRendererObj, "Rewarps: " + FarmHelperConfig.rewarpList.size()
-                            + "  |  chat: /fhrewarp  /fhspawn",
+                            + "  |  /fhrewarp  /fhspawn  /fhrot",
                     this.width / 2, this.height - 60, 0xAAAAAA);
         } else {
             this.drawCenteredString(this.fontRendererObj, "Page " + (page + 1) + "/" + PAGE_NAMES.length
-                            + "  |  also: /fhrewarp  /fhspawn",
+                            + "  |  /fhrewarp  /fhspawn  /fhrot",
                     this.width / 2, this.height - 64, 0xAAAAAA);
         }
         super.drawScreen(mouseX, mouseY, partialTicks);
@@ -181,12 +216,48 @@ public class FarmXMobileGui extends GuiScreen {
                 FarmHelperConfig.rotateAfterDrop = !FarmHelperConfig.rotateAfterDrop;
                 button.displayString = toggleLabel("Rotate After Drop", FarmHelperConfig.rotateAfterDrop);
                 break;
+            case ID_CUSTOM_PITCH:
+                FarmHelperConfig.customPitch = !FarmHelperConfig.customPitch;
+                button.displayString = toggleLabel("Custom Pitch", FarmHelperConfig.customPitch);
+                break;
+            case ID_CUSTOM_YAW:
+                FarmHelperConfig.customYaw = !FarmHelperConfig.customYaw;
+                button.displayString = toggleLabel("Custom Yaw", FarmHelperConfig.customYaw);
+                break;
+            case ID_SET_BOTH_LOOK:
+                setFromCurrentLook(true, true);
+                initGui();
+                break;
+            case ID_SET_PITCH_LOOK:
+                setFromCurrentLook(true, false);
+                initGui();
+                break;
+            case ID_SET_YAW_LOOK:
+                setFromCurrentLook(false, true);
+                initGui();
+                break;
+            case ID_PITCH_MINUS:
+                FarmHelperConfig.customPitchLevel = clampPitch(FarmHelperConfig.customPitchLevel - 1f);
+                FarmHelperConfig.customPitch = true;
+                initGui();
+                break;
+            case ID_PITCH_PLUS:
+                FarmHelperConfig.customPitchLevel = clampPitch(FarmHelperConfig.customPitchLevel + 1f);
+                FarmHelperConfig.customPitch = true;
+                initGui();
+                break;
+            case ID_YAW_MINUS:
+                FarmHelperConfig.customYawLevel = normalizeYaw(FarmHelperConfig.customYawLevel - 5f);
+                FarmHelperConfig.customYaw = true;
+                initGui();
+                break;
+            case ID_YAW_PLUS:
+                FarmHelperConfig.customYawLevel = normalizeYaw(FarmHelperConfig.customYawLevel + 5f);
+                FarmHelperConfig.customYaw = true;
+                initGui();
+                break;
             case ID_SET_SPAWN:
                 PlayerUtils.setSpawnLocation();
-                if (PlayerUtils.isSpawnLocationSet()) {
-                    LogUtils.sendSuccess("Spawn set to " + FarmHelperConfig.spawnPosX + ", "
-                            + FarmHelperConfig.spawnPosY + ", " + FarmHelperConfig.spawnPosZ);
-                }
                 initGui();
                 break;
             case ID_RESET_SPAWN:
@@ -257,6 +328,42 @@ public class FarmXMobileGui extends GuiScreen {
             default:
                 break;
         }
+    }
+
+    private void setFromCurrentLook(boolean pitch, boolean yaw) {
+        if (this.mc.thePlayer == null) {
+            LogUtils.sendError("Cannot read look angle (not in world).");
+            return;
+        }
+        if (pitch) {
+            FarmHelperConfig.customPitchLevel = clampPitch(this.mc.thePlayer.rotationPitch);
+            FarmHelperConfig.customPitch = true;
+        }
+        if (yaw) {
+            FarmHelperConfig.customYawLevel = normalizeYaw(this.mc.thePlayer.rotationYaw);
+            FarmHelperConfig.customYaw = true;
+        }
+        if (FarmHelper.config != null) {
+            FarmHelper.config.save();
+        }
+        LogUtils.sendSuccess(String.format("Custom rotation set — pitch %.1f (%s), yaw %.1f (%s)",
+                FarmHelperConfig.customPitchLevel, FarmHelperConfig.customPitch ? "ON" : "OFF",
+                FarmHelperConfig.customYawLevel, FarmHelperConfig.customYaw ? "ON" : "OFF"));
+    }
+
+    private static float clampPitch(float pitch) {
+        return MathHelper.clamp_float(pitch, -90f, 90f);
+    }
+
+    private static float normalizeYaw(float yaw) {
+        yaw = yaw % 360f;
+        if (yaw > 180f) {
+            yaw -= 360f;
+        }
+        if (yaw < -180f) {
+            yaw += 360f;
+        }
+        return yaw;
     }
 
     private void saveAndClose() {
