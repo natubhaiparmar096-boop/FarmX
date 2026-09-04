@@ -370,6 +370,8 @@ public class PlayerUtils {
         FarmHelperConfig.spawnPitch = AngleUtils.normalizeAngle(mc.thePlayer.rotationPitch);
         FarmHelperConfig.spawnPlot = GameStateHandler.getInstance().getCurrentPlot();
         FarmHelper.config.save();
+        LogUtils.sendSuccess("Spawn set to " + FarmHelperConfig.spawnPosX + ", "
+                + FarmHelperConfig.spawnPosY + ", " + FarmHelperConfig.spawnPosZ);
     }
 
     public static Entity getEntityCuttingOtherEntity(Entity e) {

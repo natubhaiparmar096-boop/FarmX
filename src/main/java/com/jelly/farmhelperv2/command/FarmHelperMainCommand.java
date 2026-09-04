@@ -20,7 +20,11 @@ public class FarmHelperMainCommand {
 
     @Main
     public void mainCommand() {
-        FarmHelper.config.openGui();
+        if (com.jelly.farmhelperv2.util.PlatformUtils.isMobile()) {
+            Minecraft.getMinecraft().displayGuiScreen(new com.jelly.farmhelperv2.gui.FarmXMobileGui());
+        } else {
+            FarmHelper.config.openGui();
+        }
     }
 
     @SubCommand(aliases = {"pfm"})
