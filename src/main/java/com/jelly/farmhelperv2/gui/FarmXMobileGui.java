@@ -444,7 +444,7 @@ public class FarmXMobileGui extends GuiScreen {
                 initGui();
                 break;
             case ID_FB_SPEED_PLUS:
-                FarmHelperConfig.fastBreakSpeed = Math.min(5, FarmHelperConfig.fastBreakSpeed + 1);
+                FarmHelperConfig.fastBreakSpeed = Math.min(3, FarmHelperConfig.fastBreakSpeed + 1);
                 initGui();
                 break;
             case ID_FB_RANDOM:
