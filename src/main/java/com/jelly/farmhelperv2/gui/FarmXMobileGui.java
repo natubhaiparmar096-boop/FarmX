@@ -25,7 +25,6 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_MACRO_TYPE = 1;
     private static final int ID_ALWAYS_W = 2;
     private static final int ID_HOLD_LMB = 3;
-    private static final int ID_CUSTOM_SPEED = 4;
     private static final int ID_ROTATE_WARP = 5;
     private static final int ID_ROTATE_DROP = 6;
 
@@ -86,8 +85,6 @@ public class FarmXMobileGui extends GuiScreen {
                 this.buttonList.add(new GuiButton(ID_ALWAYS_W, cx, y, 200, 20, toggleLabel("Always Hold W", FarmHelperConfig.alwaysHoldW)));
                 y += gap;
                 this.buttonList.add(new GuiButton(ID_HOLD_LMB, cx, y, 200, 20, toggleLabel("Hold LMB on Row Change", FarmHelperConfig.holdLeftClickWhenChangingRow)));
-                y += gap;
-                this.buttonList.add(new GuiButton(ID_CUSTOM_SPEED, cx, y, 200, 20, toggleLabel("Custom Farming Speed", FarmHelperConfig.customFarmingSpeed)));
                 y += gap;
                 this.buttonList.add(new GuiButton(ID_ROTATE_WARP, cx, y, 200, 20, toggleLabel("Rotate After Warp", FarmHelperConfig.rotateAfterWarped)));
                 y += gap;
@@ -175,10 +172,6 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_HOLD_LMB:
                 FarmHelperConfig.holdLeftClickWhenChangingRow = !FarmHelperConfig.holdLeftClickWhenChangingRow;
                 button.displayString = toggleLabel("Hold LMB on Row Change", FarmHelperConfig.holdLeftClickWhenChangingRow);
-                break;
-            case ID_CUSTOM_SPEED:
-                FarmHelperConfig.customFarmingSpeed = !FarmHelperConfig.customFarmingSpeed;
-                button.displayString = toggleLabel("Custom Farming Speed", FarmHelperConfig.customFarmingSpeed);
                 break;
             case ID_ROTATE_WARP:
                 FarmHelperConfig.rotateAfterWarped = !FarmHelperConfig.rotateAfterWarped;

@@ -94,17 +94,6 @@ public class FarmHelperConfig extends Config {
     )
     public static boolean alwaysHoldW = false;
 
-    @Switch(
-            name = "Use Custom Farming Speed", category = GENERAL,
-            description = "Enable auto ranchers boots speed changer when farming"
-    )
-    public static boolean customFarmingSpeed = false;
-    @Number(
-            name = "Custom Farming Speed", category = GENERAL,
-            description = "Set a Custom Farming Speed for Ranchers Boots",
-            min = 1, max = 400
-    )
-    public static int farmingSpeed = 400;
 
     //<editor-fold desc="Rotation">
     @Switch(
@@ -809,8 +798,6 @@ public class FarmHelperConfig extends Config {
         initialize();
 
         this.addDependency("macroType", "Macro Type", () -> !MacroHandler.getInstance().isMacroToggled());
-
-        this.addDependency("farmingSpeed", "customFarmingSpeed");
 
         this.addDependency("customPitchLevel", "customPitch");
         this.addDependency("customYawLevel", "customYaw");

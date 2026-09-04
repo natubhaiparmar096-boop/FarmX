@@ -15,10 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import static java.lang.Integer.parseInt;
 
 public class InventoryUtils {
     private static final Minecraft mc = Minecraft.getMinecraft();
@@ -310,21 +307,6 @@ public class InventoryUtils {
         return false;
     }
 
-    public static int getRancherBootSpeed() {
-        final ItemStack stack = mc.thePlayer.inventoryContainer.getSlot(8).getStack();
-        int speed = -1;
-        if (stack != null && stack.hasTagCompound()) {
-            final NBTTagCompound tag = stack.getTagCompound();
-            final Pattern pattern = Pattern.compile("Current Speed Cap: (\\d+)", Pattern.MULTILINE);
-            final Matcher matcher = pattern.matcher(StringUtils.stripControlCodes(tag.toString()));
-            while (matcher.find()) {
-                if (matcher.group(1) != null) {
-                    speed = parseInt(matcher.group(1));
-                }
-            }
-        }
-        return speed;
-    }
 
     public static boolean isInventoryLoaded() {
         if (mc.thePlayer == null || mc.thePlayer.openContainer == null) return false;
