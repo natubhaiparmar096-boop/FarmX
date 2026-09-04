@@ -51,7 +51,7 @@ public class BadEffectsFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnBadEffectsFailsafe;
+        return false;
     }
 
     @Override
@@ -94,8 +94,6 @@ public class BadEffectsFailsafe extends Failsafe {
         FailsafeManager.getInstance().emergencyQueue.remove(this);
         if (FailsafeManager.getInstance().emergencyQueue.isEmpty()) {
             LogUtils.sendWarning("[Failsafe] Bad effects check failsafe was triggered but the admin removed them from you. §c§lDO NOT REACT§e TO THIS OR YOU WILL GET BANNED!");
-            if (FailsafeNotificationsPage.notifyOnRotationFailsafe)
-                LogUtils.webhookLog("[Failsafe]\nBad effects check failsafe was triggered but the admin removed them from you. DO NOT REACT TO THIS OR YOU WILL GET BANNED!");
         }
         badEffectsState = BadEffectsState.END;
     }

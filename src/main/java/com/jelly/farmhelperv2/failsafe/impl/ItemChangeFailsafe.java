@@ -48,7 +48,7 @@ public class ItemChangeFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnItemChangeFailsafe;
+        return false;
     }
 
     @Override

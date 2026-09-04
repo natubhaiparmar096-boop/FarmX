@@ -121,7 +121,6 @@ public abstract class AbstractMacro {
             KeyBindUtils.holdThese(mc.gameSettings.keyBindSneak);
             return;
         }
-        LogUtils.webhookStatus();
         if (!PlayerUtils.isRewarpLocationSet()) {
             LogUtils.sendError("Your rewarp position is not set!");
             MacroHandler.getInstance().disableMacro();

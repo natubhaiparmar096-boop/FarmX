@@ -43,7 +43,7 @@ public class DisconnectFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnDisconnectFailsafe;
+        return false;
     }
 
     @Override

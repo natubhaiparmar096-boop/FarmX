@@ -54,7 +54,7 @@ public class CobwebFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnCobwebFailsafe;
+        return false;
     }
 
     @Override
@@ -251,8 +251,6 @@ public class CobwebFailsafe extends Failsafe {
                 FailsafeManager.getInstance().emergencyQueue.remove(this);
                 if (FailsafeManager.getInstance().emergencyQueue.isEmpty()) {
                     LogUtils.sendWarning("[Failsafe] Cobweb check failsafe was triggered but the admin removed the blocks immediately. §c§lDO NOT REACT§e TO THIS OR YOU WILL GET BANNED!");
-                    if (FailsafeNotificationsPage.notifyOnCobwebFailsafe)
-                        LogUtils.webhookLog("[Failsafe]\nCobweb check failsafe was triggered but the admin removed the blocks immediately. DO NOT REACT TO THIS OR YOU WILL GET BANNED!");
                 }
                 return true;
             }

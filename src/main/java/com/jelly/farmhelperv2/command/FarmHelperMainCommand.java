@@ -76,10 +76,4 @@ public class FarmHelperMainCommand {
     public void stoppath() {
         FlyPathFinderExecutor.getInstance().stop();
     }
-
-    @SubCommand(aliases = {"up"})
-    public void update() {
-        PlayerUtils.closeScreen();
-        FarmHelperConfig.checkForUpdate();
-    }
 }

@@ -47,7 +47,7 @@ public class JacobFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnJacobFailsafe;
+        return false;
     }
 
     @Override

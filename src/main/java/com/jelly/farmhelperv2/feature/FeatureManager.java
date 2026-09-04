@@ -40,7 +40,6 @@ public class FeatureManager {
                 Scheduler.getInstance(),
                 UngrabMouse.getInstance(),
                 PiPMode.getInstance(),
-                UsageStatsTracker.getInstance(),
                 AutoWardrobe.instance
         );
         features.addAll(featuresList);

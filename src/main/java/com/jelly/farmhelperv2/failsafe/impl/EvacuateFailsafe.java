@@ -46,7 +46,7 @@ public class EvacuateFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnEvacuateFailsafe;
+        return false;
     }
 
     @Override

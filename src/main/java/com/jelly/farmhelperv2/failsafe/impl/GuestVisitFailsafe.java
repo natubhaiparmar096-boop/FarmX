@@ -46,7 +46,7 @@ public class GuestVisitFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnGuestVisit;
+        return false;
     }
 
     @Override

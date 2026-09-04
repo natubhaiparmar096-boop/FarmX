@@ -16,13 +16,11 @@ import com.jelly.farmhelperv2.failsafe.impl.BedrockCageFailsafe;
 import com.jelly.farmhelperv2.failsafe.impl.DirtFailsafe;
 import com.jelly.farmhelperv2.feature.impl.*;
 import com.jelly.farmhelperv2.feature.impl.Proxy.ProxyType;
-import com.jelly.farmhelperv2.gui.AutoUpdaterGUI;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.GameStateHandler.BuffState;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.hud.DebugHUD;
 import com.jelly.farmhelperv2.hud.StatusHUD;
-import com.jelly.farmhelperv2.hud.UsageStatsHUD;
 import com.jelly.farmhelperv2.util.BlockUtils;
 import com.jelly.farmhelperv2.util.LogUtils;
 import com.jelly.farmhelperv2.util.PlayerUtils;
@@ -30,7 +28,6 @@ import com.jelly.farmhelperv2.util.helper.AudioManager;
 import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.BlockPos;
-import net.minecraftforge.fml.common.Loader;
 import org.lwjgl.input.Keyboard;
 
 import java.io.File;
@@ -52,7 +49,6 @@ public class FarmHelperConfig extends Config {
     private transient static final String JACOBS_CONTEST = "Jacob's Contest";
     private transient static final String AUTO_GOD_POT = "Auto God Pot";
     private transient static final String AUTO_SPRAYONATOR = "Auto Sprayonator";
-    private transient static final String DISCORD_INTEGRATION = "Discord Integration";
     private transient static final String DELAYS = "Delays";
     private transient static final String HUD = "HUD";
     private transient static final String DEBUG = "Debug";
@@ -302,23 +298,6 @@ public class FarmHelperConfig extends Config {
     //</editor-fold>
 
     //<editor-fold desc="Miscellaneous">
-    @DualOption(
-            name = "AutoUpdater Version Type", category = MISCELLANEOUS, subcategory = "Miscellaneous",
-            description = "The version type to use",
-            left = "Release",
-            right = "Pre-release"
-    )
-    public static boolean autoUpdaterDownloadBetaVersions = false;
-
-    @Button(
-            name = "Check for update", category = MISCELLANEOUS, subcategory = "Miscellaneous",
-            description = "Checks for updates",
-            text = "Check for update"
-    )
-    Runnable _checkForUpdate = () -> {
-        FarmHelperConfig.checkForUpdate();
-    };
-
     @Switch(
             name = "Mute The Game", category = MISCELLANEOUS, subcategory = "Miscellaneous",
             description = "Mutes the game while farming"
@@ -555,17 +534,6 @@ public class FarmHelperConfig extends Config {
     )
     public static boolean enableCustomReactions = false;
 
-    /*
-        @Info(
-            text = "If you want to use your own WAV file, rename it to 'farmhelper_sound.wav' and put it in your Minecraft directory.",
-            type = InfoType.WARNING,
-            category = FAILSAFE,
-            subcategory = "Failsafe Trigger Sound",
-            size = 2
-    )
-    public static boolean customFailsafeSoundWarning;
-     */
-
     // Failsafe Testing
     @Button(name = "Test Failsafe", category = FAILSAFE, subcategory = "Testing",
             description = "Simulate a failsafe trigger",
@@ -687,56 +655,15 @@ public class FarmHelperConfig extends Config {
             description = "Makes a sound when a failsafe has been triggered"
     )
     public static boolean enableFailsafeSound = true;
-    @DualOption(
-            name = "Failsafe Sound Type", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
-            description = "The failsafe sound type to play when a failsafe has been triggered",
-            left = "Minecraft",
-            right = "Custom",
-            size = 2
-    )
-    public static boolean failsafeSoundType = false;
     @Dropdown(
             name = "Minecraft Sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
             description = "The Minecraft sound to play when a failsafe has been triggered",
             options = {
-                    "Ping", // 0
-                    "Anvil" // 1
+                    "Ping",
+                    "Anvil"
             }
     )
     public static int failsafeMcSoundSelected = 1;
-
-    @Dropdown(
-            name = "Custom Sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
-            description = "The custom sound to play when a failsafe has been triggered",
-            options = {
-                    "Custom", // 0
-                    "Voice", // 1
-                    "Metal Pipe", // 2
-                    "AAAAAAAAAA", // 3
-                    "Loud Buzz", // 4
-            }
-    )
-    public static int failsafeSoundSelected = 1;
-    @Number(
-            name = "Number of times to play custom sound", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
-            description = "The number of times to play custom sound when a failsafe has been triggered",
-            min = 1, max = 10
-    )
-    public static int failsafeSoundTimes = 13;
-    @Info(
-            text = "If you want to use your own WAV file, rename it to 'farmhelper_sound.wav' and put it in your Minecraft directory.",
-            type = InfoType.WARNING,
-            category = FAILSAFE,
-            subcategory = "Failsafe Trigger Sound",
-            size = 2
-    )
-    public static boolean customFailsafeSoundWarning;
-    @Slider(
-            name = "Failsafe Sound Volume (in %)", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
-            description = "The volume of the failsafe sound",
-            min = 0, max = 100
-    )
-    public static float failsafeSoundVolume = 50.0f;
     @Switch(
             name = "Max out Master category sounds while pinging", category = FAILSAFE, subcategory = "Failsafe Trigger Sound",
             description = "Maxes out the sounds while failsafe"
@@ -995,91 +922,6 @@ public class FarmHelperConfig extends Config {
 
     //</editor-fold>
 
-    //<editor-fold desc="DISCORD INTEGRATION">
-    //<editor-fold desc="Webhook Discord">
-    @Switch(
-            name = "Enable Webhook Messages", category = DISCORD_INTEGRATION, subcategory = "Discord Webhook",
-            description = "Allows to send messages via Discord webhooks"
-    )
-    public static boolean enableWebHook = false;
-    @Switch(
-            name = "Send Logs", category = DISCORD_INTEGRATION, subcategory = "Discord Webhook",
-            description = "Sends all messages about the macro, staff checks, etc"
-    )
-    public static boolean sendLogs = false;
-    @Switch(
-            name = "Send Status Updates", category = DISCORD_INTEGRATION, subcategory = "Discord Webhook",
-            description = "Sends messages about the macro, such as profits, harvesting crops, etc"
-    )
-    public static boolean sendStatusUpdates = false;
-    @Number(
-            name = "Status Update Interval (in minutes)", category = DISCORD_INTEGRATION, subcategory = "Discord Webhook",
-            description = "The interval between sending messages about status updates",
-            min = 1, max = 60
-    )
-    public static int statusUpdateInterval = 5;
-    @Switch(
-            name = "Send Macro Enable/Disable Logs", category = DISCORD_INTEGRATION, subcategory = "Discord Webhook",
-            description = "Sends messages when the macro has been enabled or disabled"
-    )
-    public static boolean sendMacroEnableDisableLogs = true;
-    @Text(
-            name = "WebHook URL", category = DISCORD_INTEGRATION, subcategory = "Discord Webhook",
-            description = "The URL to use for the webhook",
-            placeholder = "https://discord.com/api/webhooks/...",
-            secure = true
-    )
-    public static String webHookURL = "";
-    //</editor-fold>
-
-    //<editor-fold desc="Remote Control">
-    @Switch(
-            name = "Enable Remote Control", category = DISCORD_INTEGRATION, subcategory = "Remote Control",
-            description = "Enables remote control via Discord messages"
-    )
-    public static boolean enableRemoteControl = false;
-    @Text(
-            name = "Discord Remote Control Bot Token",
-            category = DISCORD_INTEGRATION, subcategory = "Remote Control",
-            description = "The bot token to use for remote control",
-            secure = true
-    )
-    public static String discordRemoteControlToken;
-    @Text(
-            name = "Discord Remote Control Address",
-            category = DISCORD_INTEGRATION, subcategory = "Remote Control",
-            description = "The address to use for remote control. If you are unsure what to put there, leave \"localhost\".",
-            placeholder = "localhost"
-    )
-    public static String discordRemoteControlAddress = "localhost";
-
-    @Number(
-            name = "Remote Control Port", category = DISCORD_INTEGRATION, subcategory = "Remote Control",
-            description = "The port to use for remote control. Change this if you have port conflicts.",
-            min = 1, max = 65535
-    )
-    public static int remoteControlPort = 21370;
-
-    @Info(
-            text = "If you want to use the remote control feature, you need to put Farm Helper JDA Dependency inside your mods folder.",
-            type = InfoType.ERROR,
-            category = DISCORD_INTEGRATION,
-            subcategory = "Remote Control",
-            size = 2
-    )
-    public static boolean infoRemoteControl;
-
-    @Info(
-            text = "Your Farm Helper JDA Dependency is outdated! You must update it to use the remote control feature.",
-            type = InfoType.ERROR,
-            category = DISCORD_INTEGRATION,
-            subcategory = "Remote Control",
-            size = 2
-    )
-    public static boolean info2RemoteControl;
-    //</editor-fold>
-    //</editor-fold>
-
     //<editor-fold desc="God Pot">
     @Switch(
             name = "Auto God Pot", category = AUTO_GOD_POT, subcategory = "God Pot",
@@ -1324,63 +1166,6 @@ public class FarmHelperConfig extends Config {
     )
     public static boolean resetStatsBetweenDisabling = false;
 
-    @Switch(
-            name      = "Colour-code 24-hour total",
-            description = "Green < 3.5 h, 3.5 h < Orange < 7 h, Red ≥ 7 h",
-            category  = HUD,
-            subcategory = "Usage Stats"
-    )
-    public static boolean colourCode24H = true;
-    @Switch(
-            name      = "Show 24-hour total",
-            category  = HUD,
-            subcategory = "Usage Stats"
-    )
-    public static boolean showStats24H = true;
-    @Switch(
-            name       = "Show 7-day total",
-            category   = HUD,
-            subcategory = "Usage Stats"
-    )
-    public static boolean showStats7D = false;
-    @Switch(
-            name       = "Enable Long Term Data Storage",
-            category   = HUD,
-            subcategory = "Usage Stats"
-    )
-    public static boolean longTermUserStats = false;
-    @Info(
-            text = "Enabling long term storage of user stats could potentially lead to large files (< 1mb), which may cause lag, in time, on slow systems",
-            type = InfoType.WARNING,
-            category = HUD,
-            subcategory = "Usage Stats",
-            size = 2
-    )
-    public static boolean usageStatsInfo;
-    @Switch(
-            name       = "Show 30-day total",
-            category   = HUD,
-            subcategory = "Usage Stats"
-    )
-    public static boolean showStats30D = false;
-    @Switch(
-            name      = "Show lifetime total",
-            category  = HUD,
-            subcategory = "Usage Stats"
-    )
-    public static boolean showStatsLifetime = true;
-    @Switch(
-            name      = "Show FH Usage Stats Title",
-            category  = HUD,
-            subcategory = "Usage Stats"
-    )
-    public static boolean showStatsTitle = false;
-    @HUD(
-            name = "Usage Stats HUD - Visual Settings",
-            category = HUD,
-            subcategory = "Usage Stats"
-    )
-    public static UsageStatsHUD UsageStatsHUD = new UsageStatsHUD();
     //</editor-fold>
 
     //<editor-fold desc="DEBUG">
@@ -1512,16 +1297,12 @@ public class FarmHelperConfig extends Config {
         this.addDependency("autoUngrabMouse", "This feature doesn't work properly on Mac OS!", () -> !Minecraft.isRunningOnMac);
 
         this.addDependency("desyncPauseDelay", "checkDesync");
-        this.addDependency("failsafeSoundType", "Play Button", () -> enableFailsafeSound && !AudioManager.getInstance().isSoundPlaying());
+        this.addDependency("failsafeMcSoundSelected", "enableFailsafeSound");
+        this.addDependency("maxOutMinecraftSounds", "enableFailsafeSound");
         this.addDependency("_playFailsafeSoundButton", "enableFailsafeSound");
         this.addDependency("_stopFailsafeSoundButton", "enableFailsafeSound");
         this.hideIf("_playFailsafeSoundButton", () -> AudioManager.getInstance().isSoundPlaying());
         this.hideIf("_stopFailsafeSoundButton", () -> !AudioManager.getInstance().isSoundPlaying());
-        this.addDependency("failsafeMcSoundSelected", "Minecraft Sound", () -> !failsafeSoundType && enableFailsafeSound);
-        this.addDependency("failsafeSoundSelected", "Custom Sound", () -> failsafeSoundType && enableFailsafeSound);
-        this.addDependency("failsafeSoundVolume", "Custom Sound", () -> failsafeSoundType && enableFailsafeSound);
-        this.addDependency("maxOutMinecraftSounds", "Minecraft Sound", () -> !failsafeSoundType && enableFailsafeSound);
-        this.hideIf("customFailsafeSoundWarning", () -> !failsafeSoundType || !enableFailsafeSound || failsafeSoundSelected != 0);
         this.addDependency("restartAfterFailSafeDelay", "enableRestartAfterFailSafe");
         this.addDependency("alwaysTeleportToGarden", "enableRestartAfterFailSafe");
 
@@ -1550,19 +1331,7 @@ public class FarmHelperConfig extends Config {
         this.hideIf("infoCookieBuffRequired",
                 () -> GameStateHandler.getInstance().inGarden() || GameStateHandler.getInstance().getCookieBuffState() == BuffState.NOT_ACTIVE);
 
-        this.addDependency("sendLogs", "enableWebHook");
-        this.addDependency("sendStatusUpdates", "enableWebHook");
-        this.addDependency("statusUpdateInterval", "enableWebHook");
-        this.addDependency("webHookURL", "enableWebHook");
-        this.addDependency("enableRemoteControl", "Enable Remote Control",
-                () -> Loader.isModLoaded("farmhelperjdadependency") && FarmHelper.isJDAVersionCorrect);
-        this.addDependency("discordRemoteControlAddress", "enableRemoteControl");
-        this.addDependency("remoteControlPort", "enableRemoteControl");
 
-        this.hideIf("infoRemoteControl", () -> Loader.isModLoaded("farmhelperjdadependency"));
-        this.hideIf("info2RemoteControl", () -> !Loader.isModLoaded("farmhelperjdadependency") || (Loader.isModLoaded("farmhelperjdadependency")
-                && FarmHelper.isJDAVersionCorrect));
-        this.hideIf("failsafeSoundTimes", () -> true);
 
         this.addDependency("debugMode", "Streamer Mode", () -> !streamerMode);
         this.addDependency("streamerMode", "Debug Mode", () -> !debugMode);
@@ -1603,8 +1372,6 @@ public class FarmHelperConfig extends Config {
 
         this.addDependency("leaveTime", "leaveTimer");
 
-        this.addDependency("showStats30D", "longTermUserStats");
-        this.addDependency("showStatsLifetime", "longTermUserStats");
 
         this.hideIf("shownWelcomeGUI", () -> true);
 
@@ -1735,18 +1502,6 @@ public class FarmHelperConfig extends Config {
             json = nonProfileSpecificGson.toJson(this);
         }
         return json;
-    }
-
-    public static void checkForUpdate() {
-        AutoUpdaterGUI.checkedForUpdates = true;
-        AutoUpdaterGUI.shownGui = false;
-        AutoUpdaterGUI.getLatestVersion();
-        if (AutoUpdaterGUI.isOutdated) {
-            LogUtils.sendWarning("You are using an outdated version! The latest version is " + AutoUpdaterGUI.latestVersion + "!");
-            AutoUpdaterGUI.showGUI();
-        } else {
-            LogUtils.sendSuccess("You are using the latest version!");
-        }
     }
 
     public enum MacroEnum {

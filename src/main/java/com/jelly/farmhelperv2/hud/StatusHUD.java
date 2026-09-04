@@ -10,18 +10,14 @@ import com.jelly.farmhelperv2.feature.impl.LeaveTimer;
 import com.jelly.farmhelperv2.feature.impl.Scheduler;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
-import com.jelly.farmhelperv2.remote.DiscordBotHandler;
 import com.jelly.farmhelperv2.util.LogUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.common.Loader;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class StatusHUD extends TextHud {
 
-    private final boolean jdaDependencyPresent = Loader.isModLoaded("farmhelperjdadependency");
     private final List<String> cachedLines = new ArrayList<>();
     private long lastUpdateMs = 0;
 
@@ -43,13 +39,6 @@ public class StatusHUD extends TextHud {
 
         if (LeaveTimer.getInstance().isRunning()) {
             cachedLines.add("Leave: " + LogUtils.formatTime(Math.max(LeaveTimer.leaveClock.getRemainingTime(), 0)));
-        }
-
-        if (FarmHelperConfig.enableRemoteControl && jdaDependencyPresent) {
-            String state = DiscordBotHandler.getInstance().getConnectingState();
-            if (!Objects.equals(state, "")) {
-                cachedLines.add(state);
-            }
         }
 
         lines.addAll(cachedLines);

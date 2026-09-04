@@ -57,7 +57,7 @@ public class KnockbackFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnKnockbackFailsafe;
+        return false;
     }
 
     @Override

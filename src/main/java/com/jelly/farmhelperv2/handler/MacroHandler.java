@@ -158,9 +158,6 @@ public class MacroHandler {
         LogUtils.sendDebug("Selected macro: " + LogUtils.capitalize(currentMacro.get().getClass().getSimpleName()));
         PlayerUtils.closeScreen();
         LogUtils.sendSuccess("Macro enabled!");
-        if (FarmHelperConfig.sendMacroEnableDisableLogs) {
-            LogUtils.webhookLog("Macro enabled!");
-        }
 
         analyticsTimer.reset();
         Multithreading.schedule(() -> {
@@ -186,9 +183,6 @@ public class MacroHandler {
     public void disableMacro() {
         setMacroToggled(false);
         LogUtils.sendSuccess("Macro disabled!");
-        if (FarmHelperConfig.sendMacroEnableDisableLogs) {
-            LogUtils.webhookLog("Macro disabled!");
-        }
         currentMacro.ifPresent(m -> {
             m.setSavedState(Optional.empty());
             m.getRotation().reset();
@@ -196,7 +190,6 @@ public class MacroHandler {
 
         macroingTimer.pause();
 
-        UsageStatsTracker.getInstance().saveSession();
         analyticsTimer.pause();
 
         setCrop(FarmHelperConfig.CropEnum.NONE);
@@ -296,7 +289,6 @@ public class MacroHandler {
             if (!cm.isEnabledAndNoFeature()) return;
             cm.onTick();
         });
-        UsageStatsTracker.getInstance().tick(!isCurrentMacroPaused());
     }
 
     @SubscribeEvent

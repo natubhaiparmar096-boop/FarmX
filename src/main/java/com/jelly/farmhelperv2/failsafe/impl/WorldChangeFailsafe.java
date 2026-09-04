@@ -48,7 +48,7 @@ public class WorldChangeFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnWorldChangeFailsafe;
+        return false;
     }
 
     @Override

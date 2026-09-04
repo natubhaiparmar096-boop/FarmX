@@ -29,7 +29,7 @@ public class FailsafeUtils {
         }
         BufferedImage image;
         try {
-            image = ImageIO.read(Objects.requireNonNull(getClass().getResource("/farmhelper/icon-mod/rat.png")));
+            image = ImageIO.read(Objects.requireNonNull(getClass().getResource("/farmhelper/icon-mod/icon.png")));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

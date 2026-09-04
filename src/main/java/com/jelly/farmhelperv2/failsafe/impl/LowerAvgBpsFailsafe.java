@@ -50,7 +50,7 @@ public class LowerAvgBpsFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnLowerAverageBPS;
+        return false;
     }
 
     @Override

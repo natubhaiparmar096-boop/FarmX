@@ -50,7 +50,7 @@ public class FullInventoryFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnFullInventory;
+        return false;
     }
 
     @Override

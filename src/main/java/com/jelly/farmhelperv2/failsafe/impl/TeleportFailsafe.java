@@ -67,7 +67,7 @@ public class TeleportFailsafe extends Failsafe {
 
     @Override
     public boolean shouldTagEveryone() {
-        return FailsafeNotificationsPage.tagEveryoneOnTeleportationFailsafe;
+        return false;
     }
 
     @Override
@@ -136,7 +136,7 @@ public class TeleportFailsafe extends Failsafe {
             AbstractMacro.State currentState = MacroHandler.getInstance().getCurrentMacro().map(AbstractMacro::getCurrentState).orElse(null);
             LowerAvgBpsFailsafe.getInstance().resetStates();
             if (currentState == null || currentState != lastWalkedPosition.get().getSecond()) {
-                LogUtils.sendFailsafeMessage("[Failsafe] You got lag backed into previous row! Fixing state", FailsafeNotificationsPage.tagEveryoneOnLagBackFailsafe);
+                LogUtils.sendFailsafeMessage("[Failsafe] You got lag backed into previous row! Fixing state");
                 if (FailsafeNotificationsPage.notifyOnLagBackFailsafe)
                     FailsafeUtils.getInstance().sendNotification("You got lag backed into previous row! Fixing state", TrayIcon.MessageType.WARNING);
                 Optional<Tuple<BlockPos, AbstractMacro.State>> finalLastWalkedPosition = lastWalkedPosition;
@@ -148,7 +148,7 @@ public class TeleportFailsafe extends Failsafe {
                 });
                 return;
             }
-            LogUtils.sendFailsafeMessage("[Failsafe] You got lag backed! Not reacting", FailsafeNotificationsPage.tagEveryoneOnLagBackFailsafe);
+            LogUtils.sendFailsafeMessage("[Failsafe] You got lag backed! Not reacting");
             if (FailsafeNotificationsPage.notifyOnLagBackFailsafe)
                 FailsafeUtils.getInstance().sendNotification("You got lag backed! Not reacting", TrayIcon.MessageType.WARNING);
             return;
@@ -167,8 +167,6 @@ public class TeleportFailsafe extends Failsafe {
         if (mc.thePlayer.motionX * dx + mc.thePlayer.motionZ * dz > 0 && currentPlayerPos.yCoord <= packetPlayerPos.yCoord && Math.abs(dy) < 1 && (Math.abs(dx) < 1 || Math.abs(dz) < 1)) {
             LogUtils.sendDebug("[Failsafe] Teleportation in the same direction as movement. Ignoring.");
             LogUtils.sendWarning("[Failsafe] Teleport check failsafe was triggered, but the admin teleported you in the same direction you were moving. §c§lDO NOT REACT§e TO THIS OR YOU WILL GET BANNED!");
-            if (FailsafeNotificationsPage.notifyOnRotationFailsafe)
-                LogUtils.webhookLog("[Failsafe]\nTeleport check failsafe was triggered, but the admin teleported you in the same direction you were moving. DO NOT REACT TO THIS OR YOU WILL GET BANNED!");
             return;
         }
 
@@ -228,8 +226,6 @@ public class TeleportFailsafe extends Failsafe {
             FailsafeManager.getInstance().emergencyQueue.remove(this);
             if (FailsafeManager.getInstance().emergencyQueue.isEmpty()) {
                 LogUtils.sendWarning("[Failsafe] Teleport check failsafe was triggered, but the admin teleported you back. §c§lDO NOT REACT§e TO THIS OR YOU WILL GET BANNED!");
-                if (FailsafeNotificationsPage.notifyOnRotationFailsafe)
-                    LogUtils.webhookLog("[Failsafe]\nTeleport check failsafe was triggered, but the admin teleported you back. DO NOT REACT TO THIS OR YOU WILL GET BANNED!");
             }
         }
         originalPosition = null;
