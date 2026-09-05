@@ -14,14 +14,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileManager {
-    private static final File profilesFile = new File("farmhelper_profiles.json");
+    private static File profilesFile = null;
+
+    private static File getProfilesFile() {
+        if (profilesFile == null) {
+            profilesFile = new File(net.minecraft.client.Minecraft.getMinecraft().mcDataDir, "config/farmhelper_profiles.json");
+        }
+        return profilesFile;
+    }
+
     public static List<FarmingProfile> profiles = new ArrayList<>();
     public static int activeProfileIndex = 0;
 
     public static void loadProfiles() {
         profiles.clear();
-        if (profilesFile.exists()) {
-            try (FileReader reader = new FileReader(profilesFile)) {
+        File f = getProfilesFile();
+        if (f.exists()) {
+            try (FileReader reader = new FileReader(f)) {
                 List<FarmingProfile> loaded = FarmHelper.gson.fromJson(reader, new TypeToken<List<FarmingProfile>>() {}.getType());
                 if (loaded != null && !loaded.isEmpty()) {
                     profiles.addAll(loaded);
@@ -68,10 +77,14 @@ public class ProfileManager {
 
     public static void saveProfiles() {
         try {
-            if (!profilesFile.exists()) {
-                Files.createFile(profilesFile.toPath());
+            File f = getProfilesFile();
+            if (f.getParentFile() != null && !f.getParentFile().exists()) {
+                f.getParentFile().mkdirs();
             }
-            Files.write(profilesFile.toPath(), FarmHelper.gson.toJson(profiles).getBytes(StandardCharsets.UTF_8));
+            if (!f.exists()) {
+                Files.createFile(f.toPath());
+            }
+            Files.write(f.toPath(), FarmHelper.gson.toJson(profiles).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             LogUtils.sendError("Failed to save profiles: " + e.getMessage());
         }
