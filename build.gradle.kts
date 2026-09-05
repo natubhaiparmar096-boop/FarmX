@@ -84,7 +84,7 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.34")
     annotationProcessor("org.projectlombok:lombok:1.18.34")
 
-    implementation("me.djtheredstoner:DevAuth-forge-legacy:1.2.1")
+    implementation("me.djtheredstoner:DevAuth-forge-legacy:1.2.2")
 
     implementation("com.github.onixiya1337.baritone-fly:baritone-deobf:nirox-fly-SNAPSHOT")
     shadowImpl("com.github.onixiya1337.baritone-fly:baritone-api-forge:nirox-fly-SNAPSHOT") {
