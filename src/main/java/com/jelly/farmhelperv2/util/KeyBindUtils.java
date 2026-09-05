@@ -117,6 +117,32 @@ public class KeyBindUtils {
         }
     }
 
+    /** 0=W, 1=S, 2=A, 3=D */
+    public static KeyBinding wasdFromIndex(int index) {
+        switch (index) {
+            case 0:
+                return mc.gameSettings.keyBindForward;
+            case 1:
+                return mc.gameSettings.keyBindBack;
+            case 2:
+                return mc.gameSettings.keyBindLeft;
+            case 3:
+                return mc.gameSettings.keyBindRight;
+            default:
+                return mc.gameSettings.keyBindBack;
+        }
+    }
+
+    public static String wasdName(int index) {
+        switch (index) {
+            case 0: return "W";
+            case 1: return "S";
+            case 2: return "A";
+            case 3: return "D";
+            default: return "?";
+        }
+    }
+
     public static void releaseAllExcept(KeyBinding... keyBinding) {
         for (KeyBinding key : allKeys) {
             if (key != null && !contains(keyBinding, key) && key.isKeyDown()) {

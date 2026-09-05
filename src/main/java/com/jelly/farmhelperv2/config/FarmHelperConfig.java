@@ -94,6 +94,67 @@ public class FarmHelperConfig extends Config {
     )
     public static boolean alwaysHoldW = false;
 
+    //<editor-fold desc="Sugar Cane Controls">
+    @Dropdown(
+            name = "Sugar Cane Control Mode", category = GENERAL, subcategory = "Sugar Cane",
+            description = "Classic: S along the row, A/D change lane. Strafe: A one way, D the other (typical at yaw ±135), S changes lane.",
+            options = {
+                    "Classic (S along row, A/D lane)",
+                    "Strafe (A forward / D back, S lane)"
+            },
+            size = 2
+    )
+    public static int sugarcaneControlMode = 0;
+
+    @Dropdown(
+            name = "Classic: Along-Row Key", category = GENERAL, subcategory = "Sugar Cane",
+            description = "Key held while moving along the cane row (classic mode).",
+            options = {"W", "S", "A", "D"}
+    )
+    public static int sugarcaneClassicRowKey = 1; // S
+
+    @Dropdown(
+            name = "Classic: Lane-Left Key", category = GENERAL, subcategory = "Sugar Cane",
+            description = "Key used to switch lane toward the left side (classic mode).",
+            options = {"W", "S", "A", "D"}
+    )
+    public static int sugarcaneClassicLaneLeftKey = 2; // A
+
+    @Dropdown(
+            name = "Classic: Lane-Right Key", category = GENERAL, subcategory = "Sugar Cane",
+            description = "Key used to switch lane toward the right side (classic mode).",
+            options = {"W", "S", "A", "D"}
+    )
+    public static int sugarcaneClassicLaneRightKey = 3; // D
+
+    @Dropdown(
+            name = "Strafe: Forward (A-leg) Key", category = GENERAL, subcategory = "Sugar Cane",
+            description = "Key for the forward leg in strafe mode (your design: A).",
+            options = {"W", "S", "A", "D"}
+    )
+    public static int sugarcaneStrafeForwardKey = 2; // A
+
+    @Dropdown(
+            name = "Strafe: Back (D-leg) Key", category = GENERAL, subcategory = "Sugar Cane",
+            description = "Key for the return leg in strafe mode (your design: D).",
+            options = {"W", "S", "A", "D"}
+    )
+    public static int sugarcaneStrafeBackKey = 3; // D
+
+    @Dropdown(
+            name = "Strafe: Lane-Switch Key", category = GENERAL, subcategory = "Sugar Cane",
+            description = "Key held briefly to move into the next cane line (usually S).",
+            options = {"W", "S", "A", "D"}
+    )
+    public static int sugarcaneStrafeLaneKey = 1; // S
+
+    @Switch(
+            name = "Invert Sugar Cane Lane Side", category = GENERAL, subcategory = "Sugar Cane",
+            description = "Swaps left/right lane decisions if your farm mirrors the default classic layout."
+    )
+    public static boolean sugarcaneInvertLaneSide = false;
+    //</editor-fold>
+
 
     //<editor-fold desc="Rotation">
     @Switch(
