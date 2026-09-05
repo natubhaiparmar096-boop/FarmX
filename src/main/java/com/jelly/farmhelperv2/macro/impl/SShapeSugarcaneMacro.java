@@ -8,29 +8,46 @@ import com.jelly.farmhelperv2.util.AngleUtils;
 import com.jelly.farmhelperv2.util.BlockUtils;
 import com.jelly.farmhelperv2.util.KeyBindUtils;
 import com.jelly.farmhelperv2.util.LogUtils;
+import com.jelly.farmhelperv2.util.helper.Clock;
 import com.jelly.farmhelperv2.util.helper.Rotation;
 import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
 import net.minecraft.client.settings.KeyBinding;
 
 import java.util.Optional;
 
+/**
+ * Sugar cane S-shape with three control modes:
+ * <ul>
+ *   <li>0 Classic — S along row, A/D lane</li>
+ *   <li>1 Strafe — Go/Return legs + lane key</li>
+ *   <li>2 Two-key — Go until wall, idle transit (no move key), then Return (e.g. D then S)</li>
+ * </ul>
+ * Keys are remappable; works for any facing (N/S/E/W) via yaw + Go/Return key choice.
+ */
 public class SShapeSugarcaneMacro extends AbstractMacro {
 
     public double rowStartX = 0;
     public double rowStartZ = 0;
+    private final Clock transitClock = new Clock();
 
-    private boolean strafeMode() {
-        return FarmHelperConfig.sugarcaneControlMode == 1;
+    private int mode() {
+        return FarmHelperConfig.sugarcaneControlMode;
     }
 
     @Override
     public void updateState() {
         if (currentState == null)
             changeState(State.NONE);
-        if (strafeMode()) {
-            updateStateStrafe();
-        } else {
-            updateStateClassic();
+        switch (mode()) {
+            case 1:
+                updateStateStrafe();
+                break;
+            case 2:
+                updateStateTwoKey();
+                break;
+            default:
+                updateStateClassic();
+                break;
         }
     }
 
@@ -61,61 +78,99 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
                 changeState(State.S);
                 break;
             }
-            case DROPPING: {
+            case DROPPING:
                 handleDropping();
                 break;
-            }
-            case NONE: {
-                changeState(calculateDirection());
+            case NONE:
+                changeState(calculateDirectionClassic());
                 break;
-            }
-            default: {
-                LogUtils.sendDebug("This shouldn't happen, but it did...");
+            default:
                 changeState(State.NONE);
-            }
+                break;
         }
     }
 
-    /**
-     * A = forward leg, D = back leg, S = lane switch (keys remappable).
-     */
+    /** Go = State.A, Return = State.D, Lane = State.S */
     private void updateStateStrafe() {
         switch (currentState) {
-            case A: { // forward leg
-                if (strafeBlockedLeft()) {
+            case A:
+                if (blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
                     changeState(State.S);
                 }
                 break;
-            }
-            case D: { // back leg
-                if (strafeBlockedRight()) {
+            case D:
+                if (blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
                     changeState(State.S);
                 }
                 break;
-            }
-            case S: { // lane switch → opposite leg
+            case S: {
                 State prev = getPreviousState();
                 if (prev == State.A) {
                     changeState(State.D);
                 } else if (prev == State.D) {
                     changeState(State.A);
                 } else {
-                    changeState(calculateDirectionStrafe());
+                    changeState(startLeg());
                 }
                 break;
             }
-            case DROPPING: {
+            case DROPPING:
                 handleDropping();
                 break;
-            }
-            case NONE: {
-                changeState(calculateDirectionStrafe());
+            case NONE:
+                changeState(startLeg());
                 break;
-            }
-            default: {
+            default:
                 changeState(State.NONE);
-            }
+                break;
         }
+    }
+
+    /**
+     * Go until wall → hold Go during transit until Return opens → Return until wall → hold Return during transit until Go opens…
+     * Matches 2-key sugarcane farms that use continuous D then S movement without releasing keys.
+     */
+    private void updateStateTwoKey() {
+        switch (currentState) {
+            case A: // Go leg
+                if (blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
+                    changeState(State.SWITCHING_LANE);
+                }
+                break;
+            case D: // Return leg
+                if (blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
+                    changeState(State.SWITCHING_LANE);
+                }
+                break;
+            case SWITCHING_LANE: // transit
+                if (getPreviousState() == State.A) {
+                    // Came from Go leg → switch to Return as soon as Return path is unblocked
+                    if (!blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
+                        changeState(State.D);
+                    }
+                } else if (getPreviousState() == State.D) {
+                    // Came from Return leg → switch to Go as soon as Go path is unblocked
+                    if (!blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
+                        changeState(State.A);
+                    }
+                } else {
+                    changeState(startLeg());
+                }
+                break;
+            case DROPPING:
+                handleDropping();
+                break;
+            case NONE:
+                changeState(startLeg());
+                break;
+            default:
+                changeState(State.NONE);
+                break;
+        }
+    }
+
+    private State startLeg() {
+        return FarmHelperConfig.sugarcaneStartOnGoLeg ? State.A : State.D;
     }
 
     private void handleDropping() {
@@ -141,34 +196,66 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
         }
     }
 
-    private boolean strafeBlockedLeft() {
-        return hasWall(-1, 0, getYaw()) || (hasWall(-1, -1, getYaw()) && hasWall(-1, 1, getYaw()));
-    }
-
-    private boolean strafeBlockedRight() {
-        return hasWall(1, 0, getYaw()) || (hasWall(1, -1, getYaw()) && hasWall(1, 1, getYaw()));
+    /** True if movement in that WASD direction is blocked relative to current yaw. */
+    private boolean blockedForKey(int wasdIndex) {
+        float yaw = getYaw();
+        switch (wasdIndex) {
+            case 0: // W
+                return hasWall(0, 1, yaw) || (hasWall(-1, 1, yaw) && hasWall(1, 1, yaw));
+            case 1: // S
+                return hasWall(0, -1, yaw) || (hasWall(-1, -1, yaw) && hasWall(1, -1, yaw));
+            case 2: // A
+                return hasWall(-1, 0, yaw) || (hasWall(-1, -1, yaw) && hasWall(-1, 1, yaw));
+            case 3: // D
+                return hasWall(1, 0, yaw) || (hasWall(1, -1, yaw) && hasWall(1, 1, yaw));
+            default:
+                return hasWall(0, -1, yaw);
+        }
     }
 
     @Override
     public void invokeState() {
         if (currentState == null) return;
+        if (mode() == 2) {
+            updateStateTwoKey();
+        }
         switch (currentState) {
             case NONE:
                 break;
-            case A:
-                holdMove(strafeMode()
-                        ? KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneStrafeForwardKey)
-                        : KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneClassicLaneLeftKey));
+            case A: // Go (or classic lane-left)
+                if (mode() == 0) {
+                    holdMove(KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneClassicLaneLeftKey));
+                } else {
+                    holdMove(KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneGoKey));
+                }
                 break;
-            case D:
-                holdMove(strafeMode()
-                        ? KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneStrafeBackKey)
-                        : KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneClassicLaneRightKey));
+            case D: // Return (or classic lane-right)
+                if (mode() == 0) {
+                    holdMove(KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneClassicLaneRightKey));
+                } else {
+                    holdMove(KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneReturnKey));
+                }
                 break;
-            case S:
-                holdMove(strafeMode()
-                        ? KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneStrafeLaneKey)
-                        : KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneClassicRowKey));
+            case S: // Classic row / Strafe lane key
+                if (mode() == 0) {
+                    holdMove(KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneClassicRowKey));
+                } else if (mode() == 1) {
+                    holdMove(KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneLaneKey));
+                }
+                break;
+            case SWITCHING_LANE:
+                if (mode() == 2) {
+                    if (getPreviousState() == State.D) {
+                        holdMove(KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneReturnKey));
+                    } else {
+                        holdMove(KeyBindUtils.wasdFromIndex(FarmHelperConfig.sugarcaneGoKey));
+                    }
+                } else {
+                    KeyBindUtils.stopMovement(FarmHelperConfig.holdLeftClickWhenChangingRow);
+                    if (FarmHelperConfig.holdLeftClickWhenChangingRow) {
+                        KeyBindUtils.holdThese(mc.gameSettings.keyBindAttack);
+                    }
+                }
                 break;
             case DROPPING:
                 if (mc.thePlayer.onGround && Math.abs(getLayerY() - mc.thePlayer.getPosition().getY()) <= 1.5) {
@@ -205,6 +292,7 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
         }
         rowStartX = mc.thePlayer.posX;
         rowStartZ = mc.thePlayer.posZ;
+        transitClock.reset();
         if (MacroHandler.getInstance().isTeleporting()) return;
         setRestoredState(false);
         if (FarmHelperConfig.dontFixAfterWarping && Math.abs(getYaw() - AngleUtils.get360RotationYaw()) < 0.1) return;
@@ -218,9 +306,13 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
 
     @Override
     public State calculateDirection() {
-        if (strafeMode()) {
-            return calculateDirectionStrafe();
+        if (mode() == 1 || mode() == 2) {
+            return startLeg();
         }
+        return calculateDirectionClassic();
+    }
+
+    private State calculateDirectionClassic() {
         if (BlockUtils.isWater(BlockUtils.getRelativeBlock(2, -1, 1, getYaw() - 45f)) || BlockUtils.isWater(BlockUtils.getRelativeBlock(2, 0, 1, getYaw() - 45f))
                 || BlockUtils.isWater(BlockUtils.getRelativeBlock(-1, -1, 1, getYaw() - 45f)) || BlockUtils.isWater(BlockUtils.getRelativeBlock(-1, 0, 1, getYaw() - 45f)))
             if (!(hasWall(0, 1, getYaw() - 45f) && hasWall(-1, 0, getYaw() - 45f)))
@@ -229,16 +321,6 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
                     || BlockUtils.isWater(BlockUtils.getRelativeBlock(-1, -1, 1, getYaw() + 45f)) || BlockUtils.isWater(BlockUtils.getRelativeBlock(-1, 0, 1, getYaw() + 45f)))
                 if (!(hasWall(0, 1, getYaw() + 45f) && hasWall(11, 0, getYaw() + 45f)))
                     return FarmHelperConfig.sugarcaneInvertLaneSide ? State.A : State.D;
-        return State.S;
-    }
-
-    private State calculateDirectionStrafe() {
-        if (!strafeBlockedLeft()) {
-            return State.A;
-        }
-        if (!strafeBlockedRight()) {
-            return State.D;
-        }
         return State.S;
     }
 

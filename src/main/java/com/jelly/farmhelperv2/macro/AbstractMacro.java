@@ -74,18 +74,24 @@ public abstract class AbstractMacro {
     private boolean sentWarning = false;
 
     public boolean isYawSet() {
-        return yaw.isPresent();
+        return FarmHelperConfig.customYaw || yaw.isPresent();
     }
 
     public boolean isPitchSet() {
-        return pitch.isPresent();
+        return FarmHelperConfig.customPitch || pitch.isPresent();
     }
 
     public float getYaw() {
+        if (FarmHelperConfig.customYaw) {
+            return FarmHelperConfig.customYawLevel;
+        }
         return yaw.orElse(0f);
     }
 
     public float getPitch() {
+        if (FarmHelperConfig.customPitch) {
+            return FarmHelperConfig.customPitchLevel;
+        }
         return pitch.orElse(0f);
     }
 
@@ -282,6 +288,10 @@ public abstract class AbstractMacro {
     public void onEnable() {
 
         GameStateHandler.getInstance().scheduleRewarp();
+        if (!savedState.isPresent()) {
+            yaw = Optional.empty();
+            pitch = Optional.empty();
+        }
         if (FarmHelperConfig.customPitch) {
             setPitch(FarmHelperConfig.customPitchLevel);
         }
