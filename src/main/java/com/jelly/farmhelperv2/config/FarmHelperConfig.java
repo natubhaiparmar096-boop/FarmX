@@ -97,10 +97,11 @@ public class FarmHelperConfig extends Config {
     //<editor-fold desc="Sugar Cane Controls">
     @Dropdown(
             name = "Sugar Cane Control Mode", category = GENERAL, subcategory = "Sugar Cane",
-            description = "Classic: S along the row, A/D change lane. Strafe: A one way, D the other (typical at yaw ±135), S changes lane.",
+            description = "Classic: S along row, A/D lane. Strafe: Go/Return + lane key. Two-key: Hold Go (D) forward, hold Return (S) backward continuously during transit.",
             options = {
                     "Classic (S along row, A/D lane)",
-                    "Strafe (A forward / D back, S lane)"
+                    "Strafe (3 keys: go / return / lane)",
+                    "Two-key (Continuous Go / Return) — D+S style"
             },
             size = 2
     )
@@ -128,29 +129,35 @@ public class FarmHelperConfig extends Config {
     public static int sugarcaneClassicLaneRightKey = 3; // D
 
     @Dropdown(
-            name = "Strafe: Forward (A-leg) Key", category = GENERAL, subcategory = "Sugar Cane",
-            description = "Key for the forward leg in strafe mode (your design: A).",
+            name = "Strafe/Two-key: Go Key", category = GENERAL, subcategory = "Sugar Cane",
+            description = "First leg key. North-start D/S farm: set to D.",
             options = {"W", "S", "A", "D"}
     )
-    public static int sugarcaneStrafeForwardKey = 2; // A
+    public static int sugarcaneGoKey = 3; // D
 
     @Dropdown(
-            name = "Strafe: Back (D-leg) Key", category = GENERAL, subcategory = "Sugar Cane",
-            description = "Key for the return leg in strafe mode (your design: D).",
+            name = "Strafe/Two-key: Return Key", category = GENERAL, subcategory = "Sugar Cane",
+            description = "Return leg key. North-start D/S farm: set to S.",
             options = {"W", "S", "A", "D"}
     )
-    public static int sugarcaneStrafeBackKey = 3; // D
+    public static int sugarcaneReturnKey = 1; // S
 
     @Dropdown(
             name = "Strafe: Lane-Switch Key", category = GENERAL, subcategory = "Sugar Cane",
-            description = "Key held briefly to move into the next cane line (usually S).",
+            description = "Only for Strafe (3-key) mode. Two-key mode holds Go/Return continuously during transit.",
             options = {"W", "S", "A", "D"}
     )
-    public static int sugarcaneStrafeLaneKey = 1; // S
+    public static int sugarcaneLaneKey = 1; // S
+
+    @Switch(
+            name = "Start on Go Key Leg", category = GENERAL, subcategory = "Sugar Cane",
+            description = "On: start holding Go (e.g. D from the north). Off: start on Return key."
+    )
+    public static boolean sugarcaneStartOnGoLeg = true;
 
     @Switch(
             name = "Invert Sugar Cane Lane Side", category = GENERAL, subcategory = "Sugar Cane",
-            description = "Swaps left/right lane decisions if your farm mirrors the default classic layout."
+            description = "Swaps left/right lane decisions in classic mode."
     )
     public static boolean sugarcaneInvertLaneSide = false;
     //</editor-fold>
@@ -865,6 +872,16 @@ public class FarmHelperConfig extends Config {
         initialize();
 
         this.addDependency("macroType", "Macro Type", () -> !MacroHandler.getInstance().isMacroToggled());
+
+        this.hideIf("sugarcaneControlMode", () -> getMacro() != MacroEnum.S_SUGAR_CANE);
+        this.hideIf("sugarcaneClassicRowKey", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode != 0);
+        this.hideIf("sugarcaneClassicLaneLeftKey", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode != 0);
+        this.hideIf("sugarcaneClassicLaneRightKey", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode != 0);
+        this.hideIf("sugarcaneGoKey", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode == 0);
+        this.hideIf("sugarcaneReturnKey", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode == 0);
+        this.hideIf("sugarcaneLaneKey", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode != 1);
+        this.hideIf("sugarcaneStartOnGoLeg", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode == 0);
+        this.hideIf("sugarcaneInvertLaneSide", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode != 0);
 
         this.addDependency("customPitchLevel", "customPitch");
         this.addDependency("customYawLevel", "customYaw");

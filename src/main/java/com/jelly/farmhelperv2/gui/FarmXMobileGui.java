@@ -69,6 +69,7 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_SC_KEY2 = 19;
     private static final int ID_SC_KEY3 = 25;
     private static final int ID_SC_INVERT = 26;
+    private static final int ID_SC_START_GO = 18;
 
     // Rotation
     private static final int ID_C_PITCH = 10;
@@ -212,12 +213,18 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_ROT_WARP, cx, y, 200, on("Rotate After Warp", FarmHelperConfig.rotateAfterWarped)); y += g;
                 btn(ID_ROT_DROP, cx, y, 200, on("Rotate After Drop", FarmHelperConfig.rotateAfterDrop)); y += g;
                 btn(ID_DONT_FIX, cx, y, 200, on("Don't Fix After Warp", FarmHelperConfig.dontFixAfterWarping)); y += g;
-                btn(ID_AUTO_TOOL, cx, y, 200, on("Auto Switch Tool", FarmHelperConfig.autoSwitchTool)); y += g;
-                btn(ID_SC_MODE, cx, y, 200, sugarcaneModeLabel()); y += g;
-                btn(ID_SC_KEY1, cx, y, 200, sugarcaneKey1Label()); y += g;
-                btn(ID_SC_KEY2, cx, y, 200, sugarcaneKey2Label()); y += g;
-                btn(ID_SC_KEY3, cx, y, 200, sugarcaneKey3Label()); y += g;
-                btn(ID_SC_INVERT, cx, y, 200, on("Invert Cane Lane Side", FarmHelperConfig.sugarcaneInvertLaneSide));
+                if (FarmHelperConfig.getMacro() == FarmHelperConfig.MacroEnum.S_SUGAR_CANE) {
+                    btn(ID_SC_MODE, cx, y, 200, sugarcaneModeLabel()); y += g;
+                    btn(ID_SC_KEY1, cx, y, 200, sugarcaneKey1Label()); y += g;
+                    btn(ID_SC_KEY2, cx, y, 200, sugarcaneKey2Label()); y += g;
+                    btn(ID_SC_KEY3, cx, y, 200, sugarcaneKey3Label()); y += g;
+                    if (FarmHelperConfig.sugarcaneControlMode >= 1) {
+                        btn(ID_SC_START_GO, cx, y, 200, on("Start on Go Key", FarmHelperConfig.sugarcaneStartOnGoLeg)); y += g;
+                    }
+                    if (FarmHelperConfig.sugarcaneControlMode == 0) {
+                        btn(ID_SC_INVERT, cx, y, 200, on("Invert Cane Lane Side", FarmHelperConfig.sugarcaneInvertLaneSide));
+                    }
+                }
                 break;
             case 2: // Rotation — typed values
                 btn(ID_C_PITCH, cx, y, 200, on("Custom Pitch", FarmHelperConfig.customPitch)); y += g;
@@ -474,20 +481,20 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_DONT_FIX: FarmHelperConfig.dontFixAfterWarping = !FarmHelperConfig.dontFixAfterWarping; button.displayString = on("Don't Fix After Warp", FarmHelperConfig.dontFixAfterWarping); break;
             case ID_AUTO_TOOL: FarmHelperConfig.autoSwitchTool = !FarmHelperConfig.autoSwitchTool; button.displayString = on("Auto Switch Tool", FarmHelperConfig.autoSwitchTool); break;
             case ID_SC_MODE:
-                FarmHelperConfig.sugarcaneControlMode = (FarmHelperConfig.sugarcaneControlMode + 1) % 2;
+                FarmHelperConfig.sugarcaneControlMode = (FarmHelperConfig.sugarcaneControlMode + 1) % 3;
                 initGui();
                 break;
             case ID_SC_KEY1:
-                if (FarmHelperConfig.sugarcaneControlMode == 1) {
-                    FarmHelperConfig.sugarcaneStrafeForwardKey = (FarmHelperConfig.sugarcaneStrafeForwardKey + 1) % 4;
+                if (FarmHelperConfig.sugarcaneControlMode >= 1) {
+                    FarmHelperConfig.sugarcaneGoKey = (FarmHelperConfig.sugarcaneGoKey + 1) % 4;
                 } else {
                     FarmHelperConfig.sugarcaneClassicRowKey = (FarmHelperConfig.sugarcaneClassicRowKey + 1) % 4;
                 }
                 button.displayString = sugarcaneKey1Label();
                 break;
             case ID_SC_KEY2:
-                if (FarmHelperConfig.sugarcaneControlMode == 1) {
-                    FarmHelperConfig.sugarcaneStrafeBackKey = (FarmHelperConfig.sugarcaneStrafeBackKey + 1) % 4;
+                if (FarmHelperConfig.sugarcaneControlMode >= 1) {
+                    FarmHelperConfig.sugarcaneReturnKey = (FarmHelperConfig.sugarcaneReturnKey + 1) % 4;
                 } else {
                     FarmHelperConfig.sugarcaneClassicLaneLeftKey = (FarmHelperConfig.sugarcaneClassicLaneLeftKey + 1) % 4;
                 }
@@ -495,11 +502,17 @@ public class FarmXMobileGui extends GuiScreen {
                 break;
             case ID_SC_KEY3:
                 if (FarmHelperConfig.sugarcaneControlMode == 1) {
-                    FarmHelperConfig.sugarcaneStrafeLaneKey = (FarmHelperConfig.sugarcaneStrafeLaneKey + 1) % 4;
-                } else {
+                    FarmHelperConfig.sugarcaneLaneKey = (FarmHelperConfig.sugarcaneLaneKey + 1) % 4;
+                    button.displayString = sugarcaneKey3Label();
+                } else if (FarmHelperConfig.sugarcaneControlMode == 0) {
                     FarmHelperConfig.sugarcaneClassicLaneRightKey = (FarmHelperConfig.sugarcaneClassicLaneRightKey + 1) % 4;
+                    button.displayString = sugarcaneKey3Label();
                 }
-                button.displayString = sugarcaneKey3Label();
+                // mode 2: idle transit — key3 is display-only
+                break;
+            case ID_SC_START_GO:
+                FarmHelperConfig.sugarcaneStartOnGoLeg = !FarmHelperConfig.sugarcaneStartOnGoLeg;
+                button.displayString = on("Start on Go Key", FarmHelperConfig.sugarcaneStartOnGoLeg);
                 break;
             case ID_SC_INVERT:
                 FarmHelperConfig.sugarcaneInvertLaneSide = !FarmHelperConfig.sugarcaneInvertLaneSide;
@@ -739,28 +752,33 @@ public class FarmXMobileGui extends GuiScreen {
     public boolean doesGuiPauseGame() { return false; }
 
     private static String sugarcaneModeLabel() {
-        return FarmHelperConfig.sugarcaneControlMode == 1
-                ? "Cane Mode: Strafe A/D rows"
-                : "Cane Mode: Classic S+A/D";
+        switch (FarmHelperConfig.sugarcaneControlMode) {
+            case 1: return "Cane Mode: Strafe (3 keys)";
+            case 2: return "Cane Mode: Two-key (Continuous D+S)";
+            default: return "Cane Mode: Classic S+A/D";
+        }
     }
 
     private static String sugarcaneKey1Label() {
-        if (FarmHelperConfig.sugarcaneControlMode == 1) {
-            return "Cane Forward Key: " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneStrafeForwardKey);
+        if (FarmHelperConfig.sugarcaneControlMode >= 1) {
+            return "Cane Go Key: " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneGoKey);
         }
         return "Cane Row Key: " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneClassicRowKey);
     }
 
     private static String sugarcaneKey2Label() {
-        if (FarmHelperConfig.sugarcaneControlMode == 1) {
-            return "Cane Back Key: " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneStrafeBackKey);
+        if (FarmHelperConfig.sugarcaneControlMode >= 1) {
+            return "Cane Return Key: " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneReturnKey);
         }
         return "Cane Lane-Left Key: " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneClassicLaneLeftKey);
     }
 
     private static String sugarcaneKey3Label() {
         if (FarmHelperConfig.sugarcaneControlMode == 1) {
-            return "Cane Lane-Switch Key: " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneStrafeLaneKey);
+            return "Cane Lane Key: " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneLaneKey);
+        }
+        if (FarmHelperConfig.sugarcaneControlMode == 2) {
+            return "Cane Transit: Hold Go / Return";
         }
         return "Cane Lane-Right Key: " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneClassicLaneRightKey);
     }
