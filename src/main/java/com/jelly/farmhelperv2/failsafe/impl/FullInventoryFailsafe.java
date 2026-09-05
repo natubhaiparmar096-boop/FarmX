@@ -1,6 +1,7 @@
 package com.jelly.farmhelperv2.failsafe.impl;
 
 import cc.polyfrost.oneconfig.utils.Multithreading;
+import com.jelly.farmhelperv2.config.FarmHelperConfig;
 import com.jelly.farmhelperv2.config.page.FailsafeNotificationsPage;
 import com.jelly.farmhelperv2.failsafe.Failsafe;
 import com.jelly.farmhelperv2.failsafe.FailsafeManager;
@@ -58,6 +59,10 @@ public class FullInventoryFailsafe extends Failsafe {
     }
     @Override
     public void onTickDetection(TickEvent.ClientTickEvent event) {
+        if (!FarmHelperConfig.enableFullInventoryFailsafe) {
+            clock.reset();
+            return;
+        }
         if (FailsafeManager.getInstance().isHadEmergency())
             return;
         if (FeatureManager.getInstance().shouldPauseMacroExecution())

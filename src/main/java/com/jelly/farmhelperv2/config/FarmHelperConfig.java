@@ -446,6 +446,12 @@ public class FarmHelperConfig extends Config {
             min = 3_000, max = 10_000
     )
     public static int desyncPauseDelay = 5_000;
+
+    @Switch(
+            name = "Full Inventory Failsafe", category = FAILSAFE, subcategory = "Inventory",
+            description = "Triggers a failsafe when your inventory is full. Disable on servers where inventory fills often and is not a staff check."
+    )
+    public static boolean enableFullInventoryFailsafe = true;
     //</editor-fold>
 
     //<editor-fold desc="Failsafe Trigger Sound">

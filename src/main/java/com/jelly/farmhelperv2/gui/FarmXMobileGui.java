@@ -99,6 +99,7 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_FS_STOP_P = 50;
     private static final int ID_FS_RDELAY_M = 51;
     private static final int ID_FS_RDELAY_P = 52;
+    private static final int ID_FS_FULL_INV = 53;
 
     private static final int ID_DET_LAG_M = 60;
     private static final int ID_DET_LAG_P = 61;
@@ -247,6 +248,7 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_FS_WARP_GARDEN, cx, y, 200, on("Always TP Garden", FarmHelperConfig.alwaysTeleportToGarden)); y += g;
                 btn(ID_FS_MSG, cx, y, 200, on("Failsafe Chat Msgs", FarmHelperConfig.sendFailsafeMessage)); y += g;
                 btn(ID_FS_POPUP, cx, y, 200, on("Pop-up Notifications", FarmHelperConfig.popUpNotifications)); y += g;
+                btn(ID_FS_FULL_INV, cx, y, 200, on("Full Inventory Failsafe", FarmHelperConfig.enableFullInventoryFailsafe)); y += g;
                 pair(ID_FS_STOP_M, ID_FS_STOP_P, y, "StopDelay " + FarmHelperConfig.failsafeStopDelay + "ms"); y += g;
                 pair(ID_FS_RDELAY_M, ID_FS_RDELAY_P, y, "RestartDelay " + FarmHelperConfig.restartAfterFailSafeDelay + "m");
                 break;
@@ -495,6 +497,7 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_FS_WARP_GARDEN: FarmHelperConfig.alwaysTeleportToGarden = !FarmHelperConfig.alwaysTeleportToGarden; button.displayString = on("Always TP Garden", FarmHelperConfig.alwaysTeleportToGarden); break;
             case ID_FS_MSG: FarmHelperConfig.sendFailsafeMessage = !FarmHelperConfig.sendFailsafeMessage; button.displayString = on("Failsafe Chat Msgs", FarmHelperConfig.sendFailsafeMessage); break;
             case ID_FS_POPUP: FarmHelperConfig.popUpNotifications = !FarmHelperConfig.popUpNotifications; button.displayString = on("Pop-up Notifications", FarmHelperConfig.popUpNotifications); break;
+            case ID_FS_FULL_INV: FarmHelperConfig.enableFullInventoryFailsafe = !FarmHelperConfig.enableFullInventoryFailsafe; button.displayString = on("Full Inventory Failsafe", FarmHelperConfig.enableFullInventoryFailsafe); break;
             case ID_FS_STOP_M: adjI(() -> FarmHelperConfig.failsafeStopDelay, v -> FarmHelperConfig.failsafeStopDelay = v, -100, 1000, 7500); break;
             case ID_FS_STOP_P: adjI(() -> FarmHelperConfig.failsafeStopDelay, v -> FarmHelperConfig.failsafeStopDelay = v, 100, 1000, 7500); break;
             case ID_FS_RDELAY_M: adjI(() -> FarmHelperConfig.restartAfterFailSafeDelay, v -> FarmHelperConfig.restartAfterFailSafeDelay = v, -1, 0, 20); break;
