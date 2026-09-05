@@ -169,6 +169,8 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_FB_CH_M = 137;
     private static final int ID_FB_CH_P = 138;
     private static final int ID_FB_JACOB = 139;
+    private static final int ID_PROFILE = 300;
+    private static final int ID_PROFILE_SAVE = 301;
     private static final int ID_MUTE = 140;
     private static final int ID_STREAMER = 141;
     private static final int ID_HUD_OUT = 142;
@@ -207,6 +209,8 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_KB_CLEAR_DEBUG, this.width / 2 + 65, y, 35, "Clr");
                 break;
             case 1: // Farming
+                btn(ID_PROFILE, cx, y, 200, "Profile: " + com.jelly.farmhelperv2.config.ProfileManager.getActiveProfileName()); y += g;
+                btn(ID_PROFILE_SAVE, cx, y, 200, "Save Current Settings As Profile"); y += g;
                 btn(ID_MACRO, cx, y, 200, macroLabel()); y += g;
                 btn(ID_ALWAYS_W, cx, y, 200, on("Always Hold W", FarmHelperConfig.alwaysHoldW)); y += g;
                 btn(ID_HOLD_LMB, cx, y, 200, on("Hold LMB Row Change", FarmHelperConfig.holdLeftClickWhenChangingRow)); y += g;
@@ -468,7 +472,16 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_KB_CLEAR_TOGGLE: clearBind(FarmHelperConfig.toggleMacro); break;
             case ID_KB_CLEAR_GUI: clearBind(FarmHelperConfig.openGuiKeybind); break;
             case ID_KB_CLEAR_CANCEL: clearBind(FarmHelperConfig.cancelFailsafeKeybind); break;
-            case ID_KB_CLEAR_DEBUG: clearBind(FarmHelperConfig.debugKeybind); break;
+            case ID_PROFILE:
+                com.jelly.farmhelperv2.config.ProfileManager.cycleProfile();
+                initGui();
+                break;
+            case ID_PROFILE_SAVE:
+                com.jelly.farmhelperv2.config.ProfileManager.saveCurrentAsProfile(
+                        com.jelly.farmhelperv2.util.LogUtils.capitalize(FarmHelperConfig.getMacro().name().toLowerCase().replace('_', ' '))
+                );
+                initGui();
+                break;
 
             case ID_MACRO:
                 FarmHelperConfig.macroType = (FarmHelperConfig.macroType + 1) % MACRO_LABELS.length;

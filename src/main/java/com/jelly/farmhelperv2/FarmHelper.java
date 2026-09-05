@@ -117,12 +117,14 @@ public class FarmHelper {
 
     private void initializeFields() {
         config = new FarmHelperConfig();
+        com.jelly.farmhelperv2.config.ProfileManager.loadProfiles();
     }
 
     private void initializeCommands() {
         ClientCommandHandler.instance.registerCommand(new RewarpCommand());
         ClientCommandHandler.instance.registerCommand(new SpawnCommand());
         ClientCommandHandler.instance.registerCommand(new RotationCommand());
+        ClientCommandHandler.instance.registerCommand(new com.jelly.farmhelperv2.command.ProfileCommand());
         CommandManager.register(new FarmHelperMainCommand());
     }
 

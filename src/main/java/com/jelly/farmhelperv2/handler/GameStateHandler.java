@@ -271,12 +271,13 @@ public class GameStateHandler {
     }
 
     private void checkJacob(String cleanedLine) {
-        if (cleanedLine.toLowerCase().contains("jacob's contest") && !isInJacobContest) {
+        String lower = cleanedLine.toLowerCase();
+        if ((lower.contains("jacob's contest") || lower.contains("contest:") || lower.contains("crop contest")) && !isInJacobContest) {
             isInJacobContest = true;
         }
         if (isInJacobContest) {
             try {
-                if (cleanedLine.contains("with") || cleanedLine.startsWith("Collected")) {
+                if (cleanedLine.contains("with") || cleanedLine.startsWith("Collected") || cleanedLine.startsWith("Harvested")) {
                     jacobsContestCropNumber = Integer.parseInt(cleanedLine.substring(cleanedLine.lastIndexOf(" ") + 1).replace(",", ""));
                     return;
                 }
