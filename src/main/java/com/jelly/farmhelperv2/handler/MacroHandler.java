@@ -432,24 +432,15 @@ public class MacroHandler {
                 return;
             }
             lastTpTry = System.currentTimeMillis();
-            // FakePixel: do NOT send /warp garden (server replies "command not found").
-            // Finish the rewarp cycle locally and keep farming.
-            LogUtils.sendWarning("FakePixel: skipped /warp garden — continuing without Hypixel warp.");
-            this.rewarpTeleport = false;
-            beforeTeleportationPos = Optional.empty();
+            LogUtils.sendDebug("Warping to garden");
+            mc.thePlayer.sendChatMessage("/warp garden");
+            this.rewarpTeleport = rewarpTeleport;
+            beforeTeleportationPos = Optional.of(mc.thePlayer.getPosition());
             AntiStuck.getInstance().resetUnstuckTries();
             GameStateHandler.getInstance().scheduleRewarp();
-            afterRewarpDelay.schedule(1_500);
             currentMacro.ifPresent(cm -> {
                 cm.changeState(AbstractMacro.State.NONE);
-                cm.setRotated(false);
-                cm.getRewarpDelay().schedule(FarmHelperConfig.getRandomTimeBetweenChangingRows());
-                if (rewarpTeleport) {
-                    cm.setRewarpState(AbstractMacro.RewarpState.TELEPORTED);
-                    cm.actionAfterTeleport();
-                } else {
-                    cm.setRewarpState(AbstractMacro.RewarpState.NONE);
-                }
+                cm.setRewarpState(AbstractMacro.RewarpState.TELEPORTING);
             });
         }
     }
