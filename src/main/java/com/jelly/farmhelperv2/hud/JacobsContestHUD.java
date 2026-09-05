@@ -1,105 +1,125 @@
 package com.jelly.farmhelperv2.hud;
 
 import com.jelly.farmhelperv2.config.FarmHelperConfig;
+import com.jelly.farmhelperv2.config.FarmHelperConfig.CropEnum;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
-import com.jelly.farmhelperv2.util.LogUtils;
+import com.jelly.farmhelperv2.util.JacobContestSchedule;
+import com.jelly.farmhelperv2.util.SkyBlockCalendar;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Optional;
 
 public class JacobsContestHUD {
+
     private static JacobsContestHUD instance;
 
     public static JacobsContestHUD getInstance() {
-        if (instance == null) {
-            instance = new JacobsContestHUD();
-        }
+        if (instance == null) instance = new JacobsContestHUD();
         return instance;
     }
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Text event) {
-        if (FarmHelperConfig.streamerMode || !FarmHelperConfig.showJacobsContestHud) {
-            return;
-        }
+        if (FarmHelperConfig.streamerMode || !FarmHelperConfig.showJacobsContestHud) return;
         Minecraft mc = Minecraft.getMinecraft();
-        if (mc.thePlayer == null || mc.theWorld == null) {
-            return;
-        }
+        if (mc.thePlayer == null || mc.theWorld == null) return;
 
-        List<String> lines = getContestHudLines();
+        List<String> lines = buildHudLines();
         FontRenderer fr = mc.fontRendererObj;
 
         int x = 4;
-        int y = mc.currentScreen != null ? 30 : 60; // Offset down so it doesn't overlap top status lines
-
+        int y = 60;
         for (String line : lines) {
             fr.drawStringWithShadow(line, x, y, 0xFFFFFF);
             y += fr.FONT_HEIGHT + 2;
         }
     }
 
-    public List<String> getContestHudLines() {
+    // ─────────────────────────────────────────────────────────────────
+    // HUD content
+    // ─────────────────────────────────────────────────────────────────
+
+    public List<String> buildHudLines() {
         List<String> lines = new ArrayList<>();
         lines.add("§e§lJacob's Contest Tracker");
 
-        long now = System.currentTimeMillis();
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        cal.setTimeInMillis(now);
-        int minute = cal.get(Calendar.MINUTE);
-        int second = cal.get(Calendar.SECOND);
+        // SkyBlock date (always shown, useful reference)
+        lines.add("§7" + SkyBlockCalendar.getDateString());
 
-        boolean isActive = (minute >= 15 && minute < 35) || GameStateHandler.getInstance().inJacobContest();
+        boolean calendarActive  = SkyBlockCalendar.isContestActive();
+        boolean scoreboardActive = GameStateHandler.getInstance().inJacobContest();
+        boolean active = calendarActive || scoreboardActive;
 
-        if (isActive) {
-            int secondsLeft;
-            if (minute >= 15 && minute < 35) {
-                secondsLeft = (35 - minute) * 60 - second;
-            } else {
-                secondsLeft = 1200; // fallback default 20m
-            }
-            if (secondsLeft < 0) secondsLeft = 0;
-
-            lines.add("§fStatus: §aACTIVE §7(" + formatSeconds(secondsLeft) + " left)");
-
-            FarmHelperConfig.CropEnum crop = GameStateHandler.getInstance().getJacobsContestCrop().orElse(MacroHandler.getInstance().getCrop());
-            lines.add("§fCrop: §b" + (crop != null ? crop.getLocalizedName() : "Unknown"));
-
-            int harvested = GameStateHandler.getInstance().getJacobsContestCropNumber();
-            if (harvested > 0) {
-                lines.add("§fHarvested: §a" + String.format("%,d", harvested));
-            } else {
-                lines.add("§fMacro: §a" + LogUtils.capitalize(MacroHandler.getInstance().getCrop().getLocalizedName()));
-            }
+        if (active) {
+            buildActiveLines(lines, calendarActive);
         } else {
-            int secondsUntilStart;
-            if (minute < 15) {
-                secondsUntilStart = (15 - minute) * 60 - second;
-            } else {
-                secondsUntilStart = (75 - minute) * 60 - second;
-            }
-            if (secondsUntilStart < 0) secondsUntilStart = 0;
-
-            lines.add("§fStatus: §eUPCOMING §7(in " + formatSeconds(secondsUntilStart) + ")");
-            lines.add("§fNext Contest: §b:15 Past the Hour");
-
-            FarmHelperConfig.CropEnum targetCrop = MacroHandler.getInstance().getCrop();
-            lines.add("§fTarget Crop: §b" + (targetCrop != null ? targetCrop.getLocalizedName() : "None"));
+            buildUpcomingLines(lines);
         }
 
         return lines;
     }
 
-    private String formatSeconds(int totalSeconds) {
-        int minutes = totalSeconds / 60;
-        int seconds = totalSeconds % 60;
-        return String.format("%dm %02ds", minutes, seconds);
+    // ── Active contest ────────────────────────────────────────────────
+
+    private void buildActiveLines(List<String> lines, boolean calendarActive) {
+        long msLeft = SkyBlockCalendar.msLeftInContest();
+        String timeLeft = msLeft > 0 ? fmt(msLeft) : "??:??";
+        lines.add("§fStatus: §aACTIVE §7(" + timeLeft + " left)");
+
+        // Crops: prefer confirmed scoreboard crop, fall back to calendar prediction
+        Optional<CropEnum> confirmedCrop = GameStateHandler.getInstance().getJacobsContestCrop();
+        if (confirmedCrop.isPresent()) {
+            // Scoreboard confirmed
+            lines.add("§fCrop: §b" + confirmedCrop.get().getLocalizedName() + " §7(confirmed)");
+        } else {
+            // Calendar prediction
+            List<CropEnum> predicted = JacobContestSchedule.getCurrentSlotCrops();
+            lines.add("§fCrops: " + JacobContestSchedule.formatCropList(predicted) + " §7(predicted)");
+        }
+
+        // Harvested count if available
+        int harvested = GameStateHandler.getInstance().getJacobsContestCropNumber();
+        if (harvested > 0) {
+            lines.add("§fHarvested: §a" + String.format("%,d", harvested));
+        }
+    }
+
+    // ── Upcoming contest ──────────────────────────────────────────────
+
+    private void buildUpcomingLines(List<String> lines) {
+        long msUntil = SkyBlockCalendar.msUntilNextContest();
+        lines.add("§fStatus: §eUPCOMING §7(in " + fmt(msUntil) + ")");
+
+        // Calendar-predicted crops for the next slot
+        List<CropEnum> next = JacobContestSchedule.getNextContestCrops();
+        lines.add("§fPredicted Crops: " + JacobContestSchedule.formatCropList(next));
+        lines.add("§7(confirmed when contest starts)");
+
+        // Your current macro target for reference
+        CropEnum myTarget = MacroHandler.getInstance().getCrop();
+        if (myTarget != null && myTarget != CropEnum.NONE) {
+            boolean match = next.contains(myTarget);
+            String icon = match ? "§a✔" : "§c✘";
+            lines.add("§fYour Crop: §b" + myTarget.getLocalizedName() + " " + icon);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────────
+
+    /** Formats milliseconds into m:ss */
+    private String fmt(long ms) {
+        if (ms < 0) ms = 0;
+        long totalSec = ms / 1000;
+        long min = totalSec / 60;
+        long sec = totalSec % 60;
+        return min + "m " + String.format("%02d", sec) + "s";
     }
 }

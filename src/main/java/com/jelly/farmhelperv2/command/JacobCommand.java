@@ -41,7 +41,7 @@ public class JacobCommand extends CommandBase {
         }
 
         LogUtils.sendSuccess("--- Jacob's Contest Status ---");
-        for (String line : JacobsContestHUD.getInstance().getContestHudLines()) {
+        for (String line : JacobsContestHUD.getInstance().buildHudLines()) {
             LogUtils.sendSuccess(line);
         }
     }
