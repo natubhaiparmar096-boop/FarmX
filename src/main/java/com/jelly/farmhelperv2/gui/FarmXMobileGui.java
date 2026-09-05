@@ -171,6 +171,7 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_FB_JACOB = 139;
     private static final int ID_PROFILE = 300;
     private static final int ID_PROFILE_SAVE = 301;
+    private static final int ID_JACOB_HUD = 302;
     private static final int ID_MUTE = 140;
     private static final int ID_STREAMER = 141;
     private static final int ID_HUD_OUT = 142;
@@ -323,6 +324,7 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_DEBUG_FLY, this.width / 2 + 7, y, half, on("New Fly", FarmHelperConfig.debugNewFly)); y += g;
                 btn(ID_PROFIT_CULT, cx, y, 200, on("Profit via Cultivating", FarmHelperConfig.profitCalculatorCultivatingEnchant)); y += g;
                 btn(ID_JACOB_CROPS, cx, y, 200, on("Jacob Current Crops Only", FarmHelperConfig.jacobContestCurrentCropsOnly)); y += g;
+                btn(ID_JACOB_HUD, cx, y, 200, on("Jacob's Contest HUD", FarmHelperConfig.showJacobsContestHud)); y += g;
                 btn(ID_PDOTT, cx, y, 200, on("PD OTT Debug Logs", FarmHelperConfig.showDebugLogsAboutPDOTT));
                 break;
         }
@@ -641,6 +643,7 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_DEBUG_FLY: FarmHelperConfig.debugNewFly = !FarmHelperConfig.debugNewFly; button.displayString = on("New Fly", FarmHelperConfig.debugNewFly); break;
             case ID_PROFIT_CULT: FarmHelperConfig.profitCalculatorCultivatingEnchant = !FarmHelperConfig.profitCalculatorCultivatingEnchant; button.displayString = on("Profit via Cultivating", FarmHelperConfig.profitCalculatorCultivatingEnchant); break;
             case ID_JACOB_CROPS: FarmHelperConfig.jacobContestCurrentCropsOnly = !FarmHelperConfig.jacobContestCurrentCropsOnly; button.displayString = on("Jacob Current Crops Only", FarmHelperConfig.jacobContestCurrentCropsOnly); break;
+            case ID_JACOB_HUD: FarmHelperConfig.showJacobsContestHud = !FarmHelperConfig.showJacobsContestHud; button.displayString = on("Jacob's Contest HUD", FarmHelperConfig.showJacobsContestHud); break;
             case ID_PDOTT: FarmHelperConfig.showDebugLogsAboutPDOTT = !FarmHelperConfig.showDebugLogsAboutPDOTT; button.displayString = on("PD OTT Debug Logs", FarmHelperConfig.showDebugLogsAboutPDOTT); break;
             default:
                 break;
