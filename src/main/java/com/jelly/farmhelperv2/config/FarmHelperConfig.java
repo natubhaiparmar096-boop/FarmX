@@ -853,6 +853,12 @@ public class FarmHelperConfig extends Config {
     public static boolean jacobContestCurrentCropsOnly = true;
 
     @Switch(
+            name = "Show Jacob's Contest HUD", category = EXPERIMENTAL, subcategory = "Jacob's Contest",
+            description = "Shows live upcoming and active Jacob's Contest status, crop, time left, and harvested count on screen"
+    )
+    public static boolean showJacobsContestHud = true;
+
+    @Switch(
             name = "Show Debug logs about PD OTT", category = EXPERIMENTAL, subcategory = "Debug",
             description = "Shows debug logs about PD OTT"
     )
