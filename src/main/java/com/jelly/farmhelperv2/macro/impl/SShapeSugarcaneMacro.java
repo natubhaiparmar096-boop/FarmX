@@ -150,8 +150,8 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
                         changeState(State.D);
                     }
                 } else if (getPreviousState() == State.D) {
-                    // Came from Return leg (D) -> holding Go key (W) in transit until Go direction (W) is unblocked
-                    if (!blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
+                    // Came from Return leg (D) -> holding Go key (W) in transit until Return direction (D) is cleared
+                    if (!blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
                         changeState(State.A);
                     }
                 } else {
