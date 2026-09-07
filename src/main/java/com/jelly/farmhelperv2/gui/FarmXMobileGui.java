@@ -770,7 +770,7 @@ public class FarmXMobileGui extends GuiScreen {
     private static String sugarcaneModeLabel() {
         switch (FarmHelperConfig.sugarcaneControlMode) {
             case 1: return "Cane Mode: Strafe (3 keys)";
-            case 2: return "Cane Mode: Two-key (Continuous D+S)";
+            case 2: return "Cane Mode: Two-key (Continuous " + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneGoKey) + "+" + KeyBindUtils.wasdName(FarmHelperConfig.sugarcaneReturnKey) + ")";
             default: return "Cane Mode: Classic S+A/D";
         }
     }
