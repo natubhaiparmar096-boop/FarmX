@@ -17,8 +17,8 @@ public class FarmingProfile {
     @Expose private int sugarcaneClassicRowKey = 1;
     @Expose private int sugarcaneClassicLaneLeftKey = 2;
     @Expose private int sugarcaneClassicLaneRightKey = 3;
-    @Expose private int sugarcaneGoKey = 3;
-    @Expose private int sugarcaneReturnKey = 1;
+    @Expose private int sugarcaneGoKey = 0;
+    @Expose private int sugarcaneReturnKey = 3;
     @Expose private int sugarcaneLaneKey = 1;
     @Expose private boolean sugarcaneStartOnGoLeg = true;
     @Expose private boolean sugarcaneInvertLaneSide = false;

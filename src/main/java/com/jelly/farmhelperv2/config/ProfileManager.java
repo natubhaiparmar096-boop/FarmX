@@ -47,11 +47,11 @@ public class ProfileManager {
 
     private static void initDefaultProfiles() {
         FarmingProfile p1 = new FarmingProfile();
-        p1.setName("Sugarcane D+S (Continuous)");
+        p1.setName("Sugarcane W+D (Continuous)");
         p1.setMacroType(4); // S_SUGAR_CANE
         p1.setSugarcaneControlMode(2); // Two-key
-        p1.setSugarcaneGoKey(3); // D
-        p1.setSugarcaneReturnKey(1); // S
+        p1.setSugarcaneGoKey(0); // W
+        p1.setSugarcaneReturnKey(3); // D
         p1.setSugarcaneStartOnGoLeg(true);
 
         FarmingProfile p2 = new FarmingProfile();

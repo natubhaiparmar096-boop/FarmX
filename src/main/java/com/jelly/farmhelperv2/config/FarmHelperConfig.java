@@ -133,14 +133,14 @@ public class FarmHelperConfig extends Config {
             description = "First leg key. North-start D/S farm: set to D.",
             options = {"W", "S", "A", "D"}
     )
-    public static int sugarcaneGoKey = 3; // D
+    public static int sugarcaneGoKey = 0; // W
 
     @Dropdown(
             name = "Strafe/Two-key: Return Key", category = GENERAL, subcategory = "Sugar Cane",
-            description = "Return leg key. North-start D/S farm: set to S.",
+            description = "Return leg key. Standard W/D farm: set to D.",
             options = {"W", "S", "A", "D"}
     )
-    public static int sugarcaneReturnKey = 1; // S
+    public static int sugarcaneReturnKey = 3; // D
 
     @Dropdown(
             name = "Strafe: Lane-Switch Key", category = GENERAL, subcategory = "Sugar Cane",
