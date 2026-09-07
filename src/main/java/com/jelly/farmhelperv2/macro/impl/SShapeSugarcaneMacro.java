@@ -134,28 +134,15 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
     private void updateStateTwoKey() {
         switch (currentState) {
             case A: // Go leg
-                if (blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
-                    changeState(State.SWITCHING_LANE);
+                if (transitClock.passed() && blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
+                    changeState(State.D);
+                    transitClock.schedule(400);
                 }
                 break;
             case D: // Return leg
-                if (blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
-                    changeState(State.SWITCHING_LANE);
-                }
-                break;
-            case SWITCHING_LANE: // Transit turn
-                if (getPreviousState() == State.A) {
-                    // Came from Go leg (W) -> holding Return key (D) in transit until Return direction (D) is unblocked
-                    if (!blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
-                        changeState(State.D);
-                    }
-                } else if (getPreviousState() == State.D) {
-                    // Came from Return leg (D) -> holding Go key (W) in transit until Return direction (D) is cleared
-                    if (!blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
-                        changeState(State.A);
-                    }
-                } else {
-                    changeState(startLeg());
+                if (transitClock.passed() && blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
+                    changeState(State.A);
+                    transitClock.schedule(400);
                 }
                 break;
             case DROPPING:
@@ -163,6 +150,7 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
                 break;
             case NONE:
                 changeState(startLeg());
+                transitClock.schedule(400);
                 break;
             default:
                 changeState(State.NONE);
@@ -290,7 +278,7 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
         }
         rowStartX = mc.thePlayer.posX;
         rowStartZ = mc.thePlayer.posZ;
-        transitClock.reset();
+        transitClock.schedule(400);
         if (MacroHandler.getInstance().isTeleporting()) return;
         setRestoredState(false);
         if (FarmHelperConfig.dontFixAfterWarping && Math.abs(getYaw() - AngleUtils.get360RotationYaw()) < 0.1) return;
