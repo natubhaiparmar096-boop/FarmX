@@ -188,13 +188,13 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
         float yaw = getYaw();
         switch (wasdIndex) {
             case 0: // W
-                return hasWall(0, 1, yaw) || (hasWall(-1, 1, yaw) && hasWall(1, 1, yaw));
+                return hasWall(0, 1, yaw);
             case 1: // S
-                return hasWall(0, -1, yaw) || (hasWall(-1, -1, yaw) && hasWall(1, -1, yaw));
+                return hasWall(0, -1, yaw);
             case 2: // A
-                return hasWall(-1, 0, yaw) || (hasWall(-1, -1, yaw) && hasWall(-1, 1, yaw));
+                return hasWall(-1, 0, yaw);
             case 3: // D
-                return hasWall(1, 0, yaw) || (hasWall(1, -1, yaw) && hasWall(1, 1, yaw));
+                return hasWall(1, 0, yaw);
             default:
                 return hasWall(0, -1, yaw);
         }
