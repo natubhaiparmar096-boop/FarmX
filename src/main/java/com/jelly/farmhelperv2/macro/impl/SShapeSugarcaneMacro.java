@@ -145,13 +145,13 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
                 break;
             case SWITCHING_LANE: // Transit turn
                 if (getPreviousState() == State.A) {
-                    // Came from Go leg -> holding Return key in transit until Go direction is unblocked
-                    if (!blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
+                    // Came from Go leg (W) -> holding Return key (D) in transit until Return direction (D) is unblocked
+                    if (!blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
                         changeState(State.D);
                     }
                 } else if (getPreviousState() == State.D) {
-                    // Came from Return leg -> holding Go key in transit until Return direction is unblocked
-                    if (!blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
+                    // Came from Return leg (D) -> holding Go key (W) in transit until Go direction (W) is unblocked
+                    if (!blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
                         changeState(State.A);
                     }
                 } else {
