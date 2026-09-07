@@ -175,6 +175,19 @@ public class ProfileManager {
         return false;
     }
 
+    public static void deleteActiveProfile() {
+        if (profiles.isEmpty()) loadProfiles();
+        if (profiles.size() <= 1) {
+            LogUtils.sendError("Cannot delete the only remaining profile!");
+            return;
+        }
+        String name = getActiveProfileName();
+        if (deleteProfile(name)) {
+            applyProfile(activeProfileIndex);
+            LogUtils.sendSuccess("Deleted profile: " + name);
+        }
+    }
+
     public static void cycleProfile() {
         if (profiles.isEmpty()) loadProfiles();
         activeProfileIndex = (activeProfileIndex + 1) % profiles.size();

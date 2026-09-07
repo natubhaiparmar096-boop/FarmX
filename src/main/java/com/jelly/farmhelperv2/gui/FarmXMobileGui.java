@@ -171,6 +171,7 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_FB_JACOB = 139;
     private static final int ID_PROFILE = 300;
     private static final int ID_PROFILE_SAVE = 301;
+    private static final int ID_PROFILE_DELETE = 303;
     private static final int ID_JACOB_HUD = 302;
     private static final int ID_MUTE = 140;
     private static final int ID_STREAMER = 141;
@@ -211,7 +212,8 @@ public class FarmXMobileGui extends GuiScreen {
                 break;
             case 1: // Farming
                 btn(ID_PROFILE, cx, y, 200, "Profile: " + com.jelly.farmhelperv2.config.ProfileManager.getActiveProfileName()); y += g;
-                btn(ID_PROFILE_SAVE, cx, y, 200, "Save Current Settings As Profile"); y += g;
+                btn(ID_PROFILE_SAVE, this.width / 2 - 105, y, half, "Save Profile");
+                btn(ID_PROFILE_DELETE, this.width / 2 + 7, y, half, "Delete Profile"); y += g;
                 btn(ID_MACRO, cx, y, 200, macroLabel()); y += g;
                 btn(ID_ALWAYS_W, cx, y, 200, on("Always Hold W", FarmHelperConfig.alwaysHoldW)); y += g;
                 btn(ID_HOLD_LMB, cx, y, 200, on("Hold LMB Row Change", FarmHelperConfig.holdLeftClickWhenChangingRow)); y += g;
@@ -482,6 +484,10 @@ public class FarmXMobileGui extends GuiScreen {
                 com.jelly.farmhelperv2.config.ProfileManager.saveCurrentAsProfile(
                         com.jelly.farmhelperv2.util.LogUtils.capitalize(FarmHelperConfig.getMacro().name().toLowerCase().replace('_', ' '))
                 );
+                initGui();
+                break;
+            case ID_PROFILE_DELETE:
+                com.jelly.farmhelperv2.config.ProfileManager.deleteActiveProfile();
                 initGui();
                 break;
 
