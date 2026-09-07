@@ -127,40 +127,27 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
     }
 
     /**
-     * Go until wall → hold Go during transit until Return opens → Return until wall → hold Return during transit until Go opens…
-     * Matches 2-key sugarcane farms that use continuous D then S movement without releasing keys.
+     * Go until wall → switch directly to Return → Return until wall → switch directly to Go.
+     * Continuously holds the active leg key (e.g. W then D) so movement through transition is seamless,
+     * even when sugarcanes or blocks are present in the transition turn.
      */
     private void updateStateTwoKey() {
         switch (currentState) {
             case A: // Go leg
                 if (blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
-                    changeState(State.SWITCHING_LANE);
+                    changeState(State.D);
                 }
                 break;
             case D: // Return leg
                 if (blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
-                    changeState(State.SWITCHING_LANE);
-                }
-                break;
-            case SWITCHING_LANE: // transit
-                if (getPreviousState() == State.A) {
-                    // Came from Go leg → switch to Return as soon as Return path is unblocked
-                    if (!blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
-                        changeState(State.D);
-                    }
-                } else if (getPreviousState() == State.D) {
-                    // Came from Return leg → switch to Go as soon as Go path is unblocked
-                    if (!blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
-                        changeState(State.A);
-                    }
-                } else {
-                    changeState(startLeg());
+                    changeState(State.A);
                 }
                 break;
             case DROPPING:
                 handleDropping();
                 break;
             case NONE:
+            case SWITCHING_LANE:
                 changeState(startLeg());
                 break;
             default:

@@ -62,8 +62,12 @@ repositories {
     maven("https://repo.spongepowered.org/maven/")
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://repo.polyfrost.cc/releases")
+    maven("https://repo.polyfrost.org/releases")
     maven("https://repo.essential.gg/repository/maven-public")
     maven("https://jitpack.io")
+    flatDir {
+        dirs("libs")
+    }
 }
 
 val shadowImpl: Configuration by configurations.creating {
@@ -86,7 +90,7 @@ dependencies {
 
     implementation("me.djtheredstoner:DevAuth-forge-legacy:1.2.1")
 
-    implementation("com.github.onixiya1337.baritone-fly:baritone-deobf:nirox-fly-SNAPSHOT")
+    implementation(files("libs/baritone-deobf-nirox-fly-SNAPSHOT.jar"))
     shadowImpl("com.github.onixiya1337.baritone-fly:baritone-api-forge:nirox-fly-SNAPSHOT") {
         exclude(module = "fastutil")
         exclude(module = "lwjgl")
