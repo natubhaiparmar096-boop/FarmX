@@ -135,19 +135,31 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
         switch (currentState) {
             case A: // Go leg
                 if (blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
-                    changeState(State.D);
+                    changeState(State.SWITCHING_LANE);
                 }
                 break;
             case D: // Return leg
                 if (blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
-                    changeState(State.A);
+                    changeState(State.SWITCHING_LANE);
+                }
+                break;
+            case SWITCHING_LANE: // Transit turn
+                if (getPreviousState() == State.A) {
+                    if (!blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
+                        changeState(State.D);
+                    }
+                } else if (getPreviousState() == State.D) {
+                    if (!blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
+                        changeState(State.A);
+                    }
+                } else {
+                    changeState(startLeg());
                 }
                 break;
             case DROPPING:
                 handleDropping();
                 break;
             case NONE:
-            case SWITCHING_LANE:
                 changeState(startLeg());
                 break;
             default:
@@ -203,9 +215,6 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
     @Override
     public void invokeState() {
         if (currentState == null) return;
-        if (mode() == 2) {
-            updateStateTwoKey();
-        }
         switch (currentState) {
             case NONE:
                 break;
