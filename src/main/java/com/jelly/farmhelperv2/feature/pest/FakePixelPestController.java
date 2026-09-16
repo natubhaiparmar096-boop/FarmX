@@ -434,8 +434,11 @@ public class FakePixelPestController implements IFeature {
                     mc.thePlayer.inventory.currentItem = vacuumSlot;
                 }
 
-                rotateToPest(targetPest.getEntity());
-                // Hold right click to vacuum the pest!
+                // Only start a new rotation when RotationHandler is idle — avoids constant restart glitch
+                if (!RotationHandler.getInstance().isRotating()) {
+                    rotateToPest(targetPest.getEntity());
+                }
+                // Hold right-click to vacuum the pest
                 KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, true);
 
                 if (stateTimer.passed()) {
@@ -541,9 +544,13 @@ public class FakePixelPestController implements IFeature {
 
     private void rotateAndMoveToPest(Entity target) {
         if (target == null || mc.thePlayer == null) return;
-        rotateToPest(target);
 
-        // If pathfinder previously failed, or is in FAILED state, use direct flight immediately!
+        // Only start a new rotation when previous is done — avoids constant-restart jitter
+        if (!RotationHandler.getInstance().isRotating()) {
+            rotateToPest(target);
+        }
+
+        // If pathfinder previously failed, use direct flight
         if (pathfinderFailed || FlyPathFinderExecutor.getInstance().getState() == FlyPathFinderExecutor.State.FAILED) {
             pathfinderFailed = true;
             FlyPathFinderExecutor.getInstance().stop();
@@ -551,7 +558,7 @@ public class FakePixelPestController implements IFeature {
             return;
         }
 
-        // Try FlyPathFinderExecutor once
+        // Try FlyPathFinderExecutor
         if (!FlyPathFinderExecutor.getInstance().isRunning()) {
             if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
                 mc.thePlayer.capabilities.isFlying = true;
@@ -567,7 +574,6 @@ public class FakePixelPestController implements IFeature {
         double dx = targetX - mc.thePlayer.posX;
         double dy = targetY - mc.thePlayer.posY;
         double dz = targetZ - mc.thePlayer.posZ;
-        double distXZ = Math.sqrt(dx * dx + dz * dz);
         double distTotal = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
         if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
@@ -579,21 +585,24 @@ public class FakePixelPestController implements IFeature {
             return;
         }
 
-        float targetYaw = (float) (Math.atan2(dz, dx) * 180.0D / Math.PI) - 90.0F;
-        float targetPitch = (float) (-(Math.atan2(dy, distXZ) * 180.0D / Math.PI));
+        // Smooth horizontal yaw via RotationHandler — avoids fighting with RotationHandler's own interpolation
+        float targetYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
+        com.jelly.farmhelperv2.util.helper.Rotation targetRot = new com.jelly.farmhelperv2.util.helper.Rotation(targetYaw, 0.0F);
+        if (!RotationHandler.getInstance().isRotating()) {
+            RotationHandler.getInstance().easeTo(new RotationConfiguration(targetRot, 150L, null));
+        }
 
-        mc.thePlayer.rotationYaw = targetYaw;
-        mc.thePlayer.rotationPitch = targetPitch;
-
+        // Hold forward to fly in the horizontal direction we are facing
         KeyBindUtils.holdThese(mc.gameSettings.keyBindForward);
         if (FarmHelperConfig.sprintWhileFlying) {
             mc.thePlayer.setSprinting(true);
         }
 
-        if (dy > 1.2) {
+        // Vertical movement via jump/sneak (creative flight does NOT follow pitch for forward movement)
+        if (dy > 3.0) {
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, true);
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, false);
-        } else if (dy < -1.2) {
+        } else if (dy < -3.0) {
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, true);
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, false);
         } else {
