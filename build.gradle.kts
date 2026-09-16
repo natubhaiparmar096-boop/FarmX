@@ -42,7 +42,7 @@ loom {
     forge {
         pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
         // If you don't want mixins, remove this lines
-        mixinConfig("mixins.$modid.json", "mixins.baritone.json")
+        mixinConfig("mixins.$modid.json")
     }
     // If you don't want mixins, remove these lines
     mixin {
@@ -109,7 +109,7 @@ tasks.withType(Jar::class) {
 
         // If you don't want mixins, remove these lines
         this["TweakClass"] = "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker"
-        this["MixinConfigs"] = "mixins.$modid.json, mixins.baritone.json"
+        this["MixinConfigs"] = "mixins.$modid.json"
     }
 }
 
