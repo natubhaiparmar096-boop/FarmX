@@ -1123,7 +1123,7 @@ public class FarmHelperConfig extends Config {
     @Slider(
             name = "Start Hunting At (Pests)", category = PEST_FARMER,
             description = "Start hunting pests when detected pest count reaches this value while farming",
-            min = 1, max = 10
+            min = 1, max = 8
     )
     public static int fakePixelStartHuntingPestsAt = 4;
 
@@ -1134,8 +1134,8 @@ public class FarmHelperConfig extends Config {
     public static boolean fakePixelSetHomeBeforeHunt = true;
 
     @Switch(
-            name = "Rewarp Home After Hunt", category = PEST_FARMER,
-            description = "Sends rewarp command (e.g. /home) after all pests are killed to return to spawn"
+            name = "Rewarp After Hunt", category = PEST_FARMER,
+            description = "Sends rewarp command (e.g. /warp garden) after all pests are killed to return to spawn"
     )
     public static boolean fakePixelRewarpAfterHunt = true;
 
@@ -1143,7 +1143,7 @@ public class FarmHelperConfig extends Config {
             name = "Rewarp Command After Hunt", category = PEST_FARMER,
             description = "Command sent after hunting pests to return to spawn point"
     )
-    public static String fakePixelRewarpCommand = "/home";
+    public static String fakePixelRewarpCommand = "/warp garden";
 
     @Switch(
             name = "FakePixel Mode", category = PEST_FARMER,

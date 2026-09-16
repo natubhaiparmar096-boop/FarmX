@@ -349,7 +349,7 @@ public class FakePixelPestController implements IFeature {
                 logDebug("Pest hunt complete! Returning to spawn point.");
                 restoreState();
                 if (FarmHelperConfig.fakePixelRewarpAfterHunt) {
-                    String cmd = FarmHelperConfig.fakePixelRewarpCommand != null ? FarmHelperConfig.fakePixelRewarpCommand.trim() : "/home";
+                    String cmd = FarmHelperConfig.fakePixelRewarpCommand != null ? FarmHelperConfig.fakePixelRewarpCommand.trim() : "/warp garden";
                     if (!cmd.isEmpty() && mc.thePlayer != null) {
                         mc.thePlayer.sendChatMessage(cmd);
                         logDebug("Sent rewarp command: " + cmd);
