@@ -157,6 +157,10 @@ public class PestsDestroyer implements IFeature {
 
     @Override
     public void start() {
+        if (FarmHelperConfig.fakePixelMode) {
+            com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance().startManual();
+            return;
+        }
         if (enabled) {
             return;
         }
@@ -232,6 +236,9 @@ public class PestsDestroyer implements IFeature {
 
     @Override
     public boolean isToggled() {
+        if (FarmHelperConfig.fakePixelMode) {
+            return false;
+        }
         return FarmHelperConfig.enablePestsDestroyer;
     }
 
@@ -247,6 +254,9 @@ public class PestsDestroyer implements IFeature {
 
     @SubscribeEvent
     public void onKeyInput(InputEvent.KeyInputEvent event) {
+        if (FarmHelperConfig.fakePixelMode) {
+            return;
+        }
         if (!FarmHelperConfig.pestsDestroyerAfkInfiniteMode) {
             return;
         }
@@ -259,6 +269,9 @@ public class PestsDestroyer implements IFeature {
 
     @SubscribeEvent
     public void onTickAFKMode(TickEvent.ClientTickEvent event) {
+        if (FarmHelperConfig.fakePixelMode) {
+            return;
+        }
         if (event.phase == TickEvent.Phase.END) {
             return;
         }
@@ -288,6 +301,9 @@ public class PestsDestroyer implements IFeature {
     }
 
     public boolean canEnableMacro(boolean manually) {
+        if (FarmHelperConfig.fakePixelMode) {
+            return false;
+        }
         if (!isToggled()) {
             return false;
         }
@@ -330,6 +346,9 @@ public class PestsDestroyer implements IFeature {
 
     @SubscribeEvent
     public void onTickExecute(TickEvent.ClientTickEvent event) {
+        if (FarmHelperConfig.fakePixelMode) {
+            return;
+        }
         if (mc.thePlayer == null || mc.theWorld == null) {
             return;
         }

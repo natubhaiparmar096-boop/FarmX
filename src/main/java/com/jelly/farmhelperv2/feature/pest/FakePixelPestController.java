@@ -16,11 +16,15 @@ import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
 import com.jelly.farmhelperv2.util.helper.Target;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import com.jelly.farmhelperv2.event.SpawnObjectEvent;
+import com.jelly.farmhelperv2.event.SpawnParticleEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -47,6 +51,9 @@ public class FakePixelPestController implements IFeature {
         SET_HOME_BEFORE_HUNT,
         WAIT_FOR_SET_HOME,
         FIND_PEST,
+        LOOK_FOR_FIREWORK,
+        WAIT_FOR_FIREWORK,
+        FLY_TO_FIREWORK,
         MOVE_TO_PEST,
         ATTACK_VACUUM,
         CONFIRM_PEST_DEAD,
@@ -73,6 +80,20 @@ public class FakePixelPestController implements IFeature {
     private final Clock stateTimer = new Clock();
     private final Clock attackTimer = new Clock();
     private final Clock cooldownTimer = new Clock();
+
+    // Firework direction tracking
+    private Vec3 fireworkWaypoint = null;
+    private Vec3 firstParticleLocation = null;
+    private Vec3 lastParticleLocation = null;
+    private Vec3 targetWaypoint = null;
+    private int fireworkTries = 0;
+    private boolean pathfinderFailed = false;
+
+    public void resetFireworkInfo() {
+        fireworkWaypoint = null;
+        firstParticleLocation = null;
+        lastParticleLocation = null;
+    }
 
     @Override
     public String getName() {
@@ -113,7 +134,17 @@ public class FakePixelPestController implements IFeature {
         retryCount = 0;
         targetPest = null;
         killedEntities.clear();
+        resetFireworkInfo();
+        targetWaypoint = null;
+        pathfinderFailed = false;
         originalHotbarSlot = mc.thePlayer != null ? mc.thePlayer.inventory.currentItem : -1;
+
+        int vacuumSlot = adapter.findPestVacuumSlot();
+        if (vacuumSlot != -1 && mc.thePlayer != null) {
+            mc.thePlayer.inventory.currentItem = vacuumSlot;
+            logDebug("Equipped vacuum in hotbar slot " + (vacuumSlot + 1));
+        }
+
         logDebug("Pest Controller started.");
         IFeature.super.start();
     }
@@ -125,12 +156,23 @@ public class FakePixelPestController implements IFeature {
         retryCount = 0;
         targetPest = null;
         killedEntities.clear();
+        resetFireworkInfo();
+        targetWaypoint = null;
+        pathfinderFailed = false;
         originalHotbarSlot = mc.thePlayer != null ? mc.thePlayer.inventory.currentItem : -1;
 
         if (MacroHandler.getInstance().isMacroToggled()) {
             MacroHandler.getInstance().pauseMacro();
         }
         KeyBindUtils.stopMovement();
+
+        int vacuumSlot = adapter.findPestVacuumSlot();
+        if (vacuumSlot != -1 && mc.thePlayer != null) {
+            mc.thePlayer.inventory.currentItem = vacuumSlot;
+            logDebug("Equipped vacuum in hotbar slot " + (vacuumSlot + 1));
+        } else {
+            LogUtils.sendWarning("[Pest Controller] Vacuum not found in hotbar! Please ensure your vacuum is in hotbar.");
+        }
 
         LogUtils.sendWarning("[Pest Controller] Starting manual pest elimination!");
         logDebug("Manual Pest Hunt initiated.");
@@ -240,35 +282,114 @@ public class FakePixelPestController implements IFeature {
                 break;
 
             case FIND_PEST:
+                // Ensure vacuum is held
+                int curVacSlot = adapter.findPestVacuumSlot();
+                if (curVacSlot != -1 && mc.thePlayer != null && mc.thePlayer.inventory.currentItem != curVacSlot) {
+                    mc.thePlayer.inventory.currentItem = curVacSlot;
+                }
+
                 List<PestInfo> livePests = detector.scanPests(true);
                 livePests.removeIf(p -> p.getEntity() == null || p.getEntity().isDead || killedEntities.contains(p.getEntity()) || !p.isAlive());
 
-                if (livePests.isEmpty()) {
-                    if (retryCount < 3) {
-                        retryCount++;
-                        logDebug("Scan attempt " + retryCount + " found 0 pests, retrying scan in 600ms...");
-                        stateTimer.schedule(600);
-                        break;
-                    }
-                    logDebug("No valid target pests remaining.");
-                    currentState = State.RETURN_TO_HOME;
-                    break;
-                } else {
+                if (!livePests.isEmpty()) {
                     livePests.sort(Comparator.comparingDouble(PestInfo::getDistance));
                     targetPest = livePests.get(0);
                     logDebug("Target pest selected: " + targetPest.getPestType() + " at dist " + String.format("%.2f", targetPest.getDistance()));
                     if (mc.thePlayer != null && originalHotbarSlot == -1) {
                         originalHotbarSlot = mc.thePlayer.inventory.currentItem;
                     }
+                    pathfinderFailed = false;
                     currentState = State.MOVE_TO_PEST;
                     retryCount = 0;
                     stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs + 7000);
+                } else {
+                    // No pests in immediate render distance — left-click vacuum to trigger firework tracking
+                    logDebug("No pests in immediate loaded chunks. Using vacuum firework to locate distant pests...");
+                    fireworkTries = 0;
+                    currentState = State.LOOK_FOR_FIREWORK;
+                    stateTimer.schedule(200);
+                }
+                break;
+
+            case LOOK_FOR_FIREWORK:
+                if (mc.thePlayer == null) break;
+                int vac = adapter.findPestVacuumSlot();
+                if (vac != -1) {
+                    mc.thePlayer.inventory.currentItem = vac;
+                }
+                if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
+                    mc.thePlayer.capabilities.isFlying = true;
+                }
+                resetFireworkInfo();
+                // Aim up into open sky so left click doesn't hit a block
+                mc.thePlayer.rotationPitch = -30.0F;
+
+                logDebug("Left-clicking vacuum to trigger pest firework...");
+                KeyBindUtils.leftClick();
+
+                currentState = State.WAIT_FOR_FIREWORK;
+                stateTimer.schedule(2000); // 2 seconds to receive particle/firework
+                break;
+
+            case WAIT_FOR_FIREWORK:
+                if (fireworkWaypoint != null) {
+                    logDebug("Firework detected! Heading to waypoint: " + fireworkWaypoint);
+                    targetWaypoint = fireworkWaypoint;
+                    fireworkTries = 0;
+                    currentState = State.FLY_TO_FIREWORK;
+                    stateTimer.schedule(10000);
+                    break;
+                }
+                if (stateTimer.passed()) {
+                    fireworkTries++;
+                    if (fireworkTries < 3) {
+                        logDebug("No firework detected yet, retrying (" + fireworkTries + "/3)...");
+                        currentState = State.LOOK_FOR_FIREWORK;
+                        stateTimer.schedule(400);
+                    } else {
+                        logDebug("No firework produced after retries. All pests eliminated.");
+                        fireworkTries = 0;
+                        currentState = State.RETURN_TO_HOME;
+                    }
+                }
+                break;
+
+            case FLY_TO_FIREWORK:
+                if (targetWaypoint == null || mc.thePlayer == null) {
+                    currentState = State.FIND_PEST;
+                    break;
+                }
+                // Direct fly towards firework waypoint at safe open sky Y=85
+                directFlyTo(targetWaypoint.xCoord, 85.0, targetWaypoint.zCoord, 3.0);
+
+                // Continuously scan for pests as chunks load
+                List<PestInfo> scannedDuringFlight = detector.scanPests(true);
+                scannedDuringFlight.removeIf(p -> p.getEntity() == null || p.getEntity().isDead || killedEntities.contains(p.getEntity()) || !p.isAlive());
+                if (!scannedDuringFlight.isEmpty()) {
+                    KeyBindUtils.stopMovement();
+                    scannedDuringFlight.sort(Comparator.comparingDouble(PestInfo::getDistance));
+                    targetPest = scannedDuringFlight.get(0);
+                    logDebug("Pest sighted during flight! Targeting: " + targetPest.getPestType());
+                    pathfinderFailed = false;
+                    currentState = State.MOVE_TO_PEST;
+                    stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs + 7000);
+                    break;
+                }
+
+                double distToWp = mc.thePlayer.getDistance(targetWaypoint.xCoord, mc.thePlayer.posY, targetWaypoint.zCoord);
+                if (distToWp < 5.0 || stateTimer.passed()) {
+                    KeyBindUtils.stopMovement();
+                    logDebug("Reached firework waypoint area. Rescanning for pests...");
+                    targetWaypoint = null;
+                    currentState = State.FIND_PEST;
+                    stateTimer.schedule(500);
                 }
                 break;
 
             case MOVE_TO_PEST:
                 if (targetPest == null || adapter.isPestRemoved(targetPest) || targetPest.getEntity().isDead) {
                     FlyPathFinderExecutor.getInstance().stop();
+                    KeyBindUtils.stopMovement();
                     currentState = State.CHECK_NEXT_PEST;
                     break;
                 }
@@ -280,9 +401,14 @@ public class FakePixelPestController implements IFeature {
                     attackTimer.schedule(100);
                     stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs);
                 } else {
+                    int vSlotMove = adapter.findPestVacuumSlot();
+                    if (vSlotMove != -1 && mc.thePlayer.inventory.currentItem != vSlotMove) {
+                        mc.thePlayer.inventory.currentItem = vSlotMove;
+                    }
                     rotateAndMoveToPest(targetPest.getEntity());
                     if (stateTimer.passed()) {
                         FlyPathFinderExecutor.getInstance().stop();
+                        KeyBindUtils.stopMovement();
                         retryCount++;
                         if (retryCount >= FarmHelperConfig.pestMaxRetryCount) {
                             logDebug("Timeout moving to pest after retries, skipping to next.");
@@ -297,58 +423,55 @@ public class FakePixelPestController implements IFeature {
 
             case ATTACK_VACUUM:
                 if (targetPest == null || adapter.isPestRemoved(targetPest) || targetPest.getEntity().isDead) {
-                    FlyPathFinderExecutor.getInstance().stop();
+                    KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
+                    KeyBindUtils.stopMovement();
                     currentState = State.CONFIRM_PEST_DEAD;
+                    stateTimer.schedule(400);
                     break;
                 }
                 int vacuumSlot = adapter.findPestVacuumSlot();
-                if (vacuumSlot != -1) {
+                if (vacuumSlot != -1 && mc.thePlayer.inventory.currentItem != vacuumSlot) {
                     mc.thePlayer.inventory.currentItem = vacuumSlot;
                 }
 
                 rotateToPest(targetPest.getEntity());
-
-                if (attackTimer.passed()) {
-                    KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
-                    attackTimer.schedule(200);
-                    logDebug("Vacuuming pest: " + targetPest.getPestType());
-                }
+                // Hold right click to vacuum the pest!
+                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, true);
 
                 if (stateTimer.passed()) {
-                    if (retryCount < FarmHelperConfig.pestMaxRetryCount) {
-                        retryCount++;
-                        logDebug("Retrying pest vacuuming (attempt " + retryCount + ")");
-                        stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs);
-                    } else {
-                        logDebug("Pest collection retry limit reached, skipping.");
-                        currentState = State.CONFIRM_PEST_DEAD;
-                    }
+                    KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
+                    logDebug("Attack timer passed on pest, confirming removal...");
+                    currentState = State.CONFIRM_PEST_DEAD;
+                    stateTimer.schedule(400);
                 }
                 break;
 
             case CONFIRM_PEST_DEAD:
-                logDebug("Confirming pest removal...");
-                if (targetPest != null && targetPest.getEntity() != null) {
-                    killedEntities.add(targetPest.getEntity());
-                    LogUtils.sendSuccess("[Pest Controller] Killed pest: " + targetPest.getPestType());
+                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
+                if (stateTimer.passed()) {
+                    if (targetPest != null && targetPest.getEntity() != null) {
+                        killedEntities.add(targetPest.getEntity());
+                        LogUtils.sendSuccess("[Pest Controller] Eliminated pest: " + targetPest.getPestType() + " (Total: " + killedEntities.size() + ")");
+                    }
+                    currentState = State.CHECK_NEXT_PEST;
                 }
-                currentState = State.CHECK_NEXT_PEST;
-                stateTimer.schedule(400);
                 break;
 
             case CHECK_NEXT_PEST:
                 targetPest = null;
                 retryCount = 0;
+                pathfinderFailed = false;
                 List<PestInfo> remaining = detector.scanPests(true);
                 remaining.removeIf(p -> p.getEntity() == null || p.getEntity().isDead || killedEntities.contains(p.getEntity()) || !p.isAlive());
 
                 if (!remaining.isEmpty()) {
-                    logDebug(remaining.size() + " pests remaining. Targeting next pest!");
+                    logDebug(remaining.size() + " pests remaining in local chunks. Targeting next pest!");
                     currentState = State.FIND_PEST;
                 } else {
-                    logDebug("All pests eliminated!");
-                    LogUtils.sendSuccess("[Pest Controller] All pests eliminated!");
-                    currentState = State.RETURN_TO_HOME;
+                    logDebug("No remaining pests in local area. Checking other plots via firework...");
+                    fireworkTries = 0;
+                    currentState = State.LOOK_FOR_FIREWORK;
+                    stateTimer.schedule(300);
                 }
                 break;
 
@@ -420,21 +543,15 @@ public class FakePixelPestController implements IFeature {
         if (target == null || mc.thePlayer == null) return;
         rotateToPest(target);
 
-        // Fallback: If pathfinder fails / retried, move directly using keyboard controls
-        if (retryCount > 0) {
+        // If pathfinder previously failed, or is in FAILED state, use direct flight immediately!
+        if (pathfinderFailed || FlyPathFinderExecutor.getInstance().getState() == FlyPathFinderExecutor.State.FAILED) {
+            pathfinderFailed = true;
             FlyPathFinderExecutor.getInstance().stop();
-            KeyBindUtils.holdThese(mc.gameSettings.keyBindForward);
-            if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
-                mc.thePlayer.capabilities.isFlying = true;
-            }
-            if (target.posY > mc.thePlayer.posY + 0.5) {
-                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, true);
-            } else if (target.posY < mc.thePlayer.posY - 0.5) {
-                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, true);
-            }
+            directFlyTo(target.posX, target.posY + 1.0, target.posZ, FarmHelperConfig.pestVacuumRange - 1.0);
             return;
         }
 
+        // Try FlyPathFinderExecutor once
         if (!FlyPathFinderExecutor.getInstance().isRunning()) {
             if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
                 mc.thePlayer.capabilities.isFlying = true;
@@ -442,6 +559,93 @@ public class FakePixelPestController implements IFeature {
             FlyPathFinderExecutor.getInstance().setSprinting(FarmHelperConfig.sprintWhileFlying);
             FlyPathFinderExecutor.getInstance().setUseAOTV(InventoryUtils.hasItemInHotbar("Aspect of the Void", "Aspect of the End"));
             FlyPathFinderExecutor.getInstance().findPath(target, true, true, 1.5f, true);
+        }
+    }
+
+    private void directFlyTo(double targetX, double targetY, double targetZ, double stopDistance) {
+        if (mc.thePlayer == null) return;
+        double dx = targetX - mc.thePlayer.posX;
+        double dy = targetY - mc.thePlayer.posY;
+        double dz = targetZ - mc.thePlayer.posZ;
+        double distXZ = Math.sqrt(dx * dx + dz * dz);
+        double distTotal = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
+            mc.thePlayer.capabilities.isFlying = true;
+        }
+
+        if (distTotal <= stopDistance) {
+            KeyBindUtils.stopMovement();
+            return;
+        }
+
+        float targetYaw = (float) (Math.atan2(dz, dx) * 180.0D / Math.PI) - 90.0F;
+        float targetPitch = (float) (-(Math.atan2(dy, distXZ) * 180.0D / Math.PI));
+
+        mc.thePlayer.rotationYaw = targetYaw;
+        mc.thePlayer.rotationPitch = targetPitch;
+
+        KeyBindUtils.holdThese(mc.gameSettings.keyBindForward);
+        if (FarmHelperConfig.sprintWhileFlying) {
+            mc.thePlayer.setSprinting(true);
+        }
+
+        if (dy > 1.2) {
+            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, true);
+            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, false);
+        } else if (dy < -1.2) {
+            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, true);
+            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, false);
+        } else {
+            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, false);
+            KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, false);
+        }
+    }
+
+    @SubscribeEvent
+    public void onSpawnObject(SpawnObjectEvent event) {
+        if (mc.thePlayer == null || !isRunning()) return;
+        if (event.type != 76) return; // 76 = Firework Rocket entity
+        if (currentState != State.WAIT_FOR_FIREWORK) return;
+
+        double dist = mc.thePlayer.getDistance(event.pos.xCoord, event.pos.yCoord, event.pos.zCoord);
+        if (dist < 10.0) {
+            double speed = Math.sqrt(event.speedX * event.speedX + event.speedZ * event.speedZ);
+            if (speed > 0.05) {
+                double normX = event.speedX / speed;
+                double normZ = event.speedZ / speed;
+                fireworkWaypoint = new Vec3(mc.thePlayer.posX + normX * 45.0, 85.0, mc.thePlayer.posZ + normZ * 45.0);
+            } else {
+                fireworkWaypoint = new Vec3(event.pos.xCoord, 85.0, event.pos.zCoord);
+            }
+            logDebug("Caught firework rocket from vacuum! Waypoint: " + fireworkWaypoint);
+        }
+    }
+
+    @SubscribeEvent(receiveCanceled = true, priority = EventPriority.HIGHEST)
+    public void onSpawnParticle(SpawnParticleEvent event) {
+        if (mc.thePlayer == null || !isRunning()) return;
+        if (currentState != State.WAIT_FOR_FIREWORK) return;
+
+        EnumParticleTypes type = event.getParticleTypes();
+        if (type != EnumParticleTypes.VILLAGER_ANGRY && type != EnumParticleTypes.FIREWORKS_SPARK && type != EnumParticleTypes.CRIT) {
+            return;
+        }
+
+        if (firstParticleLocation == null) {
+            if (mc.thePlayer.getPositionVector().distanceTo(event.getPos()) < 5.0) {
+                firstParticleLocation = event.getPos();
+                lastParticleLocation = firstParticleLocation;
+            }
+            return;
+        }
+
+        double dist = lastParticleLocation.distanceTo(event.getPos());
+        if (dist > 0.3 && dist < 3.0) {
+            lastParticleLocation = event.getPos();
+            Vec3 dir = lastParticleLocation.subtract(firstParticleLocation).normalize();
+            fireworkWaypoint = new Vec3(mc.thePlayer.posX + dir.xCoord * 45.0, 85.0, mc.thePlayer.posZ + dir.zCoord * 45.0);
+            logDebug("Caught firework particle trail! Waypoint: " + fireworkWaypoint);
         }
     }
 
@@ -457,6 +661,10 @@ public class FakePixelPestController implements IFeature {
     private void restoreState() {
         FlyPathFinderExecutor.getInstance().stop();
         KeyBindUtils.stopMovement();
+        KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
+        resetFireworkInfo();
+        targetWaypoint = null;
+        pathfinderFailed = false;
         if (originalHotbarSlot != -1 && mc.thePlayer != null) {
             mc.thePlayer.inventory.currentItem = originalHotbarSlot;
             originalHotbarSlot = -1;

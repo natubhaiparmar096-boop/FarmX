@@ -193,10 +193,25 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
 
     @Override
     public int findPestVacuumSlot() {
+        if (mc.thePlayer == null) return -1;
+        // 1. Check current held item first
+        ItemStack current = mc.thePlayer.getHeldItem();
+        if (isPestVacuumItem(current)) {
+            return mc.thePlayer.inventory.currentItem;
+        }
+        // 2. Scan hotbar slots 0 to 8
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.thePlayer.inventory.getStackInSlot(i);
             if (isPestVacuumItem(stack)) {
                 return i;
+            }
+        }
+        // 3. Fallback: check slot 3 (hotbar key 4) if it contains an item
+        ItemStack slot3 = mc.thePlayer.inventory.getStackInSlot(3);
+        if (slot3 != null && slot3.getItem() != null) {
+            String name = net.minecraft.util.StringUtils.stripControlCodes(slot3.getDisplayName()).toLowerCase(Locale.ENGLISH);
+            if (name.contains("vacuum") || name.contains("infini") || name.contains("skymart") || name.contains("pest") || name.contains("destroyer")) {
+                return 3;
             }
         }
         return -1;
@@ -204,13 +219,26 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
 
     @Override
     public boolean isPestVacuumItem(ItemStack itemStack) {
-        if (itemStack == null || !itemStack.hasDisplayName()) {
+        if (itemStack == null) {
             return false;
         }
-        String name = itemStack.getDisplayName().toLowerCase(Locale.ENGLISH);
+        String name = net.minecraft.util.StringUtils.stripControlCodes(itemStack.getDisplayName()).toLowerCase(Locale.ENGLISH);
         // Built-in keywords
-        if (name.contains("vacuum") || name.contains("hooverius") || name.contains("pest") || name.contains("destroyer")) {
+        if (name.contains("vacuum") || name.contains("hooverius") || name.contains("pest") || name.contains("destroyer")
+                || name.contains("skymart") || name.contains("infini")) {
             return true;
+        }
+        // Check unlocalized / registry name
+        if (itemStack.getItem() != null) {
+            String unloc = itemStack.getItem().getUnlocalizedName().toLowerCase(Locale.ENGLISH);
+            if (unloc.contains("vacuum") || unloc.contains("pest")) return true;
+        }
+        // Check full NBT tag (lore, extra attributes ID, etc.)
+        if (itemStack.hasTagCompound()) {
+            String tag = itemStack.getTagCompound().toString().toLowerCase(Locale.ENGLISH);
+            if (tag.contains("vacuum") || tag.contains("hooverius") || tag.contains("pest")) {
+                return true;
+            }
         }
         // User-configured extra keyword for FakePixel custom items
         String extra = FarmHelperConfig.fakePixelVacuumItemName.toLowerCase(Locale.ENGLISH).trim();
