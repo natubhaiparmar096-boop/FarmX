@@ -80,6 +80,10 @@ public class LogUtils {
         sendFailsafeMessage(message);
     }
 
+    public static void webhookLog(String message) {
+        sendDebug("[Webhook] " + message);
+    }
+
     public static String getRuntimeFormat() {
         if (!MacroHandler.getInstance().getMacroingTimer().isScheduled())
             return "0h 0m 0s";
