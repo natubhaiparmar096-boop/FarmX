@@ -33,7 +33,8 @@ public class FeatureManager {
                 PestsDestroyer.getInstance(),
                 PestFarmer.getInstance(),
                 PestsDestroyerOnTheTrack.getInstance(),
-                com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance()
+                com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance(),
+                FakePixelInlinePestKiller.getInstance()
         );
         features.addAll(featuresList);
         return features;

@@ -978,6 +978,16 @@ public class FarmHelperConfig extends Config {
     public static int pestsKillerTicksOfNotSeeingPestWhileAttacking = 20;
 
     public static void triggerManuallyPestsDestroyer() {
+        if (FarmHelperConfig.fakePixelMode) {
+            if (com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance().isRunning()) {
+                com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance().stop();
+                com.jelly.farmhelperv2.util.LogUtils.sendSuccess("Manually stopped FakePixel Pest Destroyer!");
+            } else {
+                com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance().startManual();
+                com.jelly.farmhelperv2.util.LogUtils.sendSuccess("Manually started FakePixel Pest Destroyer!");
+            }
+            return;
+        }
         if (com.jelly.farmhelperv2.feature.impl.PestsDestroyer.getInstance().isRunning()) {
             com.jelly.farmhelperv2.feature.impl.PestsDestroyer.getInstance().stop();
             com.jelly.farmhelperv2.util.LogUtils.sendSuccess("Manually stopped Pests Destroyer!");
@@ -1099,6 +1109,43 @@ public class FarmHelperConfig extends Config {
     public static boolean enableFakePixelPestFarming = true;
 
     @Switch(
+            name = "FakePixel Inline Pest Killer", category = PEST_FARMER,
+            description = "Kills pests within vacuum range WITHOUT pausing the farming macro (Tier 1). Enabled by default; Tier 2 (FakePixel Pest Farming) handles farther pests."
+    )
+    public static boolean fakePixelInlinePestKiller = true;
+
+    @Text(
+            name = "Custom Vacuum Item Keyword", category = PEST_FARMER,
+            description = "If your FakePixel vacuum item name does not contain 'vacuum', 'hooverius', 'pest', or 'destroyer', enter a keyword from its name here (case-insensitive). Leave blank to use defaults."
+    )
+    public static String fakePixelVacuumItemName = "";
+
+    @Slider(
+            name = "Start Hunting At (Pests)", category = PEST_FARMER,
+            description = "Start hunting pests when detected pest count reaches this value while farming",
+            min = 1, max = 10
+    )
+    public static int fakePixelStartHuntingPestsAt = 4;
+
+    @Switch(
+            name = "Set Home Before Hunt", category = PEST_FARMER,
+            description = "Sends /sethome at current farm position before starting to hunt pests"
+    )
+    public static boolean fakePixelSetHomeBeforeHunt = true;
+
+    @Switch(
+            name = "Rewarp Home After Hunt", category = PEST_FARMER,
+            description = "Sends rewarp command (e.g. /home) after all pests are killed to return to spawn"
+    )
+    public static boolean fakePixelRewarpAfterHunt = true;
+
+    @Text(
+            name = "Rewarp Command After Hunt", category = PEST_FARMER,
+            description = "Command sent after hunting pests to return to spawn point"
+    )
+    public static String fakePixelRewarpCommand = "/home";
+
+    @Switch(
             name = "FakePixel Mode", category = PEST_FARMER,
             description = "Adapts pest detection to FakePixel server entity and item mechanisms"
     )
@@ -1113,9 +1160,9 @@ public class FarmHelperConfig extends Config {
 
     @Slider(
             name = "Max Detection Distance", category = PEST_FARMER,
-            min = 5.0F, max = 64.0F
+            min = 10.0F, max = 256.0F
     )
-    public static float pestMaxDetectionDistance = 32.0F;
+    public static float pestMaxDetectionDistance = 128.0F;
 
     @Slider(
             name = "Vacuum Range", category = PEST_FARMER,

@@ -204,6 +204,11 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_FAKEPIXEL_MODE = 169;
     private static final int ID_PEST_PRIORITY = 170;
     private static final int ID_PEST_DEBUG = 171;
+    private static final int ID_FP_HUNT_AT_M = 172;
+    private static final int ID_FP_HUNT_AT_P = 173;
+    private static final int ID_FP_SETHOME = 174;
+    private static final int ID_FP_REWARP = 175;
+    private static final int ID_FP_INLINE_KILLER = 176;
 
     @Override
     public void initGui() {
@@ -340,10 +345,11 @@ public class FarmXMobileGui extends GuiScreen {
             case 10:
                 btn(ID_FAKEPIXEL_PEST, cx, y, 200, on("FakePixel Pest Farming", FarmHelperConfig.enableFakePixelPestFarming)); y += g;
                 btn(ID_FAKEPIXEL_MODE, cx, y, 200, on("FakePixel Mode", FarmHelperConfig.fakePixelMode)); y += g;
+                btn(ID_FP_INLINE_KILLER, cx, y, 200, on("Inline Pest Killer", FarmHelperConfig.fakePixelInlinePestKiller)); y += g;
+                pair(ID_FP_HUNT_AT_M, ID_FP_HUNT_AT_P, y, "Hunt At: " + FarmHelperConfig.fakePixelStartHuntingPestsAt + " Pests"); y += g;
+                btn(ID_FP_SETHOME, cx, y, 200, on("/sethome Before Hunt", FarmHelperConfig.fakePixelSetHomeBeforeHunt)); y += g;
+                btn(ID_FP_REWARP, cx, y, 200, on("/home After Hunt", FarmHelperConfig.fakePixelRewarpAfterHunt)); y += g;
                 btn(ID_PEST_PRIORITY, cx, y, 200, pestPriorityLabel()); y += g;
-                btn(ID_PEST_FARMING, cx, y, 200, on("Hypixel Pest Farming", FarmHelperConfig.pestFarming)); y += g;
-                btn(ID_PEST_DESTROYER, cx, y, 200, on("Pests Destroyer", FarmHelperConfig.enablePestsDestroyer)); y += g;
-                btn(ID_PEST_ON_TRACK, cx, y, 200, on("Kill Pests On Track", FarmHelperConfig.pestsDestroyerOnTheTrack)); y += g;
                 btn(ID_PEST_ESP, cx, y, 200, on("Pests ESP", FarmHelperConfig.pestsESP)); y += g;
                 btn(ID_PEST_TRACERS, cx, y, 200, on("Pests Tracers", FarmHelperConfig.pestsTracers)); y += g;
                 btn(ID_PEST_DEBUG, cx, y, 200, on("Pest Debug Logs", FarmHelperConfig.pestDebugLogging)); y += g;
@@ -714,6 +720,11 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_PDOTT: FarmHelperConfig.showDebugLogsAboutPDOTT = !FarmHelperConfig.showDebugLogsAboutPDOTT; button.displayString = on("PD OTT Debug Logs", FarmHelperConfig.showDebugLogsAboutPDOTT); break;
             case ID_FAKEPIXEL_PEST: FarmHelperConfig.enableFakePixelPestFarming = !FarmHelperConfig.enableFakePixelPestFarming; button.displayString = on("FakePixel Pest Farming", FarmHelperConfig.enableFakePixelPestFarming); break;
             case ID_FAKEPIXEL_MODE: FarmHelperConfig.fakePixelMode = !FarmHelperConfig.fakePixelMode; button.displayString = on("FakePixel Mode", FarmHelperConfig.fakePixelMode); break;
+            case ID_FP_INLINE_KILLER: FarmHelperConfig.fakePixelInlinePestKiller = !FarmHelperConfig.fakePixelInlinePestKiller; button.displayString = on("Inline Pest Killer", FarmHelperConfig.fakePixelInlinePestKiller); break;
+            case ID_FP_HUNT_AT_M: adjI(() -> FarmHelperConfig.fakePixelStartHuntingPestsAt, v -> FarmHelperConfig.fakePixelStartHuntingPestsAt = v, -1, 1, 10); break;
+            case ID_FP_HUNT_AT_P: adjI(() -> FarmHelperConfig.fakePixelStartHuntingPestsAt, v -> FarmHelperConfig.fakePixelStartHuntingPestsAt = v, 1, 1, 10); break;
+            case ID_FP_SETHOME: FarmHelperConfig.fakePixelSetHomeBeforeHunt = !FarmHelperConfig.fakePixelSetHomeBeforeHunt; button.displayString = on("/sethome Before Hunt", FarmHelperConfig.fakePixelSetHomeBeforeHunt); break;
+            case ID_FP_REWARP: FarmHelperConfig.fakePixelRewarpAfterHunt = !FarmHelperConfig.fakePixelRewarpAfterHunt; button.displayString = on("/home After Hunt", FarmHelperConfig.fakePixelRewarpAfterHunt); break;
             case ID_PEST_PRIORITY: FarmHelperConfig.pestPriorityMode = (FarmHelperConfig.pestPriorityMode + 1) % 3; button.displayString = pestPriorityLabel(); break;
             case ID_PEST_DEBUG: FarmHelperConfig.pestDebugLogging = !FarmHelperConfig.pestDebugLogging; button.displayString = on("Pest Debug Logs", FarmHelperConfig.pestDebugLogging); break;
             default:

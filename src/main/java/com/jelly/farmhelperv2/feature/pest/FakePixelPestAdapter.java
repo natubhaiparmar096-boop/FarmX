@@ -25,6 +25,22 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
             "mosquito", "moth", "rat", "slug", "praying mantis", "firefly", "dragonfly", "pest"
     );
 
+    public static final List<net.minecraft.util.Tuple<String, String>> PEST_TEXTURES = Arrays.asList(
+            new net.minecraft.util.Tuple<>("Beetle", "70a1e836bf1968b2eaa4837227a19204f17295d870ee9e754bd6b6d60ddeed3c"),
+            new net.minecraft.util.Tuple<>("Cricket", "a24c69f96ce556221e195c8ef2bfad71ebf7f95f5ae914a484a8d0ec21672674"),
+            new net.minecraft.util.Tuple<>("Earthworm", "6403ba4027a333d8d2fd32ab59d1cfdbaa7d908d80d2381db2a69cbe65450ad8"),
+            new net.minecraft.util.Tuple<>("Fly", "9d90e777826a52461368e26d1b2e19bfa1ba582d602483e545f4124d0f731842"),
+            new net.minecraft.util.Tuple<>("Locust", "4b274a482a32db1ea78fb98060b0c2fa4a373cbd18a68eddddeea7419455a59cda9"),
+            new net.minecraft.util.Tuple<>("Mite", "be6baf6431a9daa2ca604d5a3c26e9a761d5952f0817174a4fe0b764616e21ff"),
+            new net.minecraft.util.Tuple<>("Mosquito", "52a9fe05bc663efcd12e56a3ccc5ec035bf577b78708548b6f4ffcf1d30eccfe"),
+            new net.minecraft.util.Tuple<>("Moth", "65485c4b34e5b5470be94de100e61f7816f81bc5a11dfdf0eccf890172da5d0a"),
+            new net.minecraft.util.Tuple<>("Rat", "a8abb471db0ab78703011979dc8b40798a941f3a4dec3ec61cbeec2af8cffe8"),
+            new net.minecraft.util.Tuple<>("Slug", "7a79d0fd677b54530961117ef84adc206e2cc5045c1344d61d776bf8ac2fe1ba"),
+            new net.minecraft.util.Tuple<>("Praying Mantis", "1e04bb6367caa4e88f5fd0ee80f0745d137a6060223dbbc42a16471fdf64bb83"),
+            new net.minecraft.util.Tuple<>("Firefly", "4ce79e90adf34718f313ec24d6c6135b69b3788c618498446ccc83ca640cb14"),
+            new net.minecraft.util.Tuple<>("Dragonfly", "254aff4c0b2dce3a672349cc0ee9e6f3a9deebe4b3556e84611eca250a7821bf")
+    );
+
     @Override
     public boolean isSupportedServer() {
         if (!FarmHelperConfig.fakePixelMode) {
@@ -64,7 +80,22 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
             String detectedType = "Pest";
 
             if (entity instanceof EntityArmorStand) {
-                if (entityName != null && !entityName.isEmpty()) {
+                EntityArmorStand stand = (EntityArmorStand) entity;
+                // 1. Check skull texture in helmet slot (slot 4)
+                ItemStack helm = stand.getEquipmentInSlot(4);
+                if (helm != null && helm.hasTagCompound()) {
+                    String tagStr = helm.getTagCompound().toString();
+                    for (net.minecraft.util.Tuple<String, String> p : PEST_TEXTURES) {
+                        if (tagStr.contains(p.getSecond())) {
+                            isPest = true;
+                            detectedType = p.getFirst();
+                            break;
+                        }
+                    }
+                }
+
+                // 2. Check custom name tag if not already identified
+                if (!isPest && entityName != null && !entityName.isEmpty()) {
                     for (String pestName : KNOWN_PEST_NAMES) {
                         if (nameLower.contains(pestName)) {
                             isPest = true;
@@ -72,8 +103,9 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
                             break;
                         }
                     }
-                    if (!isPest && entityName.contains("ൠ")) {
+                    if (!isPest && (entityName.contains("ൠ") || entityName.contains("Pest"))) {
                         isPest = true;
+                        detectedType = "Pest";
                     }
                 }
             } else {
@@ -96,15 +128,23 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
                     }
                 }
 
-                // Garden boundary check (plots grid is bounded within X,Z in [-240, 240])
-                if (Math.abs(targetEntity.posX) > 240 || Math.abs(targetEntity.posZ) > 240) {
-                    continue;
-                }
-
                 BlockPos pos = new BlockPos(targetEntity.posX, targetEntity.posY, targetEntity.posZ);
                 PlotUtils.Plot plot = PlotUtils.getPlotNumberBasedOnLocation(pos);
                 int plotNum = plot != null && plot.number != null ? plot.number : -1;
                 double realDist = mc.thePlayer.getDistanceToEntity(targetEntity);
+
+                // Deduplicate entities within 1.5 blocks of each other (e.g. name tag + skull stand)
+                boolean alreadyAdded = false;
+                for (PestInfo pi : detected) {
+                    if (pi.getEntity().equals(targetEntity) ||
+                            (Math.abs(pi.getLocation().getX() - pos.getX()) <= 1 &&
+                             Math.abs(pi.getLocation().getY() - pos.getY()) <= 2 &&
+                             Math.abs(pi.getLocation().getZ() - pos.getZ()) <= 1)) {
+                        alreadyAdded = true;
+                        break;
+                    }
+                }
+                if (alreadyAdded) continue;
 
                 PestInfo info = new PestInfo(
                         targetEntity,
@@ -145,7 +185,13 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
             return false;
         }
         String name = itemStack.getDisplayName().toLowerCase(Locale.ENGLISH);
-        return name.contains("vacuum") || name.contains("hooverius") || name.contains("pest") || name.contains("destroyer");
+        // Built-in keywords
+        if (name.contains("vacuum") || name.contains("hooverius") || name.contains("pest") || name.contains("destroyer")) {
+            return true;
+        }
+        // User-configured extra keyword for FakePixel custom items
+        String extra = FarmHelperConfig.fakePixelVacuumItemName.toLowerCase(Locale.ENGLISH).trim();
+        return !extra.isEmpty() && name.contains(extra);
     }
 
     @Override

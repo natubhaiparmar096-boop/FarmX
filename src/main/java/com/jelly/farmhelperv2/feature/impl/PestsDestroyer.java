@@ -1285,7 +1285,7 @@ public class PestsDestroyer implements IFeature {
         pestsLocations.clear();
         pestsLocations.addAll(pests);
 
-        if (!FarmHelperConfig.highlightPlotWithPests) {
+        if (!FarmHelperConfig.highlightPlotWithPests || FarmHelperConfig.fakePixelMode) {
             return;
         }
 

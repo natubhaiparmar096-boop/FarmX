@@ -2,7 +2,6 @@ package com.jelly.farmhelperv2.feature.pest;
 
 import com.jelly.farmhelperv2.config.FarmHelperConfig;
 import com.jelly.farmhelperv2.failsafe.FailsafeManager;
-import com.jelly.farmhelperv2.feature.FeatureManager;
 import com.jelly.farmhelperv2.feature.IFeature;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
@@ -11,20 +10,23 @@ import com.jelly.farmhelperv2.pathfinder.FlyPathFinderExecutor;
 import com.jelly.farmhelperv2.util.InventoryUtils;
 import com.jelly.farmhelperv2.util.KeyBindUtils;
 import com.jelly.farmhelperv2.util.LogUtils;
-import com.jelly.farmhelperv2.util.PlayerUtils;
-import com.jelly.farmhelperv2.util.PlotUtils;
+import com.jelly.farmhelperv2.util.RenderUtils;
 import com.jelly.farmhelperv2.util.helper.Clock;
 import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
 import com.jelly.farmhelperv2.util.helper.Target;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class FakePixelPestController implements IFeature {
@@ -42,12 +44,15 @@ public class FakePixelPestController implements IFeature {
         IDLE,
         FARMING,
         PEST_DETECTED,
-        STOP_FARMING,
+        SET_HOME_BEFORE_HUNT,
+        WAIT_FOR_SET_HOME,
         FIND_PEST,
         MOVE_TO_PEST,
         ATTACK_VACUUM,
         CONFIRM_PEST_DEAD,
-        RETURN_TO_FARM,
+        CHECK_NEXT_PEST,
+        RETURN_TO_HOME,
+        WAIT_FOR_RETURN,
         RESUME_FARMING,
         FAILED,
         COOLDOWN
@@ -59,10 +64,12 @@ public class FakePixelPestController implements IFeature {
 
     private State currentState = State.IDLE;
     private boolean enabled = false;
+    private boolean manualMode = false;
     private PestInfo targetPest = null;
     private int originalHotbarSlot = -1;
     private int retryCount = 0;
 
+    private final List<Entity> killedEntities = new ArrayList<>();
     private final Clock stateTimer = new Clock();
     private final Clock attackTimer = new Clock();
     private final Clock cooldownTimer = new Clock();
@@ -101,22 +108,53 @@ public class FakePixelPestController implements IFeature {
     public void start() {
         if (enabled) return;
         enabled = true;
+        manualMode = false;
         currentState = State.IDLE;
         retryCount = 0;
         targetPest = null;
+        killedEntities.clear();
         originalHotbarSlot = mc.thePlayer != null ? mc.thePlayer.inventory.currentItem : -1;
         logDebug("Pest Controller started.");
         IFeature.super.start();
     }
 
+    public void startManual() {
+        if (isRunning()) stop();
+        enabled = true;
+        manualMode = true;
+        retryCount = 0;
+        targetPest = null;
+        killedEntities.clear();
+        originalHotbarSlot = mc.thePlayer != null ? mc.thePlayer.inventory.currentItem : -1;
+
+        if (MacroHandler.getInstance().isMacroToggled()) {
+            MacroHandler.getInstance().pauseMacro();
+        }
+        KeyBindUtils.stopMovement();
+
+        LogUtils.sendWarning("[Pest Controller] Starting manual pest elimination!");
+        logDebug("Manual Pest Hunt initiated.");
+
+        if (FarmHelperConfig.fakePixelSetHomeBeforeHunt) {
+            currentState = State.SET_HOME_BEFORE_HUNT;
+            stateTimer.schedule(300);
+        } else {
+            currentState = State.FIND_PEST;
+            stateTimer.schedule(300);
+        }
+        IFeature.super.start();
+    }
+
     @Override
     public void stop() {
-        if (!enabled) return;
+        if (!enabled && currentState == State.IDLE) return;
         logDebug("Pest Controller stopping.");
         restoreState();
         enabled = false;
+        manualMode = false;
         currentState = State.IDLE;
         targetPest = null;
+        killedEntities.clear();
         detector.clearCache();
         IFeature.super.stop();
     }
@@ -132,7 +170,7 @@ public class FakePixelPestController implements IFeature {
             return;
         }
 
-        if (!isToggled()) {
+        if (!isToggled() && !manualMode) {
             if (isRunning()) stop();
             return;
         }
@@ -148,10 +186,18 @@ public class FakePixelPestController implements IFeature {
             return;
         }
 
-        // Trigger check when farming
+        // Trigger check when farming (Farming Mode)
         if (!isRunning() && MacroHandler.getInstance().isMacroToggled() && MacroHandler.getInstance().isCurrentMacroEnabled()) {
             List<PestInfo> pests = detector.scanPests(false);
-            if (!pests.isEmpty()) {
+            int count = Math.max(pests.size(), GameStateHandler.getInstance().getPestsCount());
+            if (count >= FarmHelperConfig.fakePixelStartHuntingPestsAt && !pests.isEmpty()) {
+                // Tier 1 deference: if inline killer is active and all detected pests are within vacuum range, let it handle
+                boolean inlineActive = FarmHelperConfig.fakePixelInlinePestKiller;
+                boolean allInRange = pests.stream().allMatch(p -> p.getDistance() <= FarmHelperConfig.pestVacuumRange);
+                if (inlineActive && allInRange) {
+                    return;
+                }
+                manualMode = false;
                 start();
                 currentState = State.PEST_DETECTED;
                 stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs);
@@ -164,40 +210,59 @@ public class FakePixelPestController implements IFeature {
         // State Machine Processing
         switch (currentState) {
             case PEST_DETECTED:
-                logDebug("Pest detected! Pausing farming macro.");
+                logDebug("Pest threshold reached! Pausing farming macro.");
                 if (MacroHandler.getInstance().isMacroToggled()) {
                     MacroHandler.getInstance().pauseMacro();
                 }
                 KeyBindUtils.stopMovement();
-                currentState = State.STOP_FARMING;
-                stateTimer.schedule(1000);
+                if (FarmHelperConfig.fakePixelSetHomeBeforeHunt) {
+                    currentState = State.SET_HOME_BEFORE_HUNT;
+                    stateTimer.schedule(300);
+                } else {
+                    currentState = State.FIND_PEST;
+                    stateTimer.schedule(500);
+                }
                 break;
 
-            case STOP_FARMING:
+            case SET_HOME_BEFORE_HUNT:
+                if (mc.thePlayer != null) {
+                    mc.thePlayer.sendChatMessage("/sethome");
+                    logDebug("Sent /sethome before starting pest hunt.");
+                }
+                currentState = State.WAIT_FOR_SET_HOME;
+                stateTimer.schedule(800);
+                break;
+
+            case WAIT_FOR_SET_HOME:
                 if (stateTimer.passed()) {
                     currentState = State.FIND_PEST;
                 }
                 break;
 
             case FIND_PEST:
-                targetPest = detector.selectTargetPest();
-                if (targetPest == null || !targetPest.isAlive()) {
-                    logDebug("No valid target pest found.");
-                    currentState = State.RETURN_TO_FARM;
+                List<PestInfo> livePests = detector.scanPests(true);
+                livePests.removeIf(p -> p.getEntity() == null || p.getEntity().isDead || killedEntities.contains(p.getEntity()) || !p.isAlive());
+
+                if (livePests.isEmpty()) {
+                    logDebug("No valid target pests remaining.");
+                    currentState = State.RETURN_TO_HOME;
                 } else {
+                    livePests.sort(Comparator.comparingDouble(PestInfo::getDistance));
+                    targetPest = livePests.get(0);
                     logDebug("Target pest selected: " + targetPest.getPestType() + " at dist " + String.format("%.2f", targetPest.getDistance()));
-                    if (mc.thePlayer != null) {
+                    if (mc.thePlayer != null && originalHotbarSlot == -1) {
                         originalHotbarSlot = mc.thePlayer.inventory.currentItem;
                     }
                     currentState = State.MOVE_TO_PEST;
-                    stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs);
+                    retryCount = 0;
+                    stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs + 7000);
                 }
                 break;
 
             case MOVE_TO_PEST:
-                if (targetPest == null || adapter.isPestRemoved(targetPest)) {
+                if (targetPest == null || adapter.isPestRemoved(targetPest) || targetPest.getEntity().isDead) {
                     FlyPathFinderExecutor.getInstance().stop();
-                    currentState = State.CONFIRM_PEST_DEAD;
+                    currentState = State.CHECK_NEXT_PEST;
                     break;
                 }
                 double dist = mc.thePlayer.getDistanceToEntity(targetPest.getEntity());
@@ -211,13 +276,20 @@ public class FakePixelPestController implements IFeature {
                     rotateAndMoveToPest(targetPest.getEntity());
                     if (stateTimer.passed()) {
                         FlyPathFinderExecutor.getInstance().stop();
-                        handleFailure("Timeout moving to pest");
+                        retryCount++;
+                        if (retryCount >= FarmHelperConfig.pestMaxRetryCount) {
+                            logDebug("Timeout moving to pest after retries, skipping to next.");
+                            if (targetPest.getEntity() != null) killedEntities.add(targetPest.getEntity());
+                            currentState = State.CHECK_NEXT_PEST;
+                        } else {
+                            stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs);
+                        }
                     }
                 }
                 break;
 
             case ATTACK_VACUUM:
-                if (targetPest == null || adapter.isPestRemoved(targetPest)) {
+                if (targetPest == null || adapter.isPestRemoved(targetPest) || targetPest.getEntity().isDead) {
                     FlyPathFinderExecutor.getInstance().stop();
                     currentState = State.CONFIRM_PEST_DEAD;
                     break;
@@ -231,44 +303,83 @@ public class FakePixelPestController implements IFeature {
 
                 if (attackTimer.passed()) {
                     KeyBinding.onTick(mc.gameSettings.keyBindUseItem.getKeyCode());
-                    attackTimer.schedule(300);
-                    logDebug("Interacting/Vacuuming pest: " + targetPest.getPestType());
+                    attackTimer.schedule(200);
+                    logDebug("Vacuuming pest: " + targetPest.getPestType());
                 }
 
                 if (stateTimer.passed()) {
                     if (retryCount < FarmHelperConfig.pestMaxRetryCount) {
                         retryCount++;
-                        logDebug("Retrying pest collection (attempt " + retryCount + ")");
+                        logDebug("Retrying pest vacuuming (attempt " + retryCount + ")");
                         stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs);
                     } else {
-                        handleFailure("Pest collection retry limit reached");
+                        logDebug("Pest collection retry limit reached, skipping.");
+                        currentState = State.CONFIRM_PEST_DEAD;
                     }
                 }
                 break;
 
             case CONFIRM_PEST_DEAD:
                 logDebug("Confirming pest removal...");
-                if (targetPest == null || adapter.isPestRemoved(targetPest)) {
-                    logDebug("Pest confirmed removed!");
-                    currentState = State.RETURN_TO_FARM;
+                if (targetPest != null && targetPest.getEntity() != null) {
+                    killedEntities.add(targetPest.getEntity());
+                    LogUtils.sendSuccess("[Pest Controller] Killed pest: " + targetPest.getPestType());
+                }
+                currentState = State.CHECK_NEXT_PEST;
+                stateTimer.schedule(400);
+                break;
+
+            case CHECK_NEXT_PEST:
+                targetPest = null;
+                retryCount = 0;
+                List<PestInfo> remaining = detector.scanPests(true);
+                remaining.removeIf(p -> p.getEntity() == null || p.getEntity().isDead || killedEntities.contains(p.getEntity()) || !p.isAlive());
+
+                if (!remaining.isEmpty()) {
+                    logDebug(remaining.size() + " pests remaining. Targeting next pest!");
+                    currentState = State.FIND_PEST;
                 } else {
-                    currentState = State.ATTACK_VACUUM;
+                    logDebug("All pests eliminated!");
+                    LogUtils.sendSuccess("[Pest Controller] All pests eliminated!");
+                    currentState = State.RETURN_TO_HOME;
                 }
                 break;
 
-            case RETURN_TO_FARM:
-                logDebug("Restoring state and returning to farming.");
+            case RETURN_TO_HOME:
+                logDebug("Pest hunt complete! Returning to spawn point.");
                 restoreState();
-                currentState = State.RESUME_FARMING;
-                stateTimer.schedule(500);
+                if (FarmHelperConfig.fakePixelRewarpAfterHunt) {
+                    String cmd = FarmHelperConfig.fakePixelRewarpCommand != null ? FarmHelperConfig.fakePixelRewarpCommand.trim() : "/home";
+                    if (!cmd.isEmpty() && mc.thePlayer != null) {
+                        mc.thePlayer.sendChatMessage(cmd);
+                        logDebug("Sent rewarp command: " + cmd);
+                    }
+                    currentState = State.WAIT_FOR_RETURN;
+                    stateTimer.schedule(2500);
+                } else {
+                    currentState = State.RESUME_FARMING;
+                    stateTimer.schedule(500);
+                }
+                break;
+
+            case WAIT_FOR_RETURN:
+                if (stateTimer.passed()) {
+                    currentState = State.RESUME_FARMING;
+                }
                 break;
 
             case RESUME_FARMING:
-                if (MacroHandler.getInstance().isMacroToggled()) {
-                    MacroHandler.getInstance().resumeMacro();
+                restoreState();
+                if (manualMode) {
+                    LogUtils.sendSuccess("[Pest Controller] Manual pest hunt completed successfully!");
+                    stop();
+                } else {
+                    if (MacroHandler.getInstance().isMacroToggled()) {
+                        MacroHandler.getInstance().resumeMacro();
+                    }
+                    currentState = State.COOLDOWN;
+                    cooldownTimer.schedule(2000);
                 }
-                currentState = State.COOLDOWN;
-                cooldownTimer.schedule(2000);
                 break;
 
             case COOLDOWN:
@@ -280,6 +391,11 @@ public class FakePixelPestController implements IFeature {
             case FAILED:
                 restoreState();
                 logDebug("Entering failed state recovery.");
+                if (manualMode) {
+                    LogUtils.sendError("[Pest Controller] Pest hunt aborted or failed.");
+                } else if (MacroHandler.getInstance().isMacroToggled()) {
+                    MacroHandler.getInstance().resumeMacro();
+                }
                 stop();
                 break;
 
@@ -290,12 +406,31 @@ public class FakePixelPestController implements IFeature {
     }
 
     private void rotateAndMoveToPest(Entity target) {
-        if (target == null) return;
+        if (target == null || mc.thePlayer == null) return;
         rotateToPest(target);
+
+        // Fallback: If pathfinder fails / retried, move directly using keyboard controls
+        if (retryCount > 0) {
+            FlyPathFinderExecutor.getInstance().stop();
+            KeyBindUtils.holdThese(mc.gameSettings.keyBindForward);
+            if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
+                mc.thePlayer.capabilities.isFlying = true;
+            }
+            if (target.posY > mc.thePlayer.posY + 0.5) {
+                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, true);
+            } else if (target.posY < mc.thePlayer.posY - 0.5) {
+                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, true);
+            }
+            return;
+        }
+
         if (!FlyPathFinderExecutor.getInstance().isRunning()) {
+            if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
+                mc.thePlayer.capabilities.isFlying = true;
+            }
             FlyPathFinderExecutor.getInstance().setSprinting(FarmHelperConfig.sprintWhileFlying);
             FlyPathFinderExecutor.getInstance().setUseAOTV(InventoryUtils.hasItemInHotbar("Aspect of the Void", "Aspect of the End"));
-            FlyPathFinderExecutor.getInstance().findPath(target, true, true, 2.5f, true);
+            FlyPathFinderExecutor.getInstance().findPath(target, true, true, 1.5f, true);
         }
     }
 
@@ -303,7 +438,7 @@ public class FakePixelPestController implements IFeature {
         if (target == null || mc.thePlayer == null) return;
         RotationHandler.getInstance().easeTo(new RotationConfiguration(
                 new Target(target),
-                200L,
+                180L,
                 null
         ).followTarget(true));
     }
@@ -313,6 +448,7 @@ public class FakePixelPestController implements IFeature {
         KeyBindUtils.stopMovement();
         if (originalHotbarSlot != -1 && mc.thePlayer != null) {
             mc.thePlayer.inventory.currentItem = originalHotbarSlot;
+            originalHotbarSlot = -1;
         }
     }
 
@@ -324,6 +460,46 @@ public class FakePixelPestController implements IFeature {
     private void logDebug(String message) {
         if (FarmHelperConfig.pestDebugLogging) {
             LogUtils.sendDebug("[Pest] " + message);
+        }
+    }
+
+    @SubscribeEvent
+    public void onRender(RenderWorldLastEvent event) {
+        if (mc.thePlayer == null || mc.theWorld == null) return;
+        if (!FarmHelperConfig.fakePixelMode) return;
+        if (!FarmHelperConfig.pestsESP && !isRunning()) return;
+
+        double d0 = mc.getRenderManager().viewerPosX;
+        double d1 = mc.getRenderManager().viewerPosY;
+        double d2 = mc.getRenderManager().viewerPosZ;
+
+        List<PestInfo> cached = detector.getCachedPests();
+        for (PestInfo pest : cached) {
+            if (pest == null || pest.getEntity() == null || pest.getEntity().isDead) continue;
+            if (killedEntities.contains(pest.getEntity())) continue;
+
+            Entity e = pest.getEntity();
+            double dist = mc.thePlayer.getDistanceToEntity(e);
+            boolean inRange = dist <= FarmHelperConfig.pestVacuumRange;
+
+            AxisAlignedBB bb = new AxisAlignedBB(
+                    e.posX - 0.4, e.posY, e.posZ - 0.4,
+                    e.posX + 0.4, e.posY + 1.0, e.posZ + 0.4
+            ).offset(-d0, -d1, -d2);
+
+            Color col = inRange ? new Color(0, 255, 100, 80) : new Color(255, 60, 60, 80);
+            RenderUtils.drawBox(bb, col);
+            RenderUtils.drawText(
+                    pest.getPestType() + String.format(" (%.1fm)", dist),
+                    (float) e.posX, (float) (e.posY + 1.2), (float) e.posZ, 1.0f
+            );
+
+            if (FarmHelperConfig.pestsTracers) {
+                RenderUtils.drawTracer(
+                        new Vec3(e.posX, e.posY + 0.5, e.posZ),
+                        FarmHelperConfig.pestsTracersColor.toJavaColor()
+                );
+            }
         }
     }
 
