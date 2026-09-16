@@ -4,12 +4,13 @@ import lombok.Getter;
 
 public class Clock {
     private long remainingTime;
-    @Getter
     private boolean paused;
-    @Getter
     private boolean scheduled;
-    @Getter
     private long endTime;
+
+    public boolean isPaused() { return paused; }
+    public boolean isScheduled() { return scheduled; }
+    public long getEndTime() { return endTime; }
 
     public void schedule(long milliseconds) {
         this.endTime = System.currentTimeMillis() + milliseconds;

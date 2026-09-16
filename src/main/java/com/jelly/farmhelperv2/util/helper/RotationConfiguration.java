@@ -22,8 +22,28 @@ public class RotationConfiguration {
     private boolean goingBackToClientSide = false;
     private boolean followTarget = false;
     private RotationType rotationType = RotationType.CLIENT;
-    private boolean easeOutBack = false;
     private boolean randomness = false;
+
+    public Rotation from() { return from; }
+    public RotationConfiguration from(Rotation from) { this.from = from; return this; }
+    public Optional<Rotation> to() { return to; }
+    public RotationConfiguration to(Optional<Rotation> to) { this.to = to; return this; }
+    public Optional<Target> target() { return target; }
+    public RotationConfiguration target(Optional<Target> target) { this.target = target; return this; }
+    public long time() { return time; }
+    public RotationConfiguration time(long time) { this.time = time; return this; }
+    public Optional<Runnable> callback() { return callback; }
+    public RotationConfiguration callback(Optional<Runnable> callback) { this.callback = callback; return this; }
+    public boolean goingBackToClientSide() { return goingBackToClientSide; }
+    public RotationConfiguration goingBackToClientSide(boolean goingBackToClientSide) { this.goingBackToClientSide = goingBackToClientSide; return this; }
+    public boolean followTarget() { return followTarget; }
+    public RotationConfiguration followTarget(boolean followTarget) { this.followTarget = followTarget; return this; }
+    public RotationType rotationType() { return rotationType; }
+    public RotationConfiguration rotationType(RotationType rotationType) { this.rotationType = rotationType; return this; }
+    public boolean easeOutBack() { return easeOutBack; }
+    public RotationConfiguration easeOutBack(boolean easeOutBack) { this.easeOutBack = easeOutBack; return this; }
+    public boolean randomness() { return randomness; }
+    public RotationConfiguration randomness(boolean randomness) { this.randomness = randomness; return this; }
 
     public RotationConfiguration(Rotation from, Rotation to, long time, RotationType rotationType, Runnable callback) {
         this.from = from;

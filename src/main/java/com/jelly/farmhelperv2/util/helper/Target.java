@@ -12,14 +12,11 @@ import java.util.Optional;
 
 public class Target {
     private Vec3 vec;
-    @Getter
-    private Entity entity;
-    @Getter
-    private BlockPos blockPos;
-    @Accessors(fluent = true)
-    @Setter
-    @Getter
-    private float additionalY;
+    public Entity getEntity() { return entity; }
+    public BlockPos getBlockPos() { return blockPos; }
+    public float additionalY() { return additionalY; }
+    public Target additionalY(float additionalY) { this.additionalY = additionalY; return this; }
+    public float getAdditionalY() { return additionalY; }
 
     public Target(Vec3 vec) {
         this.vec = vec;
