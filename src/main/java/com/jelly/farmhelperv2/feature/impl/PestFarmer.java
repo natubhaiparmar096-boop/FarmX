@@ -28,7 +28,14 @@ import java.lang.Math;
 
 public class PestFarmer implements IFeature {
 
-    public static PestFarmer instance = new PestFarmer();
+    public static PestFarmer instance;
+
+    public static PestFarmer getInstance() {
+        if (instance == null) {
+            instance = new PestFarmer();
+        }
+        return instance;
+    }
     private final Minecraft mc = Minecraft.getMinecraft();
     private boolean enabled = false;
     private long pestSpawnTime = 0L;

@@ -15,6 +15,7 @@ public class RotationConfiguration {
     private boolean goingBackToClientSide = false;
     private boolean followTarget = false;
     private RotationType rotationType = RotationType.CLIENT;
+    private boolean easeOutBack = false;
     private boolean randomness = false;
 
     public Rotation from() { return from; }

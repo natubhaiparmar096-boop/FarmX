@@ -229,9 +229,7 @@ public class GameStateHandler {
         checkJacob(updatedLine);
     }
 
-    @SubscribeEvent
-    public void onUpdateScoreboardList(UpdateScoreboardListEvent event) {
-    }
+
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -699,6 +697,8 @@ public class GameStateHandler {
         TELEPORTING("Teleporting");
 
         private final String name;
+
+        public String getName() { return name; }
 
         Location(String name) {
             this.name = name;
