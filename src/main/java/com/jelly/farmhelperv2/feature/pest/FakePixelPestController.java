@@ -91,6 +91,11 @@ public class FakePixelPestController implements IFeature {
     }
 
     @Override
+    public boolean shouldCheckForFailsafes() {
+        return currentState != State.IDLE && currentState != State.FAILED;
+    }
+
+    @Override
     public void start() {
         if (enabled) return;
         enabled = true;
