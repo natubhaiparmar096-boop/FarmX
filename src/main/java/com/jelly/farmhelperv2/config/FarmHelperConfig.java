@@ -49,6 +49,7 @@ public class FarmHelperConfig extends Config {
     private transient static final String HUD = "HUD";
     private transient static final String DEBUG = "Debug";
     private transient static final String EXPERIMENTAL = "Experimental";
+    private transient static final String AUTO_SPRAYONATOR = "Auto Sprayonator";
 
     private transient static final File configRewarpFile = new File("farmhelper_rewarp.json");
 
@@ -872,6 +873,44 @@ public class FarmHelperConfig extends Config {
             name = "Shown Welcome GUI", category = EXPERIMENTAL, subcategory = "Experimental"
     )
     public static boolean shownWelcomeGUI2 = false;
+
+    //</editor-fold>
+
+    // <editor-fold desc="AUTO_SPRAYONATOR">
+    @Switch(
+            name = "Auto Sprayonator", category = AUTO_SPRAYONATOR, subcategory = "Auto Sprayonator",
+            description = "Automatically uses the Sprayonator when its buff expires"
+    )
+    public static boolean autoSprayonator = false;
+
+    @Dropdown(
+            name = "Spray Material", category = AUTO_SPRAYONATOR, subcategory = "Auto Sprayonator",
+            description = "Item to spray your plot with",
+            options = {
+                    "Fine Flour (+20 Farming Fortune)",
+                    "Compost (Earthworm & Mosquito)",
+                    "Honey Jar (Moth & Cricket)",
+                    "Dung (Fly & Slug)",
+                    "Plant Matter (Beetle & Mite)",
+                    "Tasty Cheese (Rat)"
+            }
+    )
+    public static int autoSprayonatorSprayMaterial = 0;
+
+    @Slider(
+            name = "Additional Delay", category = AUTO_SPRAYONATOR, subcategory = "Auto Sprayonator",
+            description = "Additional delay between actions (in milliseconds)",
+            min = 0, max = 5000, step = 1
+    )
+    public static int autoSprayonatorAdditionalDelay = 500;
+
+    @Slider(
+            name = "Start Delay", category = AUTO_SPRAYONATOR, subcategory = "Auto Sprayonator",
+            description = "Time to wait after buff expires before spraying (in milliseconds)",
+            min = 0, max = 5000, step = 100
+    )
+    public static int autoSprayonatorStartDelay = 0;
+    // </editor-fold>
 
     public FarmHelperConfig() {
         super(new Mod("Farm Helper", ModType.HYPIXEL, "/farmhelper/icon-mod/icon.png"), "/farmhelper/config.json");

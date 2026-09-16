@@ -27,7 +27,8 @@ public class FeatureManager {
                 AntiStuck.getInstance(),
                 BPSTracker.getInstance(),
                 DesyncChecker.getInstance(),
-                LagDetector.getInstance()
+                LagDetector.getInstance(),
+                AutoSprayonator.getInstance()
         );
         features.addAll(featuresList);
         return features;
