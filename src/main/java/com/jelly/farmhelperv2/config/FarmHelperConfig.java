@@ -965,6 +965,28 @@ public class FarmHelperConfig extends Config {
     )
     public static boolean pestsDestroyerAfkInfiniteMode = false;
 
+    @Slider(
+            name = "Stuck Timer (minutes)", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            min = 1, max = 10
+    )
+    public static int pestsKillerStuckTime = 3;
+
+    @Slider(
+            name = "Ticks of not seeing pest while attacking", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            min = 0, max = 100
+    )
+    public static int pestsKillerTicksOfNotSeeingPestWhileAttacking = 20;
+
+    public static void triggerManuallyPestsDestroyer() {
+        if (com.jelly.farmhelperv2.feature.impl.PestsDestroyer.getInstance().isRunning()) {
+            com.jelly.farmhelperv2.feature.impl.PestsDestroyer.getInstance().stop();
+            com.jelly.farmhelperv2.util.LogUtils.sendSuccess("Manually stopped Pests Destroyer!");
+        } else {
+            com.jelly.farmhelperv2.feature.impl.PestsDestroyer.getInstance().start();
+            com.jelly.farmhelperv2.util.LogUtils.sendSuccess("Manually started Pests Destroyer!");
+        }
+    }
+
     @Switch(
             name = "Pests Destroyer on the track", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track",
             description = "Will kill pests if they are in your range while farming"

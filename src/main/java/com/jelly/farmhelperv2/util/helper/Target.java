@@ -1,8 +1,5 @@
 package com.jelly.farmhelperv2.util.helper;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
@@ -12,6 +9,11 @@ import java.util.Optional;
 
 public class Target {
     private Vec3 vec;
+    private Entity entity;
+    private BlockPos blockPos;
+    private float additionalY = 0f;
+
+    public Vec3 getVec() { return vec; }
     public Entity getEntity() { return entity; }
     public BlockPos getBlockPos() { return blockPos; }
     public float additionalY() { return additionalY; }

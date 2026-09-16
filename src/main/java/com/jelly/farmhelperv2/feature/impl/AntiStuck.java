@@ -48,6 +48,7 @@ public class AntiStuck implements IFeature {
     private int unstuckTries = 0;
 
     public UnstuckState getUnstuckState() { return unstuckState; }
+    public Clock getDelayBetweenMovementsClock() { return delayBetweenMovementsClock; }
     public void setIntersectingBlockPos(BlockPos intersectingBlockPos) { this.intersectingBlockPos = intersectingBlockPos; }
     public void setDirectionBlockPos(BlockPos directionBlockPos) { this.directionBlockPos = directionBlockPos; }
     public int getLagBackCounter() { return lagBackCounter; }

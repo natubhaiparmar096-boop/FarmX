@@ -61,6 +61,7 @@ public abstract class AbstractMacro {
     public RewarpState getRewarpState() { return rewarpState; }
     public WalkingDirection getWalkingDirection() { return walkingDirection; }
     public int getPreviousWalkingCoord() { return previousWalkingCoord; }
+    public Clock getCheckOnSpawnClock() { return checkOnSpawnClock; }
 
     // Explicit setters (replacing field-level @Setter)
     public void setCurrentState(State currentState) { this.currentState = currentState; }
