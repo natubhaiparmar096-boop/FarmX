@@ -1,97 +1,101 @@
 {
   "mappings": {
     "baritone/launch/mixins/MixinMinecraft": {
-      "thePlayer": "Lnet/minecraft/client/Minecraft;field_71439_g:Lnet/minecraft/client/entity/EntityPlayerSP;",
-      "theWorld": "Lnet/minecraft/client/Minecraft;field_71441_e:Lnet/minecraft/client/multiplayer/WorldClient;",
-      "currentScreen": "Lnet/minecraft/client/Minecraft;field_71462_r:Lnet/minecraft/client/gui/GuiScreen;",
-      "startGame": "Lnet/minecraft/client/Minecraft;func_71384_a()V",
-      "runTick": "Lnet/minecraft/client/Minecraft;func_71407_l()V",
-      "loadWorld": "Lnet/minecraft/client/Minecraft;func_71353_a(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V"
+      "thePlayer": "field_71439_g",
+      "theWorld": "field_71441_e",
+      "currentScreen": "field_71462_r",
+      "leftClickCounter": "field_71429_W",
+      "startGame": "func_71384_a",
+      "runTick": "func_71407_l",
+      "loadWorld(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V": "func_71353_a(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V",
+      "Lnet/minecraft/client/multiplayer/WorldClient;updateEntities()V": "Lnet/minecraft/client/multiplayer/WorldClient;func_71403_a()V"
     },
     "baritone/launch/mixins/MixinEntity": {
-      "posX": "Lnet/minecraft/entity/Entity;field_70165_t:D",
-      "posY": "Lnet/minecraft/entity/Entity;field_70163_u:D",
-      "posZ": "Lnet/minecraft/entity/Entity;field_70161_v:D",
-      "rotationYaw": "Lnet/minecraft/entity/Entity;field_70177_z:F",
-      "rotationPitch": "Lnet/minecraft/entity/Entity;field_70125_A:F",
-      "moveEntity": "Lnet/minecraft/entity/Entity;func_70091_d(DDD)V"
+      "posX": "field_70165_t",
+      "posY": "field_70163_u",
+      "posZ": "field_70161_v",
+      "rotationYaw": "field_70177_z",
+      "rotationPitch": "field_70125_A",
+      "moveEntity(DDD)V": "func_70091_d(DDD)V"
     },
     "baritone/launch/mixins/MixinEntityLivingBase": {
-      "moveEntityWithHeading": "Lnet/minecraft/entity/EntityLivingBase;func_70612_e(FF)V",
-      "jump": "Lnet/minecraft/entity/EntityLivingBase;func_70664_aR()V"
+      "moveEntityWithHeading(FF)V": "func_70612_e(FF)V",
+      "jump()V": "func_70664_aR()V"
     },
     "baritone/launch/mixins/MixinEntityPlayerSP": {
-      "onUpdate": "Lnet/minecraft/client/entity/EntityPlayerSP;func_70071_h_()V",
-      "sendChatMessage": "Lnet/minecraft/client/entity/EntityPlayerSP;func_71165_d(Ljava/lang/String;)V"
+      "onUpdate()V": "func_70071_h_()V",
+      "sendChatMessage(Ljava/lang/String;)V": "func_71165_d(Ljava/lang/String;)V"
     },
     "baritone/launch/mixins/MixinEntityRenderer": {
-      "orientCamera": "Lnet/minecraft/client/renderer/EntityRenderer;func_78467_g(F)V",
-      "updateCameraAndRender": "Lnet/minecraft/client/renderer/EntityRenderer;func_181560_a(FJ)V"
+      "orientCamera(F)V": "func_78467_g(F)V",
+      "updateCameraAndRender(FJ)V": "func_181560_a(FJ)V"
     },
     "baritone/launch/mixins/MixinNetHandlerPlayClient": {
-      "handlePlayerPosLook": "Lnet/minecraft/client/network/NetHandlerPlayClient;func_147258_a(Lnet/minecraft/network/play/server/S08PacketPlayerPosLook;)V",
-      "handleChunkData": "Lnet/minecraft/client/network/NetHandlerPlayClient;func_147269_a(Lnet/minecraft/network/play/server/S21PacketChunkData;)V"
+      "handlePlayerPosLook(Lnet/minecraft/network/play/server/S08PacketPlayerPosLook;)V": "func_147258_a(Lnet/minecraft/network/play/server/S08PacketPlayerPosLook;)V",
+      "handleChunkData(Lnet/minecraft/network/play/server/S21PacketChunkData;)V": "func_147269_a(Lnet/minecraft/network/play/server/S21PacketChunkData;)V"
     },
     "baritone/launch/mixins/MixinNetworkManager": {
-      "sendPacket": "Lnet/minecraft/network/NetworkManager;func_179290_a(Lnet/minecraft/network/Packet;)V"
+      "sendPacket(Lnet/minecraft/network/Packet;)V": "func_179290_a(Lnet/minecraft/network/Packet;)V"
     },
     "baritone/launch/mixins/MixinPlayerControllerMP": {
-      "onPlayerDamageBlock": "Lnet/minecraft/client/multiplayer/PlayerControllerMP;func_180512_a(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
-      "clickBlock": "Lnet/minecraft/client/multiplayer/PlayerControllerMP;func_180511_b(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"
+      "onPlayerDamageBlock(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z": "func_180512_a(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
+      "clickBlock(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z": "func_180511_b(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"
     },
     "baritone/launch/mixins/MixinWorldClient": {
-      "doVoidFogParticles": "Lnet/minecraft/client/multiplayer/WorldClient;func_73029_E(III)V"
+      "doVoidFogParticles(III)V": "func_73029_E(III)V"
     },
     "baritone/launch/mixins/MixinChunkProviderClient": {
-      "unloadChunk": "Lnet/minecraft/world/chunk/ChunkProviderClient;func_73156_b(II)Z"
+      "unloadChunk(II)Z": "func_73156_b(II)Z"
     }
   },
   "data": {
     "searge": {
       "baritone/launch/mixins/MixinMinecraft": {
-        "thePlayer": "Lnet/minecraft/client/Minecraft;field_71439_g:Lnet/minecraft/client/entity/EntityPlayerSP;",
-        "theWorld": "Lnet/minecraft/client/Minecraft;field_71441_e:Lnet/minecraft/client/multiplayer/WorldClient;",
-        "currentScreen": "Lnet/minecraft/client/Minecraft;field_71462_r:Lnet/minecraft/client/gui/GuiScreen;",
-        "startGame": "Lnet/minecraft/client/Minecraft;func_71384_a()V",
-        "runTick": "Lnet/minecraft/client/Minecraft;func_71407_l()V",
-        "loadWorld": "Lnet/minecraft/client/Minecraft;func_71353_a(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V"
+        "thePlayer": "field_71439_g",
+        "theWorld": "field_71441_e",
+        "currentScreen": "field_71462_r",
+        "leftClickCounter": "field_71429_W",
+        "startGame": "func_71384_a",
+        "runTick": "func_71407_l",
+        "loadWorld(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V": "func_71353_a(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V",
+        "Lnet/minecraft/client/multiplayer/WorldClient;updateEntities()V": "Lnet/minecraft/client/multiplayer/WorldClient;func_71403_a()V"
       },
       "baritone/launch/mixins/MixinEntity": {
-        "posX": "Lnet/minecraft/entity/Entity;field_70165_t:D",
-        "posY": "Lnet/minecraft/entity/Entity;field_70163_u:D",
-        "posZ": "Lnet/minecraft/entity/Entity;field_70161_v:D",
-        "rotationYaw": "Lnet/minecraft/entity/Entity;field_70177_z:F",
-        "rotationPitch": "Lnet/minecraft/entity/Entity;field_70125_A:F",
-        "moveEntity": "Lnet/minecraft/entity/Entity;func_70091_d(DDD)V"
+        "posX": "field_70165_t",
+        "posY": "field_70163_u",
+        "posZ": "field_70161_v",
+        "rotationYaw": "field_70177_z",
+        "rotationPitch": "field_70125_A",
+        "moveEntity(DDD)V": "func_70091_d(DDD)V"
       },
       "baritone/launch/mixins/MixinEntityLivingBase": {
-        "moveEntityWithHeading": "Lnet/minecraft/entity/EntityLivingBase;func_70612_e(FF)V",
-        "jump": "Lnet/minecraft/entity/EntityLivingBase;func_70664_aR()V"
+        "moveEntityWithHeading(FF)V": "func_70612_e(FF)V",
+        "jump()V": "func_70664_aR()V"
       },
       "baritone/launch/mixins/MixinEntityPlayerSP": {
-        "onUpdate": "Lnet/minecraft/client/entity/EntityPlayerSP;func_70071_h_()V",
-        "sendChatMessage": "Lnet/minecraft/client/entity/EntityPlayerSP;func_71165_d(Ljava/lang/String;)V"
+        "onUpdate()V": "func_70071_h_()V",
+        "sendChatMessage(Ljava/lang/String;)V": "func_71165_d(Ljava/lang/String;)V"
       },
       "baritone/launch/mixins/MixinEntityRenderer": {
-        "orientCamera": "Lnet/minecraft/client/renderer/EntityRenderer;func_78467_g(F)V",
-        "updateCameraAndRender": "Lnet/minecraft/client/renderer/EntityRenderer;func_181560_a(FJ)V"
+        "orientCamera": "func_78467_g",
+        "updateCameraAndRender(FJ)V": "func_181560_a(FJ)V"
       },
       "baritone/launch/mixins/MixinNetHandlerPlayClient": {
-        "handlePlayerPosLook": "Lnet/minecraft/client/network/NetHandlerPlayClient;func_147258_a(Lnet/minecraft/network/play/server/S08PacketPlayerPosLook;)V",
-        "handleChunkData": "Lnet/minecraft/client/network/NetHandlerPlayClient;func_147269_a(Lnet/minecraft/network/play/server/S21PacketChunkData;)V"
+        "handlePlayerPosLook(Lnet/minecraft/network/play/server/S08PacketPlayerPosLook;)V": "func_147258_a(Lnet/minecraft/network/play/server/S08PacketPlayerPosLook;)V",
+        "handleChunkData(Lnet/minecraft/network/play/server/S21PacketChunkData;)V": "func_147269_a(Lnet/minecraft/network/play/server/S21PacketChunkData;)V"
       },
       "baritone/launch/mixins/MixinNetworkManager": {
-        "sendPacket": "Lnet/minecraft/network/NetworkManager;func_179290_a(Lnet/minecraft/network/Packet;)V"
+        "sendPacket(Lnet/minecraft/network/Packet;)V": "func_179290_a(Lnet/minecraft/network/Packet;)V"
       },
       "baritone/launch/mixins/MixinPlayerControllerMP": {
-        "onPlayerDamageBlock": "Lnet/minecraft/client/multiplayer/PlayerControllerMP;func_180512_a(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
-        "clickBlock": "Lnet/minecraft/client/multiplayer/PlayerControllerMP;func_180511_b(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"
+        "onPlayerDamageBlock(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z": "func_180512_a(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z",
+        "clickBlock(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z": "func_180511_b(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)Z"
       },
       "baritone/launch/mixins/MixinWorldClient": {
-        "doVoidFogParticles": "Lnet/minecraft/client/multiplayer/WorldClient;func_73029_E(III)V"
+        "doVoidFogParticles(III)V": "func_73029_E(III)V"
       },
       "baritone/launch/mixins/MixinChunkProviderClient": {
-        "unloadChunk": "Lnet/minecraft/world/chunk/ChunkProviderClient;func_73156_b(II)Z"
+        "unloadChunk(II)Z": "func_73156_b(II)Z"
       }
     }
   }
