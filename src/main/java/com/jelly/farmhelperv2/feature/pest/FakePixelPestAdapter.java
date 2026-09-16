@@ -72,7 +72,7 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
                             break;
                         }
                     }
-                    if (!isPest && (entityName.contains("ൠ") || nameLower.contains("hp") || nameLower.contains("lvl"))) {
+                    if (!isPest && entityName.contains("ൠ")) {
                         isPest = true;
                     }
                 }
@@ -94,6 +94,11 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
                     if (realEntity != null) {
                         targetEntity = realEntity;
                     }
+                }
+
+                // Garden boundary check (plots grid is bounded within X,Z in [-240, 240])
+                if (Math.abs(targetEntity.posX) > 240 || Math.abs(targetEntity.posZ) > 240) {
+                    continue;
                 }
 
                 BlockPos pos = new BlockPos(targetEntity.posX, targetEntity.posY, targetEntity.posZ);

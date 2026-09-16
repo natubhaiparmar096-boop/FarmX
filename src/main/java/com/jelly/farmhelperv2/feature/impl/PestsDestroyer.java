@@ -1293,6 +1293,9 @@ public class PestsDestroyer implements IFeature {
         double d1 = Minecraft.getMinecraft().getRenderManager().viewerPosY;
         double d2 = Minecraft.getMinecraft().getRenderManager().viewerPosZ;
         for (int plotNumber : GameStateHandler.getInstance().getInfestedPlots()) {
+            if (plotNumber < 0 || plotNumber > 24) {
+                continue;
+            }
             List<Tuple<Integer, Integer>> chunks = PlotUtils.getPlotChunksBasedOnNumber(plotNumber);
             if (chunks.isEmpty()) {
                 continue;
