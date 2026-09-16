@@ -507,21 +507,9 @@ public class PestsDestroyer implements IFeature {
                 delayClock.schedule((long) (200 + Math.random() * 200));
                 break;
             case SWAP_ARMOR:
-                if (FarmHelperConfig.pestSwapArmorBefore) {
-                    currentSlot = FarmHelperConfig.pestArmorSlot0;
-                    if (finishing) {
-                        currentSlot = FarmHelperConfig.pestArmorSlot1;
-                    }
-                    if (AutoWardrobe.activeSlot != currentSlot) {
-                        AutoWardrobe.instance.swapTo(currentSlot, FarmHelperConfig.pestSwapEquipments ? Arrays.asList(FarmHelperConfig.pestSwapEq.split("\\|")) : Collections.emptyList());
-                    }
-                }
                 state = States.ARMOR_SWAP_VERIFY;
                 break;
             case ARMOR_SWAP_VERIFY:
-                if (AutoWardrobe.instance.isRunning()) {
-                    return;
-                }
                 if (finishing) {
                     state = States.FINISH;
                 } else {

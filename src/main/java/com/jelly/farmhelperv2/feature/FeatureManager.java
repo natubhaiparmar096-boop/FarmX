@@ -29,7 +29,6 @@ public class FeatureManager {
                 DesyncChecker.getInstance(),
                 LagDetector.getInstance(),
                 AutoSprayonator.getInstance(),
-                AutoWardrobe.getInstance(),
                 PestsDestroyer.getInstance(),
                 PestFarmer.getInstance(),
                 PestsDestroyerOnTheTrack.getInstance(),

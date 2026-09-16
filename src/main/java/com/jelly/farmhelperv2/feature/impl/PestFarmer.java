@@ -170,20 +170,9 @@ public class PestFarmer implements IFeature {
             long timeDiff = System.currentTimeMillis() - pestSpawnTime;
             if (timeDiff >= FarmHelperConfig.pestFarmingWaitTime * 1000L) {
                 pestSpawned = false;
-                if (AutoWardrobe.activeSlot != FarmHelperConfig.pestFarmingBiohazardSlot) {
-                    LogUtils.sendDebug("Swapping to " + FarmHelperConfig.pestFarmingBiohazardSlot);
-                    swapTo = FarmHelperConfig.pestFarmingBiohazardSlot;
-                    if (FarmHelperConfig.pestFarmingSwapEq) {
-                        equipments = Arrays.asList(FarmHelperConfig.pestFarmingEq1.split("\\|"));
-                    }
-                    mainState = MainState.SWAP_N_START;
-                    start();
-                }
-            } else if (AutoWardrobe.activeSlot != FarmHelperConfig.pestFarmingFermentoSlot) {
-                LogUtils.sendDebug("Swapping to " + FarmHelperConfig.pestFarmingFermentoSlot);
-                swapTo = FarmHelperConfig.pestFarmingFermentoSlot;
+                swapTo = FarmHelperConfig.pestFarmingBiohazardSlot;
                 if (FarmHelperConfig.pestFarmingSwapEq) {
-                    equipments = Arrays.asList(FarmHelperConfig.pestFarmingEq0.split("\\|"));
+                    equipments = Arrays.asList(FarmHelperConfig.pestFarmingEq1.split("\\|"));
                 }
                 mainState = MainState.SWAP_N_START;
                 start();
@@ -249,13 +238,7 @@ public class PestFarmer implements IFeature {
         case SWAP_N_START: {
             switch (state) {
                 case SWAPPING:
-                    AutoWardrobe.instance.swapTo(swapTo, equipments);
-                    setState(State.WAITING_FOR_SWAP, 0);
-                    break;
                 case WAITING_FOR_SWAP:
-                    if (AutoWardrobe.instance.isRunning()) {
-                        return;
-                    }
                     if (pestSpawned && ((FarmHelperConfig.pestFarmerKillPests && GameStateHandler.getInstance().getPestsCount() >= FarmHelperConfig.pestFarmerStartKillAt) || FarmHelperConfig.pestFarmingSetSpawn)) {
                         setState(State.SETTING_SPAWN, 0);
                     } else {
