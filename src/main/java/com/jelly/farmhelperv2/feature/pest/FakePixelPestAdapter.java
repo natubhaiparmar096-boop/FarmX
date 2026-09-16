@@ -85,16 +85,28 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
             }
 
             if (isPest) {
-                BlockPos pos = new BlockPos(entity.posX, entity.posY, entity.posZ);
+                Entity targetEntity = entity;
+                if (entity instanceof EntityArmorStand) {
+                    Entity realEntity = com.jelly.farmhelperv2.util.PlayerUtils.getEntityCuttingOtherEntity(
+                            entity,
+                            (e) -> !(e instanceof EntityArmorStand)
+                    );
+                    if (realEntity != null) {
+                        targetEntity = realEntity;
+                    }
+                }
+
+                BlockPos pos = new BlockPos(targetEntity.posX, targetEntity.posY, targetEntity.posZ);
                 PlotUtils.Plot plot = PlotUtils.getPlotNumberBasedOnLocation(pos);
                 int plotNum = plot != null && plot.number != null ? plot.number : -1;
+                double realDist = mc.thePlayer.getDistanceToEntity(targetEntity);
 
                 PestInfo info = new PestInfo(
-                        entity,
+                        targetEntity,
                         detectedType,
                         pos,
-                        dist,
-                        entity.isEntityAlive(),
+                        realDist,
+                        targetEntity.isEntityAlive(),
                         now,
                         plotNum
                 );

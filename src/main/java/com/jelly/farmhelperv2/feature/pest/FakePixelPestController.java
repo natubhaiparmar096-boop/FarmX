@@ -7,6 +7,8 @@ import com.jelly.farmhelperv2.feature.IFeature;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.handler.RotationHandler;
+import com.jelly.farmhelperv2.pathfinder.FlyPathFinderExecutor;
+import com.jelly.farmhelperv2.util.InventoryUtils;
 import com.jelly.farmhelperv2.util.KeyBindUtils;
 import com.jelly.farmhelperv2.util.LogUtils;
 import com.jelly.farmhelperv2.util.PlayerUtils;
@@ -194,11 +196,13 @@ public class FakePixelPestController implements IFeature {
 
             case MOVE_TO_PEST:
                 if (targetPest == null || adapter.isPestRemoved(targetPest)) {
+                    FlyPathFinderExecutor.getInstance().stop();
                     currentState = State.CONFIRM_PEST_DEAD;
                     break;
                 }
                 double dist = mc.thePlayer.getDistanceToEntity(targetPest.getEntity());
                 if (dist <= FarmHelperConfig.pestVacuumRange) {
+                    FlyPathFinderExecutor.getInstance().stop();
                     KeyBindUtils.stopMovement();
                     currentState = State.ATTACK_VACUUM;
                     attackTimer.schedule(100);
@@ -206,6 +210,7 @@ public class FakePixelPestController implements IFeature {
                 } else {
                     rotateAndMoveToPest(targetPest.getEntity());
                     if (stateTimer.passed()) {
+                        FlyPathFinderExecutor.getInstance().stop();
                         handleFailure("Timeout moving to pest");
                     }
                 }
@@ -213,6 +218,7 @@ public class FakePixelPestController implements IFeature {
 
             case ATTACK_VACUUM:
                 if (targetPest == null || adapter.isPestRemoved(targetPest)) {
+                    FlyPathFinderExecutor.getInstance().stop();
                     currentState = State.CONFIRM_PEST_DEAD;
                     break;
                 }
@@ -286,7 +292,11 @@ public class FakePixelPestController implements IFeature {
     private void rotateAndMoveToPest(Entity target) {
         if (target == null) return;
         rotateToPest(target);
-        KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindForward, true);
+        if (!FlyPathFinderExecutor.getInstance().isRunning()) {
+            FlyPathFinderExecutor.getInstance().setSprinting(FarmHelperConfig.sprintWhileFlying);
+            FlyPathFinderExecutor.getInstance().setUseAOTV(InventoryUtils.hasItemInHotbar("Aspect of the Void", "Aspect of the End"));
+            FlyPathFinderExecutor.getInstance().findPath(target, true, true, 2.5f, true);
+        }
     }
 
     private void rotateToPest(Entity target) {
@@ -299,6 +309,7 @@ public class FakePixelPestController implements IFeature {
     }
 
     private void restoreState() {
+        FlyPathFinderExecutor.getInstance().stop();
         KeyBindUtils.stopMovement();
         if (originalHotbarSlot != -1 && mc.thePlayer != null) {
             mc.thePlayer.inventory.currentItem = originalHotbarSlot;
