@@ -25,20 +25,34 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
             "mosquito", "moth", "rat", "slug", "praying mantis", "firefly", "dragonfly", "pest"
     );
 
+    // Full base64 skin values (same as PestsDestroyer) — these appear inside getTagCompound().toString()
     public static final List<net.minecraft.util.Tuple<String, String>> PEST_TEXTURES = Arrays.asList(
-            new net.minecraft.util.Tuple<>("Beetle", "70a1e836bf1968b2eaa4837227a19204f17295d870ee9e754bd6b6d60ddeed3c"),
-            new net.minecraft.util.Tuple<>("Cricket", "a24c69f96ce556221e195c8ef2bfad71ebf7f95f5ae914a484a8d0ec21672674"),
-            new net.minecraft.util.Tuple<>("Earthworm", "6403ba4027a333d8d2fd32ab59d1cfdbaa7d908d80d2381db2a69cbe65450ad8"),
-            new net.minecraft.util.Tuple<>("Fly", "9d90e777826a52461368e26d1b2e19bfa1ba582d602483e545f4124d0f731842"),
-            new net.minecraft.util.Tuple<>("Locust", "4b274a482a32db1ea78fb98060b0c2fa4a373cbd18a68eddddeea7419455a59cda9"),
-            new net.minecraft.util.Tuple<>("Mite", "be6baf6431a9daa2ca604d5a3c26e9a761d5952f0817174a4fe0b764616e21ff"),
-            new net.minecraft.util.Tuple<>("Mosquito", "52a9fe05bc663efcd12e56a3ccc5ec035bf577b78708548b6f4ffcf1d30eccfe"),
-            new net.minecraft.util.Tuple<>("Moth", "65485c4b34e5b5470be94de100e61f7816f81bc5a11dfdf0eccf890172da5d0a"),
-            new net.minecraft.util.Tuple<>("Rat", "a8abb471db0ab78703011979dc8b40798a941f3a4dec3ec61cbeec2af8cffe8"),
-            new net.minecraft.util.Tuple<>("Slug", "7a79d0fd677b54530961117ef84adc206e2cc5045c1344d61d776bf8ac2fe1ba"),
-            new net.minecraft.util.Tuple<>("Praying Mantis", "1e04bb6367caa4e88f5fd0ee80f0745d137a6060223dbbc42a16471fdf64bb83"),
-            new net.minecraft.util.Tuple<>("Firefly", "4ce79e90adf34718f313ec24d6c6135b69b3788c618498446ccc83ca640cb14"),
-            new net.minecraft.util.Tuple<>("Dragonfly", "254aff4c0b2dce3a672349cc0ee9e6f3a9deebe4b3556e84611eca250a7821bf")
+            new net.minecraft.util.Tuple<>("Beetle",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTcyMzE3OTc4OTkzNCwKICAicHJvZmlsZUlkIiA6ICJlMjc5NjliODYyNWY0NDg1YjkyNmM5NTBhMDljMWMwMSIsCiAgInByb2ZpbGVOYW1lIiA6ICJLRVZJTktFTE9LRSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS83MGExZTgzNmJmMTk2OGIyZWFhNDgzNzIyN2ExOTIwNGYxNzI5NWQ4NzBlZTllNzU0YmQ2YjZkNjBkZGJlZDNjIgogICAgfQogIH0KfQ"),
+            new net.minecraft.util.Tuple<>("Cricket",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTcyMzE3OTgxMTI2NCwKICAicHJvZmlsZUlkIiA6ICJjZjc4YzFkZjE3ZTI0Y2Q5YTIxYmU4NWQ0NDk5ZWE4ZiIsCiAgInByb2ZpbGVOYW1lIiA6ICJNYXR0c0FybW9yU3RhbmRzIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2EyNGM2OWY5NmNlNTU2MjIxZTE5NWM4ZWYyYmZhZDcxZWJmN2Y5NWY1YWU5MTRhNDg0YThkMGVjMjE2NzI2NzQiCiAgICB9CiAgfQp9"),
+            new net.minecraft.util.Tuple<>("Earthworm",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTY5NzQ3MDQ1OTc0NywKICAicHJvZmlsZUlkIiA6ICIyNTBlNzc5MjZkNDM0ZDIyYWM2MTQ4N2EyY2M3YzAwNCIsCiAgInByb2ZpbGVOYW1lIiA6ICJMdW5hMTIxMDUiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjQwM2JhNDAyN2EzMzNkOGQyZmQzMmFiNTlkMWNmZGJhYTdkOTA4ZDgwZDIzODFkYjJhNjljYmU2NTQ1MGFkOCIKICAgIH0KICB9Cn0"),
+            new net.minecraft.util.Tuple<>("Fly",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTY5Njk0NTA2MzI4MSwKICAicHJvZmlsZUlkIiA6ICJjN2FmMWNkNjNiNTE0Y2YzOGY4NWQ2ZDUxNzhjYThlNCIsCiAgInByb2ZpbGVOYW1lIiA6ICJtb25zdGVyZ2FtZXIzMTUiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWQ5MGU3Nzc4MjZhNTI0NjEzNjhlMjZkMWIyZTE5YmZhMWJhNTgyZDYwMjQ4M2U1NDVmNDEyNGQwZjczMTg0MiIKICAgIH0KICB9Cn0"),
+            new net.minecraft.util.Tuple<>("Locust",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTY5NzU1NzA3NzAzNywKICAicHJvZmlsZUlkIiA6ICI0YjJlMGM1ODliZjU0ZTk1OWM1ZmJlMzg5MjQ1MzQzZSIsCiAgInByb2ZpbGVOYW1lIiA6ICJfTmVvdHJvbl8iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGIyNGE0ODJhMzJkYjFlYTc4ZmI5ODA2MGIwYzJmYTRhMzczY2JkMThhNjhlZGRkZWI3NDE5NDU1YTU5Y2RhOSIKICAgIH0KICB9Cn0"),
+            new net.minecraft.util.Tuple<>("Mite",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTY5Njg3MDQxOTcyNSwKICAicHJvZmlsZUlkIiA6ICJkYjYzNWE3MWI4N2U0MzQ5YThhYTgwOTMwOWFhODA3NyIsCiAgInByb2ZpbGVOYW1lIiA6ICJFbmdlbHMxNzQiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmU2YmFmNjQzMWE5ZGFhMmNhNjA0ZDVhM2MyNmU5YTc2MWQ1OTUyZjA4MTcxNzRhNGZlMGI3NjQ2MTZlMjFmZiIKICAgIH0KICB9Cn0"),
+            new net.minecraft.util.Tuple<>("Mosquito",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTY5Njk0NTAyOTQ2MSwKICAicHJvZmlsZUlkIiA6ICI3NTE0NDQ4MTkxZTY0NTQ2OGM5NzM5YTZlMzk1N2JlYiIsCiAgInByb2ZpbGVOYW1lIiA6ICJUaGFua3NNb2phbmciLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTJhOWZlMDViYzY2M2VmY2QxMmU1NmEzY2NjNWVjMDM1YmY1NzdiNzg3MDg1NDhiNmY0ZmZjZjFkMzBlY2NmZSIKICAgIH0KICB9Cn0"),
+            new net.minecraft.util.Tuple<>("Moth",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTY5Njg3MDQwNTk1NCwKICAicHJvZmlsZUlkIiA6ICJiMTUyZDlhZTE1MTM0OWNmOWM2NmI0Y2RjMTA5NTZjOCIsCiAgInByb2ZpbGVOYW1lIiA6ICJNaXNxdW90aCIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS82NTQ4NWM0YjM0ZTViNTQ3MGJlOTRkZTEwMGU2MWY3ODE2ZjgxYmM1YTExZGZkZjBlY2NmODkwMTcyZGE1ZDBhIgogICAgfQogIH0KfQ"),
+            new net.minecraft.util.Tuple<>("Rat",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTYxODQxOTcwMTc1MywKICAicHJvZmlsZUlkIiA6ICI3MzgyZGRmYmU0ODU0NTVjODI1ZjkwMGY4OGZkMzJmOCIsCiAgInByb2ZpbGVOYW1lIiA6ICJCdUlJZXQiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYThhYmI0NzFkYjBhYjc4NzAzMDExOTc5ZGM4YjQwNzk4YTk0MWYzYTRkZWMzZWM2MWNiZWVjMmFmOGNmZmU4IiwKICAgICAgIm1ldGFkYXRhIiA6IHsKICAgICAgICAibW9kZWwiIDogInNsaW0iCiAgICAgIH0KICAgIH0KICB9Cn0="),
+            new net.minecraft.util.Tuple<>("Slug",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTY5NzQ3MDQ0MzA4MiwKICAicHJvZmlsZUlkIiA6ICJkOGNkMTNjZGRmNGU0Y2IzODJmYWZiYWIwOGIyNzQ4OSIsCiAgInByb2ZpbGVOYW1lIiA6ICJaYWNoeVphY2giLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2E3OWQwZmQ2NzdiNTQ1MzA5NjExMTdlZjg0YWRjMjA2ZTJjYzUwNDVjMTM0NGQ2MWQ3NzZiZjhhYzJmZTFiYSIKICAgIH0KICB9Cn0"),
+            new net.minecraft.util.Tuple<>("Praying Mantis",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTc2MDQ1MDQxOTYxMiwKICAicHJvZmlsZUlkIiA6ICI0OWIzODUyNDdhMWY0NTM3YjBmN2MwZTFmMTVjMTc2NCIsCiAgInByb2ZpbGVOYW1lIiA6ICJiY2QyMDMzYzYzZWM0YmY4IiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzFlMDRiYjYzNjdjYWE0ZTg4ZjVmZDBlZTgwZjA3NDVkMTM3YTYwNjAyMjNkYmJjNDJhMTY0NzFmZGY2NGJiODMiLAogICAgICAibWV0YWRhdGEiIDogewogICAgICAgICJtb2RlbCIgOiAic2xpbSIKICAgICAgfQogICAgfQogIH0KfQ=="),
+            new net.minecraft.util.Tuple<>("Firefly",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTc2MDQ1MDQyMjEzNiwKICAicHJvZmlsZUlkIiA6ICIzNDY4Y2VjMWFlOTY0YWRmYWQyNjEzMGEwZGQ0NjRkYyIsCiAgInByb2ZpbGVOYW1lIiA6ICJzdXJlZWxta18iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGNlNzllOTBhZGYzNDcxOGYzMTNlYzI0ZDZjNjEzNWI2OWIzNzg4YzYxODQ5ODQ0NmNjYzgzY2E2NDBjMGIxNCIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9"),
+            new net.minecraft.util.Tuple<>("Dragonfly",
+                    "ewogICJ0aW1lc3RhbXAiIDogMTc2MDQ1MDQxODQzNywKICAicHJvZmlsZUlkIiA6ICIwNjY5Y2E1MGYyZWU0NTQxODhlYWQ3YTM3NTkzNDRlMCIsCiAgInByb2ZpbGVOYW1lIiA6ICJDcjR6eWNsb3duVFYiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjU0YWZmNGMwYjJkY2UzYTY3MjM0OWNjMGVlOWU2ZjNhOWRlZWJlNGIzNTU2ZTg0NjExZWNhMjUwYTc4MjFiZiIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9")
     );
 
     @Override
@@ -65,7 +79,8 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
         }
 
         long now = System.currentTimeMillis();
-        double maxDist = FarmHelperConfig.pestMaxDetectionDistance;
+        // Check all loaded entities across the entire garden (up to 256 blocks)
+        double maxDist = Math.max(FarmHelperConfig.pestMaxDetectionDistance, 256.0);
 
         for (Entity entity : mc.theWorld.loadedEntityList) {
             if (entity == null || entity.isDead) continue;
@@ -74,12 +89,17 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
             if (dist > maxDist) continue;
 
             String entityName = entity.getCustomNameTag();
-            String nameLower = entityName != null ? entityName.toLowerCase(Locale.ENGLISH) : "";
+            String cleanName = entityName != null ? net.minecraft.util.StringUtils.stripControlCodes(entityName).toLowerCase(Locale.ENGLISH) : "";
 
             boolean isPest = false;
             String detectedType = "Pest";
 
-            if (entity instanceof EntityArmorStand) {
+            // Check if PestsDestroyer already identified this entity
+            if (com.jelly.farmhelperv2.feature.impl.PestsDestroyer.getInstance().getPestsLocations().contains(entity)) {
+                isPest = true;
+            }
+
+            if (!isPest && entity instanceof EntityArmorStand) {
                 EntityArmorStand stand = (EntityArmorStand) entity;
                 // 1. Check skull texture in helmet slot (slot 4)
                 ItemStack helm = stand.getEquipmentInSlot(4);
@@ -95,20 +115,20 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
                 }
 
                 // 2. Check custom name tag if not already identified
-                if (!isPest && entityName != null && !entityName.isEmpty()) {
+                if (!isPest && !cleanName.isEmpty()) {
                     for (String pestName : KNOWN_PEST_NAMES) {
-                        if (nameLower.contains(pestName)) {
+                        if (cleanName.contains(pestName)) {
                             isPest = true;
                             detectedType = capitalize(pestName);
                             break;
                         }
                     }
-                    if (!isPest && (entityName.contains("ൠ") || entityName.contains("Pest"))) {
+                    if (!isPest && (cleanName.contains("ൠ") || cleanName.contains("pest"))) {
                         isPest = true;
                         detectedType = "Pest";
                     }
                 }
-            } else {
+            } else if (!isPest) {
                 String className = entity.getClass().getSimpleName().toLowerCase(Locale.ENGLISH);
                 if (className.contains("silverfish") || className.contains("bat")) {
                     isPest = true;
@@ -123,7 +143,7 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
                             entity,
                             (e) -> !(e instanceof EntityArmorStand)
                     );
-                    if (realEntity != null) {
+                    if (realEntity != null && !realEntity.isDead) {
                         targetEntity = realEntity;
                     }
                 }
@@ -151,12 +171,15 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
                         detectedType,
                         pos,
                         realDist,
-                        targetEntity.isEntityAlive(),
+                        !targetEntity.isDead,
                         now,
                         plotNum
                 );
                 detected.add(info);
             }
+        }
+        if (FarmHelperConfig.pestDebugLogging) {
+            com.jelly.farmhelperv2.util.LogUtils.sendDebug("[Pest Adapter] Scanned " + mc.theWorld.loadedEntityList.size() + " loaded entities, found " + detected.size() + " pests.");
         }
         return detected;
     }

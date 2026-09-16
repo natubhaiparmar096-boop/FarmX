@@ -244,8 +244,15 @@ public class FakePixelPestController implements IFeature {
                 livePests.removeIf(p -> p.getEntity() == null || p.getEntity().isDead || killedEntities.contains(p.getEntity()) || !p.isAlive());
 
                 if (livePests.isEmpty()) {
+                    if (retryCount < 3) {
+                        retryCount++;
+                        logDebug("Scan attempt " + retryCount + " found 0 pests, retrying scan in 600ms...");
+                        stateTimer.schedule(600);
+                        break;
+                    }
                     logDebug("No valid target pests remaining.");
                     currentState = State.RETURN_TO_HOME;
+                    break;
                 } else {
                     livePests.sort(Comparator.comparingDouble(PestInfo::getDistance));
                     targetPest = livePests.get(0);
@@ -371,7 +378,11 @@ public class FakePixelPestController implements IFeature {
             case RESUME_FARMING:
                 restoreState();
                 if (manualMode) {
-                    LogUtils.sendSuccess("[Pest Controller] Manual pest hunt completed successfully!");
+                    if (killedEntities.isEmpty()) {
+                        LogUtils.sendWarning("[Pest Controller] Manual pest hunt ended — no pests could be detected in loaded chunks.");
+                    } else {
+                        LogUtils.sendSuccess("[Pest Controller] Manual pest hunt completed successfully! Eliminated " + killedEntities.size() + " pests.");
+                    }
                     stop();
                 } else {
                     if (MacroHandler.getInstance().isMacroToggled()) {
