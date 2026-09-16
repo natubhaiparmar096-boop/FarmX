@@ -102,7 +102,6 @@ dependencies {
 
 tasks.withType(JavaCompile::class) {
     options.encoding = "UTF-8"
-    options.compilerArgs.addAll(listOf("-proc:full"))
 }
 
 tasks.withType(Jar::class) {
