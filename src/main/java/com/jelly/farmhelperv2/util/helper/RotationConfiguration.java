@@ -1,17 +1,10 @@
 package com.jelly.farmhelperv2.util.helper;
 
 import com.jelly.farmhelperv2.handler.RotationHandler;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import net.minecraft.client.Minecraft;
 
 import java.util.Optional;
 
-
-@Getter
-@Setter
-@Accessors(fluent = true)
 public class RotationConfiguration {
     private final Minecraft mc = Minecraft.getMinecraft();
     private Rotation from;

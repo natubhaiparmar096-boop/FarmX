@@ -1,13 +1,11 @@
 package com.jelly.farmhelperv2.event;
 
-import lombok.Getter;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 import net.minecraftforge.fml.common.eventhandler.Event;
 
 @Cancelable
-@Getter
 public class SpawnParticleEvent extends Event {
 
     EnumParticleTypes particleTypes;
@@ -20,6 +18,16 @@ public class SpawnParticleEvent extends Event {
     double yOffset;
     double zOffset;
     int[] params;
+
+    public EnumParticleTypes getParticleTypes() { return particleTypes; }
+    public boolean isLongDistance() { return isLongDistance; }
+    public double getXCoord() { return xCoord; }
+    public double getYCoord() { return yCoord; }
+    public double getZCoord() { return zCoord; }
+    public double getXOffset() { return xOffset; }
+    public double getYOffset() { return yOffset; }
+    public double getZOffset() { return zOffset; }
+    public int[] getParams() { return params; }
 
     public SpawnParticleEvent(
             EnumParticleTypes particleTypes,

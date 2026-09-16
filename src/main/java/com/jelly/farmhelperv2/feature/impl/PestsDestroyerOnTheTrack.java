@@ -43,10 +43,11 @@ public class PestsDestroyerOnTheTrack implements IFeature {
 
     private boolean isRunning = false;
 
-    @Getter
     private final Clock delayStart = new Clock();
-    @Getter
     private final Clock stuckTimer = new Clock();
+
+    public Clock getDelayStart() { return delayStart; }
+    public Clock getStuckTimer() { return stuckTimer; }
 
     private Entity currentTarget = null;
 
@@ -243,6 +244,6 @@ public class PestsDestroyerOnTheTrack implements IFeature {
         return false;
     }
 
-    @Getter
     private final CopyOnWriteArrayList<Tuple<Entity, Double>> entities = new CopyOnWriteArrayList<>();
+    public CopyOnWriteArrayList<Tuple<Entity, Double>> getEntities() { return entities; }
 }

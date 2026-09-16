@@ -1,7 +1,5 @@
 package com.jelly.farmhelperv2.util.helper;
 
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -24,9 +22,9 @@ public class PlayerSimulation {
     public double motionX;
     public double motionY;
     public double motionZ;
-    @Getter
-    @Setter
     private AxisAlignedBB entityBoundingBox;
+    public AxisAlignedBB getEntityBoundingBox() { return entityBoundingBox; }
+    public void setEntityBoundingBox(AxisAlignedBB entityBoundingBox) { this.entityBoundingBox = entityBoundingBox; }
 
     public boolean onGround;
 

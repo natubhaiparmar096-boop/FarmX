@@ -1,10 +1,5 @@
 package com.jelly.farmhelperv2.util.helper;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
 public class Rotation {
     private float yaw;
     private float pitch;

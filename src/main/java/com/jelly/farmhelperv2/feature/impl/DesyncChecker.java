@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 public class DesyncChecker implements IFeature {
     private static DesyncChecker instance;
     private final Minecraft mc = Minecraft.getMinecraft();
-    @Getter
     private final FifoQueue<ClickedBlockEvent> clickedBlocks = new FifoQueue<>(60);
+    public FifoQueue<ClickedBlockEvent> getClickedBlocks() { return clickedBlocks; }
     private boolean enabled = false;
 
     public static DesyncChecker getInstance() {

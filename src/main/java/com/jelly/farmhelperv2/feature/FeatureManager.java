@@ -18,9 +18,10 @@ public class FeatureManager {
         return instance;
     }
 
-    @Getter
-    @Setter
     private Set<IFeature> pauseExecutionFeatures = new HashSet<>();
+
+    public Set<IFeature> getPauseExecutionFeatures() { return pauseExecutionFeatures; }
+    public void setPauseExecutionFeatures(Set<IFeature> pauseExecutionFeatures) { this.pauseExecutionFeatures = pauseExecutionFeatures; }
 
     public List<IFeature> fillFeatures() {
         List<IFeature> featuresList = Arrays.asList(

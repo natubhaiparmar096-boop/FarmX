@@ -44,14 +44,15 @@ public class FailsafeManager {
 
     public final List<Failsafe> failsafes = new ArrayList<>();
     public Optional<Failsafe> triggeredFailsafe = Optional.empty();
-    @Getter
     public final ArrayList<Failsafe> emergencyQueue = new ArrayList<>();
-    @Getter
     public final Clock chooseEmergencyDelay = new Clock();
-    @Getter
     private final Clock onTickDelay = new Clock();
-    @Getter
     private final Clock restartMacroAfterFailsafeDelay = new Clock();
+
+    public ArrayList<Failsafe> getEmergencyQueue() { return emergencyQueue; }
+    public Clock getChooseEmergencyDelay() { return chooseEmergencyDelay; }
+    public Clock getOnTickDelay() { return onTickDelay; }
+    public Clock getRestartMacroAfterFailsafeDelay() { return restartMacroAfterFailsafeDelay; }
     public final RotationHandler rotation = RotationHandler.getInstance();
     private boolean sendingFailsafeInfo = false;
     public boolean swapItemDuringRecording = false;
@@ -92,9 +93,10 @@ public class FailsafeManager {
             "let me farm please and thank you", "let me farm and dont interrupt me please", "let me farm dude seriously",
             "admin dude let me farm okay?", "dude seriously let me farm in peace", "dude let me farm okay?"};
 
-    @Getter
-    @Setter
     private boolean hadEmergency = false;
+
+    public boolean isHadEmergency() { return hadEmergency; }
+    public void setHadEmergency(boolean hadEmergency) { this.hadEmergency = hadEmergency; }
 
     public FailsafeManager() {
         failsafes.addAll(

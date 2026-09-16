@@ -28,7 +28,6 @@ import java.util.*;
 /*
     Credits to Nirox for this superb class
 */
-@Getter
 public class AntiStuck implements IFeature {
     private static final Vec3[] BLOCK_SIDE_MULTIPLIERS = new Vec3[]{
             new Vec3(0.5, 0.5, 1), // South
@@ -42,15 +41,17 @@ public class AntiStuck implements IFeature {
 
     private UnstuckState unstuckState = UnstuckState.NONE;
     private boolean enabled = false;
-    @Setter
     private BlockPos intersectingBlockPos = null;
-    @Setter
     private BlockPos directionBlockPos = null;
     private final ArrayList<KeyBinding> oppositeKeys = new ArrayList<>();
-    @Getter
-    @Setter
     private int lagBackCounter = 0;
     private int unstuckTries = 0;
+
+    public UnstuckState getUnstuckState() { return unstuckState; }
+    public void setIntersectingBlockPos(BlockPos intersectingBlockPos) { this.intersectingBlockPos = intersectingBlockPos; }
+    public void setDirectionBlockPos(BlockPos directionBlockPos) { this.directionBlockPos = directionBlockPos; }
+    public int getLagBackCounter() { return lagBackCounter; }
+    public void setLagBackCounter(int lagBackCounter) { this.lagBackCounter = lagBackCounter; }
 
     public static AntiStuck getInstance() {
         if (instance == null) {

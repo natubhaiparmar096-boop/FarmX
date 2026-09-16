@@ -16,8 +16,6 @@ import com.jelly.farmhelperv2.util.*;
 import com.jelly.farmhelperv2.util.helper.Clock;
 import com.jelly.farmhelperv2.util.helper.Rotation;
 import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -26,7 +24,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("ALL")
-@Getter
 public abstract class AbstractMacro {
     public static final Minecraft mc = Minecraft.getMinecraft();
     private final RotationHandler rotation = RotationHandler.getInstance();
@@ -34,32 +31,49 @@ public abstract class AbstractMacro {
     private final Clock delayBeforeBreakTime = new Clock();
     private final Clock breakTime = new Clock();
 
-    @Setter
     public State currentState = State.NONE;
-    @Setter
     public State previousState = State.NONE;
-    @Setter
-    @Getter
     private boolean enabled = false;
-    @Setter
     private Optional<SavedState> savedState = Optional.empty();
-    @Setter
     private boolean restoredState = false;
-    @Setter
     private int layerY = 0;
     private Optional<Float> yaw = Optional.empty();
     private Optional<Float> pitch = Optional.empty();
-    @Setter
     private Optional<Float> closest90Deg = Optional.empty();
-    @Setter
     private boolean rotated = false;
-    @Setter
     private RewarpState rewarpState = RewarpState.NONE;
-    @Setter
     private WalkingDirection walkingDirection = WalkingDirection.X;
-    @Setter
     private int previousWalkingCoord = 0;
 
+    // Explicit getters (replacing class-level @Getter)
+    public RotationHandler getRotation() { return rotation; }
+    public Clock getRewarpDelay() { return rewarpDelay; }
+    public Clock getDelayBeforeBreakTime() { return delayBeforeBreakTime; }
+    public Clock getBreakTime() { return breakTime; }
+    public State getCurrentState() { return currentState; }
+    public State getPreviousState() { return previousState; }
+    public boolean isEnabled() { return enabled; }
+    public Optional<SavedState> getSavedState() { return savedState; }
+    public boolean isRestoredState() { return restoredState; }
+    public int getLayerY() { return layerY; }
+    public Optional<Float> getClosest90Deg() { return closest90Deg; }
+    public boolean isRotated() { return rotated; }
+    public RewarpState getRewarpState() { return rewarpState; }
+    public WalkingDirection getWalkingDirection() { return walkingDirection; }
+    public int getPreviousWalkingCoord() { return previousWalkingCoord; }
+
+    // Explicit setters (replacing field-level @Setter)
+    public void setCurrentState(State currentState) { this.currentState = currentState; }
+    public void setPreviousState(State previousState) { this.previousState = previousState; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public void setSavedState(Optional<SavedState> savedState) { this.savedState = savedState; }
+    public void setRestoredState(boolean restoredState) { this.restoredState = restoredState; }
+    public void setLayerY(int layerY) { this.layerY = layerY; }
+    public void setClosest90Deg(Optional<Float> closest90Deg) { this.closest90Deg = closest90Deg; }
+    public void setRotated(boolean rotated) { this.rotated = rotated; }
+    public void setRewarpState(RewarpState rewarpState) { this.rewarpState = rewarpState; }
+    public void setWalkingDirection(WalkingDirection walkingDirection) { this.walkingDirection = walkingDirection; }
+    public void setPreviousWalkingCoord(int previousWalkingCoord) { this.previousWalkingCoord = previousWalkingCoord; }
 
     public boolean isEnabledAndNoFeature() {
         return enabled && !FeatureManager.getInstance().shouldPauseMacroExecution();
@@ -421,14 +435,23 @@ public abstract class AbstractMacro {
         Z,
     }
 
-    @Getter
-    @Setter
     public static class SavedState {
         private State state;
         private float yaw;
         private float pitch;
         private Optional<Float> closest90Deg;
         private FarmHelperConfig.CropEnum crop;
+
+        public State getState() { return state; }
+        public void setState(State state) { this.state = state; }
+        public float getYaw() { return yaw; }
+        public void setYaw(float yaw) { this.yaw = yaw; }
+        public float getPitch() { return pitch; }
+        public void setPitch(float pitch) { this.pitch = pitch; }
+        public Optional<Float> getClosest90Deg() { return closest90Deg; }
+        public void setClosest90Deg(Optional<Float> closest90Deg) { this.closest90Deg = closest90Deg; }
+        public FarmHelperConfig.CropEnum getCrop() { return crop; }
+        public void setCrop(FarmHelperConfig.CropEnum crop) { this.crop = crop; }
 
         public SavedState(State state, float yaw, float pitch, float closest90Deg, FarmHelperConfig.CropEnum crop) {
             this.state = state;

@@ -1361,7 +1361,6 @@ public class FarmHelperConfig extends Config {
         C_NORMAL_TYPE
     }
 
-    @Getter
     public enum CropEnum {
         NONE("None"),
         CARROT("Carrot"),
@@ -1382,6 +1381,8 @@ public class FarmHelperConfig extends Config {
         ;
 
         final String localizedName;
+
+        public String getLocalizedName() { return localizedName; }
 
         CropEnum(String localizedName) {
             this.localizedName = localizedName;

@@ -1,20 +1,20 @@
 package com.jelly.farmhelperv2.util.helper;
 
 import cc.polyfrost.oneconfig.utils.Multithreading;
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 import java.util.concurrent.TimeUnit;
 
-@Getter
 public class TickTask {
     private static TickTask instance;
-    @Setter
     private Runnable task;
-    @Setter
     private Runnable callback;
+
+    public Runnable getTask() { return task; }
+    public void setTask(Runnable task) { this.task = task; }
+    public Runnable getCallback() { return callback; }
+    public void setCallback(Runnable callback) { this.callback = callback; }
 
     public static TickTask getInstance() {
         if (instance == null) {

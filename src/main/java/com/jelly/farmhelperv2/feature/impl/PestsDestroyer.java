@@ -80,27 +80,18 @@ public class PestsDestroyer implements IFeature {
             new Tuple<>("Dragonfly", "ewogICJ0aW1lc3RhbXAiIDogMTc2MDQ1MDQxODQzNywKICAicHJvZmlsZUlkIiA6ICIwNjY5Y2E1MGYyZWU0NTQxODhlYWQ3YTM3NTkzNDRlMCIsCiAgInByb2ZpbGVOYW1lIiA6ICJDcjR6eWNsb3duVFYiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjU0YWZmNGMwYjJkY2UzYTY3MjM0OWNjMGVlOWU2ZjNhOWRlZWJlNGIzNTU2ZTg0NjExZWNhMjUwYTc4MjFiZiIsCiAgICAgICJtZXRhZGF0YSIgOiB7CiAgICAgICAgIm1vZGVsIiA6ICJzbGltIgogICAgICB9CiAgICB9CiAgfQp9")
     );
     private Optional<PlotUtils.Plot> closestPlot = Optional.empty();
-    @Getter
     private final ArrayList<Entity> pestsLocations = new ArrayList<>();
     private final List<Entity> killedEntities = new ArrayList<>();
-    @Getter
     private final Clock stuckClock = new Clock();
-    @Getter
     private final Clock delayClock = new Clock();
     private final Clock delayBetweenBackTaps = new Clock();
     private final Clock delayBetweenFireworks = new Clock();
     private final Clock suffocateEscapeTimer = new Clock();
-    @Getter
     private Optional<Entity> currentEntityTarget = Optional.empty();
     private boolean enabled = false;
     private boolean preparing = false;
-    @Setter
-    @Getter
     public int cantReachPest = 0;
-    @Getter
-    @Setter
     private States state = States.IDLE;
-    @Getter
     private EscapeState escapeState = EscapeState.NONE;
     private Optional<BlockPos> preTpBlockPos = Optional.empty();
     private long lastFireworkTime = 0;
@@ -115,8 +106,18 @@ public class PestsDestroyer implements IFeature {
         put("InfiniVacuum™ Hooverius", 15F);
         put("InfiniVacuum", 12.5F);
     }};
-    @Getter
     private float currentVacuumRange = -1;
+
+    public ArrayList<Entity> getPestsLocations() { return pestsLocations; }
+    public Clock getStuckClock() { return stuckClock; }
+    public Clock getDelayClock() { return delayClock; }
+    public Optional<Entity> getCurrentEntityTarget() { return currentEntityTarget; }
+    public int getCantReachPest() { return cantReachPest; }
+    public void setCantReachPest(int cantReachPest) { this.cantReachPest = cantReachPest; }
+    public States getState() { return state; }
+    public void setState(States state) { this.state = state; }
+    public EscapeState getEscapeState() { return escapeState; }
+    public float getCurrentVacuumRange() { return currentVacuumRange; }
 
     private boolean gotRangeOfVacuum = false;
     private boolean isPlotObstructed = false;
