@@ -183,9 +183,6 @@ public class PestsDestroyer implements IFeature {
             enabled = true;
             preparing = false;
             LogUtils.sendWarning("[Pests Destroyer] Starting killing shitters!");
-            if (FarmHelperConfig.sendWebhookLogWhenPestDestroyerStartsStops) {
-                LogUtils.webhookLog("[Pests Destroyer]\\nStarting killing shitters!");
-            }
         }, MacroHandler.getInstance().isMacroToggled() ? (800 + (long) (Math.random() * 500)) : 0, TimeUnit.MILLISECONDS);
         IFeature.super.start();
     }
@@ -194,9 +191,6 @@ public class PestsDestroyer implements IFeature {
     public void stop() {
         if (enabled || preparing) {
             LogUtils.sendWarning("[Pests Destroyer] Stopping!");
-            if (FarmHelperConfig.sendWebhookLogWhenPestDestroyerStartsStops) {
-                LogUtils.webhookLog("[Pests Destroyer]\\nStopping!");
-            }
             if (GameStateHandler.getInstance().getPestsCount() == 0) {
                 pestsLocations.clear();
             }

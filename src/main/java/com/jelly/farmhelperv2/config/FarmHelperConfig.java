@@ -1068,11 +1068,6 @@ public class FarmHelperConfig extends Config {
             name = "Profit Calc Count Pest Drop", category = PESTS_DESTROYER, subcategory = "Profit Calculator"
     )
     public static boolean profitCalcCountPestDrop = true;
-
-    @Switch(
-            name = "Send Webhook Log When Pests Destroyer Starts/Stops", category = PESTS_DESTROYER, subcategory = "Webhook Logs"
-    )
-    public static boolean sendWebhookLogWhenPestDestroyerStartsStops = false;
     // </editor-fold>
 
     // <editor-fold desc="PEST FARMER">

@@ -398,19 +398,13 @@ public class AutoPestExchange implements IFeature {
                     ItemStack itemLore = vacuumSlot.getStack();
                     List<String> lore = InventoryUtils.getItemLore(itemLore);
                     if (lore.stream().anyMatch(l -> l.contains("Click to empty"))) {
-                        if (FarmHelperConfig.logAutoPestExchangeEvents)
-                            LogUtils.webhookLog("[Auto Pest Exchange] Emptied the vacuum!\\n" + GameStateHandler.getInstance().getPestsFromVacuum() + " pests in total!");
                         newState = NewState.WAIT_FOR_VACUUM;
                         LogUtils.sendWarning("[Auto Pest Exchange] Emptied the vacuum! " + GameStateHandler.getInstance().getPestsFromVacuum() + " pests in total!");
                         InventoryUtils.clickContainerSlot(vacuumSlot.slotNumber, InventoryUtils.ClickType.LEFT, InventoryUtils.ClickMode.PICKUP);
                     } else if (lore.stream().anyMatch(l -> l.contains("You've exchanged enough Pests"))) {
-                        if (FarmHelperConfig.logAutoPestExchangeEvents)
-                            LogUtils.webhookLog("[Auto Pest Exchange] Already emptied the vacuum!");
                         newState = NewState.END;
                         LogUtils.sendWarning("[Auto Pest Exchange] Already emptied the vacuum!");
                     } else {
-                        if (FarmHelperConfig.logAutoPestExchangeEvents)
-                            LogUtils.webhookLog("[Auto Pest Exchange] Failed to empty your vacuum!");
                         newState = NewState.END;
                         LogUtils.sendError("[Auto Pest Exchange] Failed to empty your vacuum!");
                     }
