@@ -105,6 +105,12 @@ public class GameStateHandler {
     private Optional<Integer> serverClosingSeconds = Optional.empty();
     @Getter
     private int speed = 0;
+    @Getter
+    private int pestsCount = 0;
+    @Getter
+    private int currentPlotPestsCount = 0;
+    @Getter
+    private List<Integer> infestedPlots = new ArrayList<>();
     @Setter
     private boolean updatedState = false;
 
@@ -190,6 +196,7 @@ public class GameStateHandler {
             if (cleanedLine.contains("Starts In")) {
                 nextJacobCropFound = 0;
             }
+            checkInfestedPlotsTabList(cleanedLine);
             if (cleanedLine.startsWith(" Spray: ")) {
                 sprayonatorState = cleanedLine.endsWith("None") ? BuffState.NOT_ACTIVE : BuffState.ACTIVE;
                 foundSpray = true;
@@ -613,7 +620,61 @@ public class GameStateHandler {
         return 0L;
     }
 
-    @Getter
+    @SubscribeEvent
+    public void onUpdateScoreboardList(UpdateScoreboardListEvent event) {
+        checkCurrentPests(event.cleanScoreboardLines);
+    }
+
+    private void checkCurrentPests(List<String> list) {
+        int pestsCountTemp = 0;
+        for (String cleanedLine : list) {
+            if (cleanedLine.contains("The Garden") && cleanedLine.contains("ൠ")) {
+                try {
+                    String[] split = cleanedLine.trim().split(" ");
+                    int temp = Integer.parseInt(split[split.length - 1].trim().replace("x", ""));
+                    pestsCount = temp;
+                    pestsCountTemp = temp;
+                } catch (NumberFormatException ignored) {
+                    pestsCount = 0;
+                }
+            }
+            if (cleanedLine.contains("Plot") && cleanedLine.contains("x")) {
+                String[] split = cleanedLine.trim().split(" ");
+                String last = split[split.length - 1];
+                try {
+                    currentPlotPestsCount = Integer.parseInt(last.replace("x", ""));
+                } catch (NumberFormatException ignored) {
+                    currentPlotPestsCount = 0;
+                }
+            } else if (cleanedLine.contains("Plot")) {
+                currentPlotPestsCount = 0;
+            }
+        }
+        if (pestsCountTemp != pestsCount) {
+            pestsCount = pestsCountTemp;
+        }
+        if (pestsCount == 0) {
+            infestedPlots.clear();
+        }
+    }
+
+    private void checkInfestedPlotsTabList(String cleanedLine) {
+        if (cleanedLine.contains("Plots:")) {
+            try {
+                String[] split = cleanedLine.trim().split(" ");
+                infestedPlots.clear();
+                for (int i = 1; i < split.length; i++) {
+                    try {
+                        infestedPlots.add(Integer.parseInt(split[i].replace(",", "")));
+                    } catch (Exception ignored) {
+                    }
+                }
+            } catch (Exception ignored) {
+                infestedPlots.clear();
+            }
+        }
+    }
+
     public enum Location {
         PRIVATE_ISLAND("Private Island"),
         HUB("Hub"),
