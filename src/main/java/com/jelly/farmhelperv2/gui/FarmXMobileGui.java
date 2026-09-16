@@ -196,7 +196,6 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_PEST_FARMING = 160;
     private static final int ID_PEST_DESTROYER = 161;
     private static final int ID_PEST_ON_TRACK = 162;
-    private static final int ID_AUTO_PEST_EXCHANGE = 163;
     private static final int ID_PEST_ESP = 164;
     private static final int ID_PEST_TRACERS = 165;
     private static final int ID_PEST_SWAP_ARMOR = 166;
@@ -338,7 +337,6 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_PEST_FARMING, cx, y, 200, on("Pest Farming", FarmHelperConfig.pestFarming)); y += g;
                 btn(ID_PEST_DESTROYER, cx, y, 200, on("Pests Destroyer", FarmHelperConfig.enablePestsDestroyer)); y += g;
                 btn(ID_PEST_ON_TRACK, cx, y, 200, on("Kill Pests On Track", FarmHelperConfig.pestsDestroyerOnTheTrack)); y += g;
-                btn(ID_AUTO_PEST_EXCHANGE, cx, y, 200, on("Auto Pest Exchange", FarmHelperConfig.enableAutoPestExchange)); y += g;
                 btn(ID_PEST_ESP, cx, y, 200, on("Pests ESP", FarmHelperConfig.pestsESP)); y += g;
                 btn(ID_PEST_TRACERS, cx, y, 200, on("Pests Tracers", FarmHelperConfig.pestsTracers)); y += g;
                 btn(ID_PEST_SWAP_ARMOR, cx, y, 200, on("Swap Armor Before Kill", FarmHelperConfig.pestSwapArmorBefore)); y += g;
@@ -682,7 +680,6 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_PEST_FARMING: FarmHelperConfig.pestFarming = !FarmHelperConfig.pestFarming; button.displayString = on("Pest Farming", FarmHelperConfig.pestFarming); break;
             case ID_PEST_DESTROYER: FarmHelperConfig.enablePestsDestroyer = !FarmHelperConfig.enablePestsDestroyer; button.displayString = on("Pests Destroyer", FarmHelperConfig.enablePestsDestroyer); break;
             case ID_PEST_ON_TRACK: FarmHelperConfig.pestsDestroyerOnTheTrack = !FarmHelperConfig.pestsDestroyerOnTheTrack; button.displayString = on("Kill Pests On Track", FarmHelperConfig.pestsDestroyerOnTheTrack); break;
-            case ID_AUTO_PEST_EXCHANGE: FarmHelperConfig.enableAutoPestExchange = !FarmHelperConfig.enableAutoPestExchange; button.displayString = on("Auto Pest Exchange", FarmHelperConfig.enableAutoPestExchange); break;
             case ID_PEST_ESP: FarmHelperConfig.pestsESP = !FarmHelperConfig.pestsESP; button.displayString = on("Pests ESP", FarmHelperConfig.pestsESP); break;
             case ID_PEST_TRACERS: FarmHelperConfig.pestsTracers = !FarmHelperConfig.pestsTracers; button.displayString = on("Pests Tracers", FarmHelperConfig.pestsTracers); break;
             case ID_PEST_SWAP_ARMOR: FarmHelperConfig.pestSwapArmorBefore = !FarmHelperConfig.pestSwapArmorBefore; button.displayString = on("Swap Armor Before Kill", FarmHelperConfig.pestSwapArmorBefore); break;

@@ -52,7 +52,6 @@ public class FarmHelperConfig extends Config {
     private transient static final String AUTO_SPRAYONATOR = "Auto Sprayonator";
     private transient static final String PESTS_DESTROYER = "Pests Destroyer";
     private transient static final String PEST_FARMER = "Pest Farmer";
-    private transient static final String AUTO_PEST_EXCHANGE = "Auto Pest Exchange";
 
     private transient static final File configRewarpFile = new File("farmhelper_rewarp.json");
 
@@ -1142,41 +1141,6 @@ public class FarmHelperConfig extends Config {
             min = 1, max = 8
     )
     public static int pestFarmerStartKillAt = 1;
-    // </editor-fold>
-
-    // <editor-fold desc="AUTO PEST EXCHANGE">
-    @Switch(
-            name = "Enable Auto Pest Exchange", category = AUTO_PEST_EXCHANGE
-    )
-    public static boolean enableAutoPestExchange = false;
-
-    @Switch(
-            name = "Pause Auto Pest Exchange during Jacob's Contest", category = AUTO_PEST_EXCHANGE
-    )
-    public static boolean pauseAutoPestExchangeDuringJacobsContest = true;
-
-    @Switch(
-            name = "Log Auto Pest Exchange Events", category = AUTO_PEST_EXCHANGE
-    )
-    public static boolean logAutoPestExchangeEvents = true;
-
-    @Number(
-            name = "Desk Pos X", category = AUTO_PEST_EXCHANGE,
-            min = -30000000, max = 30000000
-    )
-    public static int pestExchangeDeskX = 0;
-
-    @Number(
-            name = "Desk Pos Y", category = AUTO_PEST_EXCHANGE,
-            min = -30000000, max = 30000000
-    )
-    public static int pestExchangeDeskY = 0;
-
-    @Number(
-            name = "Desk Pos Z", category = AUTO_PEST_EXCHANGE,
-            min = -30000000, max = 30000000
-    )
-    public static int pestExchangeDeskZ = 0;
     // </editor-fold>
 
     public FarmHelperConfig() {

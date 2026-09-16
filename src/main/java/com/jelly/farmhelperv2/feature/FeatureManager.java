@@ -31,8 +31,7 @@ public class FeatureManager {
                 AutoSprayonator.getInstance(),
                 PestsDestroyer.getInstance(),
                 PestFarmer.getInstance(),
-                PestsDestroyerOnTheTrack.getInstance(),
-                AutoPestExchange.getInstance()
+                PestsDestroyerOnTheTrack.getInstance()
         );
         features.addAll(featuresList);
         return features;
