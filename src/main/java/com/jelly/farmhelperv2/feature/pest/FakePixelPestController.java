@@ -281,15 +281,14 @@ public class FakePixelPestController implements IFeature {
     private void rotateAndMoveToPest(Entity target) {
         if (target == null) return;
         rotateToPest(target);
-        KeyBindUtils.holdKey(mc.gameSettings.keyBindForward);
+        KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindForward, true);
     }
 
     private void rotateToPest(Entity target) {
         if (target == null || mc.thePlayer == null) return;
         RotationHandler.getInstance().easeTo(new RotationConfiguration(
                 new Target(target),
-                200,
-                RotationConfiguration.RotationType.CLIENT,
+                200L,
                 null
         ).followTarget(true));
     }
