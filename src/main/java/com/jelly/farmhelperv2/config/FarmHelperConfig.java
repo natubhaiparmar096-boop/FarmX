@@ -1093,6 +1093,67 @@ public class FarmHelperConfig extends Config {
 
     // <editor-fold desc="PEST FARMER">
     @Switch(
+            name = "Enable FakePixel Pest Farming", category = PEST_FARMER,
+            description = "Enables FakePixel-compatible pest farming system"
+    )
+    public static boolean enableFakePixelPestFarming = true;
+
+    @Switch(
+            name = "FakePixel Mode", category = PEST_FARMER,
+            description = "Adapts pest detection to FakePixel server entity and item mechanisms"
+    )
+    public static boolean fakePixelMode = true;
+
+    @Dropdown(
+            name = "Pest Priority", category = PEST_FARMER,
+            description = "Pest targeting priority",
+            options = {"NEAREST", "CURRENT_PLOT", "FIRST_DETECTED"}
+    )
+    public static int pestPriorityMode = 0;
+
+    @Slider(
+            name = "Max Detection Distance", category = PEST_FARMER,
+            min = 5.0F, max = 64.0F
+    )
+    public static float pestMaxDetectionDistance = 32.0F;
+
+    @Slider(
+            name = "Vacuum Range", category = PEST_FARMER,
+            min = 2.0F, max = 15.0F
+    )
+    public static float pestVacuumRange = 5.0F;
+
+    @Slider(
+            name = "Pest Scan Interval (ms)", category = PEST_FARMER,
+            min = 100, max = 2000
+    )
+    public static int pestScanThrottleMs = 500;
+
+    @Slider(
+            name = "Interaction Timeout (ms)", category = PEST_FARMER,
+            min = 1000, max = 10000
+    )
+    public static int pestInteractionTimeoutMs = 5000;
+
+    @Slider(
+            name = "Max Retry Count", category = PEST_FARMER,
+            min = 1, max = 10
+    )
+    public static int pestMaxRetryCount = 3;
+
+    @Switch(
+            name = "Pause Farming While Handling Pest", category = PEST_FARMER,
+            description = "Pauses farming macro while collecting pests"
+    )
+    public static boolean pauseFarmingWhileHandlingPest = true;
+
+    @Switch(
+            name = "Pest Debug Logging", category = PEST_FARMER,
+            description = "Enables detailed pest logging"
+    )
+    public static boolean pestDebugLogging = true;
+
+    @Switch(
             name = "Enable Pest Farming", category = PEST_FARMER
     )
     public static boolean pestFarming = false;

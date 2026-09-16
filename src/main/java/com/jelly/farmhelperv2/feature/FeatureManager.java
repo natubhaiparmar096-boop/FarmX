@@ -32,7 +32,8 @@ public class FeatureManager {
                 AutoSprayonator.getInstance(),
                 PestsDestroyer.getInstance(),
                 PestFarmer.getInstance(),
-                PestsDestroyerOnTheTrack.getInstance()
+                PestsDestroyerOnTheTrack.getInstance(),
+                com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance()
         );
         features.addAll(featuresList);
         return features;
