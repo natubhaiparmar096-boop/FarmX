@@ -286,20 +286,12 @@ public class FakePixelPestController implements IFeature {
 
     private void rotateToPest(Entity target) {
         if (target == null || mc.thePlayer == null) return;
-        double dx = target.posX - mc.thePlayer.posX;
-        double dy = target.posY + (target.height / 2.0) - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
-        double dz = target.posZ - mc.thePlayer.posZ;
-
-        double distXZ = MathHelper.sqrt_double(dx * dx + dz * dz);
-        float yaw = (float) (MathHelper.atan2(dz, dx) * 180.0 / Math.PI) - 90.0F;
-        float pitch = (float) (-(MathHelper.atan2(dy, distXZ) * 180.0 / Math.PI));
-
         RotationHandler.getInstance().easeTo(new RotationConfiguration(
-                new Target(yaw, pitch),
+                new Target(target),
                 200,
                 RotationConfiguration.RotationType.CLIENT,
                 null
-        ));
+        ).followTarget(true));
     }
 
     private void restoreState() {
