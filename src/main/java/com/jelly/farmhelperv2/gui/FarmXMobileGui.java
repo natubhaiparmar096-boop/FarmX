@@ -25,7 +25,7 @@ import java.util.function.IntSupplier;
 public class FarmXMobileGui extends GuiScreen {
     private static final String[] PAGE_NAMES = {
             "Keybinds", "Farming", "Rotation", "Crop Utils", "Rewarp & Spawn",
-            "Failsafe", "Detection", "Delays Rows", "Delays Rot/Rewarp", "Misc"
+            "Failsafe", "Detection", "Delays Rows", "Delays Rot/Rewarp", "Auto Sprayonator", "Misc"
     };
     private int page = 0;
     /** Which keybind button is waiting for a key press; 0 = none. */
@@ -45,6 +45,9 @@ public class FarmXMobileGui extends GuiScreen {
             "S Mushroom SDS", "Circle Crops"
     };
     private static final String[] SOUND_LABELS = {"Sound: Orb", "Sound: Anvil"};
+    private static final String[] SPRAY_MATERIALS = {
+            "Fine Flour (+20 Fortune)", "Compost", "Honey Jar", "Dung", "Plant Matter", "Tasty Cheese"
+    };
 
     // Keybinds
     private static final int ID_KB_TOGGLE = 200;
@@ -183,6 +186,13 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_JACOB_CROPS = 147;
     private static final int ID_PDOTT = 148;
 
+    private static final int ID_SPRAY_TOGGLE = 150;
+    private static final int ID_SPRAY_MAT = 151;
+    private static final int ID_SPRAY_ADD_M = 152;
+    private static final int ID_SPRAY_ADD_P = 153;
+    private static final int ID_SPRAY_START_M = 154;
+    private static final int ID_SPRAY_START_P = 155;
+
     @Override
     public void initGui() {
         this.buttonList.clear();
@@ -310,6 +320,12 @@ public class FarmXMobileGui extends GuiScreen {
                 pair(ID_RW_R_M, ID_RW_R_P, y, "Rewarp Rand +" + fmt(FarmHelperConfig.rewarpDelayRandomness) + "ms");
                 break;
             case 9:
+                btn(ID_SPRAY_TOGGLE, cx, y, 200, on("Auto Sprayonator", FarmHelperConfig.autoSprayonator)); y += g;
+                btn(ID_SPRAY_MAT, cx, y, 200, sprayMaterialLabel()); y += g;
+                pair(ID_SPRAY_ADD_M, ID_SPRAY_ADD_P, y, "Add Delay " + FarmHelperConfig.autoSprayonatorAdditionalDelay + "ms"); y += g;
+                pair(ID_SPRAY_START_M, ID_SPRAY_START_P, y, "Start Delay " + FarmHelperConfig.autoSprayonatorStartDelay + "ms");
+                break;
+            case 10:
             default:
                 btn(ID_ANTISTUCK, cx, y, 200, on("Anti Stuck", FarmHelperConfig.tmpAntiStuckEnabled)); y += g;
                 pair(ID_AS_TRIES_M, ID_AS_TRIES_P, y, "AntiStuck Tries " + FarmHelperConfig.antiStuckTriesUntilRewarp); y += g;
@@ -631,6 +647,19 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_RW_R_M: adjF(() -> FarmHelperConfig.rewarpDelayRandomness, v -> FarmHelperConfig.rewarpDelayRandomness = (float) v, -50, 0, 2000); break;
             case ID_RW_R_P: adjF(() -> FarmHelperConfig.rewarpDelayRandomness, v -> FarmHelperConfig.rewarpDelayRandomness = (float) v, 50, 0, 2000); break;
 
+            case ID_SPRAY_TOGGLE:
+                FarmHelperConfig.autoSprayonator = !FarmHelperConfig.autoSprayonator;
+                button.displayString = on("Auto Sprayonator", FarmHelperConfig.autoSprayonator);
+                break;
+            case ID_SPRAY_MAT:
+                FarmHelperConfig.autoSprayonatorSprayMaterial = (FarmHelperConfig.autoSprayonatorSprayMaterial + 1) % SPRAY_MATERIALS.length;
+                button.displayString = sprayMaterialLabel();
+                break;
+            case ID_SPRAY_ADD_M: adjI(() -> FarmHelperConfig.autoSprayonatorAdditionalDelay, v -> FarmHelperConfig.autoSprayonatorAdditionalDelay = v, -100, 0, 5000); break;
+            case ID_SPRAY_ADD_P: adjI(() -> FarmHelperConfig.autoSprayonatorAdditionalDelay, v -> FarmHelperConfig.autoSprayonatorAdditionalDelay = v, 100, 0, 5000); break;
+            case ID_SPRAY_START_M: adjI(() -> FarmHelperConfig.autoSprayonatorStartDelay, v -> FarmHelperConfig.autoSprayonatorStartDelay = v, -100, 0, 5000); break;
+            case ID_SPRAY_START_P: adjI(() -> FarmHelperConfig.autoSprayonatorStartDelay, v -> FarmHelperConfig.autoSprayonatorStartDelay = v, 100, 0, 5000); break;
+
             case ID_ANTISTUCK: FarmHelperConfig.tmpAntiStuckEnabled = !FarmHelperConfig.tmpAntiStuckEnabled; button.displayString = on("Anti Stuck", FarmHelperConfig.tmpAntiStuckEnabled); break;
             case ID_AS_TRIES_M: adjI(() -> FarmHelperConfig.antiStuckTriesUntilRewarp, v -> FarmHelperConfig.antiStuckTriesUntilRewarp = v, -1, 3, 10); break;
             case ID_AS_TRIES_P: adjI(() -> FarmHelperConfig.antiStuckTriesUntilRewarp, v -> FarmHelperConfig.antiStuckTriesUntilRewarp = v, 1, 3, 10); break;
@@ -817,6 +846,12 @@ public class FarmXMobileGui extends GuiScreen {
         int i = FarmHelperConfig.failsafeMcSoundSelected;
         if (i < 0 || i >= SOUND_LABELS.length) i = 0;
         return SOUND_LABELS[i];
+    }
+
+    private static String sprayMaterialLabel() {
+        int i = FarmHelperConfig.autoSprayonatorSprayMaterial;
+        if (i < 0 || i >= SPRAY_MATERIALS.length) i = 0;
+        return "Material: " + SPRAY_MATERIALS[i];
     }
 
     private static String fmt(float v) {
