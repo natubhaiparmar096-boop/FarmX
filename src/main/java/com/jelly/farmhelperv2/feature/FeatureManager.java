@@ -28,7 +28,12 @@ public class FeatureManager {
                 BPSTracker.getInstance(),
                 DesyncChecker.getInstance(),
                 LagDetector.getInstance(),
-                AutoSprayonator.getInstance()
+                AutoSprayonator.getInstance(),
+                AutoWardrobe.getInstance(),
+                PestsDestroyer.getInstance(),
+                PestFarmer.getInstance(),
+                PestsDestroyerOnTheTrack.getInstance(),
+                AutoPestExchange.getInstance()
         );
         features.addAll(featuresList);
         return features;

@@ -50,6 +50,9 @@ public class FarmHelperConfig extends Config {
     private transient static final String DEBUG = "Debug";
     private transient static final String EXPERIMENTAL = "Experimental";
     private transient static final String AUTO_SPRAYONATOR = "Auto Sprayonator";
+    private transient static final String PESTS_DESTROYER = "Pests Destroyer";
+    private transient static final String PEST_FARMER = "Pest Farmer";
+    private transient static final String AUTO_PEST_EXCHANGE = "Auto Pest Exchange";
 
     private transient static final File configRewarpFile = new File("farmhelper_rewarp.json");
 
@@ -910,6 +913,275 @@ public class FarmHelperConfig extends Config {
             min = 0, max = 5000, step = 100
     )
     public static int autoSprayonatorStartDelay = 0;
+    // </editor-fold>
+
+    // <editor-fold desc="PESTS DESTROYER">
+    @Switch(
+            name = "Enable Pests Destroyer", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Destroys pests"
+    )
+    public static boolean enablePestsDestroyer = false;
+
+    @Slider(
+            name = "Start killing pests at X pests", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "The amount of pests to start killing pests",
+            min = 1, max = 8
+    )
+    public static int startKillingPestsAt = 3;
+
+    @Slider(
+            name = "Additional GUI Delay (ms)", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Extra time to wait between clicks",
+            min = 0, max = 5000
+    )
+    public static int pestAdditionalGUIDelay = 0;
+
+    @Switch(
+            name = "Sprint while flying", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Sprints while flying"
+    )
+    public static boolean sprintWhileFlying = false;
+
+    @Switch(
+            name = "Use AOTE/V in Pests Destroyer", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Uses AOTE/V in Pests Destroyer"
+    )
+    public static boolean useAoteVInPestsDestroyer = false;
+
+    @Switch(
+            name = "Don't teleport to plots when the spawn is not obstructed", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Prevents the macro from teleporting to plots"
+    )
+    public static boolean dontTeleportToPlots = false;
+
+    @Switch(
+            name = "Pause the Pests Destroyer during Jacob's contests", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Pauses the Pests Destroyer during Jacob's contests"
+    )
+    public static boolean pausePestsDestroyerDuringJacobsContest = true;
+
+    @Switch(
+            name = "Pests Destroyer Afk Infinite mode", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Will turn on Pests Destroyer automatically when you are not farming"
+    )
+    public static boolean pestsDestroyerAfkInfiniteMode = false;
+
+    @Switch(
+            name = "Pests Destroyer on the track", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track",
+            description = "Will kill pests if they are in your range while farming"
+    )
+    public static boolean pestsDestroyerOnTheTrack = false;
+
+    @Slider(
+            name = "Pests Destroyer on the track FOV", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track",
+            min = 1, max = 360
+    )
+    public static int pestsDestroyerOnTheTrackFOV = 360;
+
+    @Slider(
+            name = "Time for the pest to stay in range to activate (ms)", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track",
+            min = 0, max = 2000
+    )
+    public static int pestsDestroyerOnTheTrackTimeForPestToStayInRange = 750;
+
+    @Slider(
+            name = "Stuck timer (ms)", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track",
+            min = 4000, max = 25000
+    )
+    public static int pestsDestroyerOnTheTrackStuckTimer = 5000;
+
+    @Switch(
+            name = "Don't kill pests on track during Jacob's Contest", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track"
+    )
+    public static boolean dontKillPestsOnTrackDuringJacobsContest = true;
+
+    @KeyBind(
+            name = "Enable Pests Destroyer", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            size = 2
+    )
+    public static OneKeyBind enablePestsDestroyerKeyBind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @Switch(
+            name = "Swap Armor Before Killing", category = PESTS_DESTROYER, subcategory = "Armor Swapper"
+    )
+    public static boolean pestSwapArmorBefore = false;
+
+    @Slider(
+            name = "Wardrobe Slot To Kill With", category = PESTS_DESTROYER, subcategory = "Armor Swapper",
+            min = 1, max = 18
+    )
+    public static int pestArmorSlot0 = 1;
+
+    @Switch(
+            name = "Swap Armor After Killing", category = PESTS_DESTROYER, subcategory = "Armor Swapper"
+    )
+    public static boolean pestSwapArmorAfter = false;
+
+    @Slider(
+            name = "Wardrobe Slot To Farm With", category = PESTS_DESTROYER, subcategory = "Armor Swapper",
+            min = 1, max = 18
+    )
+    public static int pestArmorSlot1 = 1;
+
+    @Switch(
+            name = "Swap Equipments", category = PESTS_DESTROYER, subcategory = "Armor Swapper"
+    )
+    public static boolean pestSwapEquipments = false;
+
+    @Text(
+            name = "Pest Swap Equipments", category = PESTS_DESTROYER, subcategory = "Armor Swapper", size = 2,
+            placeholder = "Pesthunter's Necklace|Pesthunter's Cloak|Pesthunter's Belt"
+    )
+    public static String pestSwapEq = "";
+
+    @Switch(
+            name = "Pests ESP", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static boolean pestsESP = true;
+
+    @Color(
+            name = "ESP Color", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static OneColor pestsESPColor = new OneColor(255, 0, 0, 255);
+
+    @Switch(
+            name = "Pests Tracers", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static boolean pestsTracers = true;
+
+    @Color(
+            name = "Tracers Color", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static OneColor pestsTracersColor = new OneColor(255, 0, 0, 255);
+
+    @Switch(
+            name = "Highlight Plot With Pests", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static boolean highlightPlotWithPests = true;
+
+    @Color(
+            name = "Plot Highlight Color", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static OneColor plotHighlightColor = new OneColor(255, 0, 0, 100);
+
+    @Switch(
+            name = "Profit Calc Count Pest Drop", category = PESTS_DESTROYER, subcategory = "Profit Calculator"
+    )
+    public static boolean profitCalcCountPestDrop = true;
+
+    @Switch(
+            name = "Send Webhook Log When Pests Destroyer Starts/Stops", category = PESTS_DESTROYER, subcategory = "Webhook Logs"
+    )
+    public static boolean sendWebhookLogWhenPestDestroyerStartsStops = false;
+    // </editor-fold>
+
+    // <editor-fold desc="PEST FARMER">
+    @Switch(
+            name = "Enable Pest Farming", category = PEST_FARMER
+    )
+    public static boolean pestFarming = false;
+
+    @Switch(
+            name = "Use Squeaky Mousemat To Set Angle", category = PEST_FARMER
+    )
+    public static boolean pestFarmingUseMousemat = false;
+
+    @Slider(
+            name = "Fermento Armor Slot", category = PEST_FARMER,
+            min = 1, max = 18
+    )
+    public static int pestFarmingFermentoSlot = 1;
+
+    @Slider(
+            name = "Biohazard Armor Slot", category = PEST_FARMER,
+            min = 1, max = 18
+    )
+    public static int pestFarmingBiohazardSlot = 1;
+
+    @Slider(
+            name = "Pest Spawn Timer (In seconds)", category = PEST_FARMER,
+            min = 30, max = 300
+    )
+    public static int pestFarmingWaitTime = 255;
+
+    @Switch(
+            name = "Set Spawn After Armor Swap", category = PEST_FARMER
+    )
+    public static boolean pestFarmingSetSpawn = false;
+
+    @Switch(
+            name = "Swap Equipments", category = PEST_FARMER
+    )
+    public static boolean pestFarmingSwapEq = false;
+
+    @Text(
+            name = "Farming Fortune Equipments", category = PEST_FARMER, size = 2,
+            placeholder = "Ex: Lotus Necklace|Lotus Cloak|Lotus Belt|Lotus Bracelet"
+    )
+    public static String pestFarmingEq0 = "";
+
+    @Text(
+            name = "Pest Chance Equipments", category = PEST_FARMER, size = 2,
+            placeholder = "Ex: Pesthunter's Necklace|Pesthunter's Belt|Pesthunter's Gloves|Pest Vest"
+    )
+    public static String pestFarmingEq1 = "";
+
+    @Slider(
+            name = "Equipment Click Delay", category = PEST_FARMER,
+            min = 300, max = 2000, step = 10
+    )
+    public static int pestFarmerEquipmentClickDelay = 400;
+
+    @Switch(
+            name = "Start Pests Destroyer During Farming", category = PEST_FARMER
+    )
+    public static boolean pestFarmerKillPests = false;
+
+    @Switch(
+            name = "Cast Rod After Killing", category = PEST_FARMER
+    )
+    public static boolean pestFarmerCastRod = false;
+
+    @Slider(
+            name = "Pest Count to Start Killing At", category = PEST_FARMER,
+            min = 1, max = 8
+    )
+    public static int pestFarmerStartKillAt = 1;
+    // </editor-fold>
+
+    // <editor-fold desc="AUTO PEST EXCHANGE">
+    @Switch(
+            name = "Enable Auto Pest Exchange", category = AUTO_PEST_EXCHANGE
+    )
+    public static boolean enableAutoPestExchange = false;
+
+    @Switch(
+            name = "Pause Auto Pest Exchange during Jacob's Contest", category = AUTO_PEST_EXCHANGE
+    )
+    public static boolean pauseAutoPestExchangeDuringJacobsContest = true;
+
+    @Switch(
+            name = "Log Auto Pest Exchange Events", category = AUTO_PEST_EXCHANGE
+    )
+    public static boolean logAutoPestExchangeEvents = true;
+
+    @Number(
+            name = "Desk Pos X", category = AUTO_PEST_EXCHANGE,
+            min = -30000000, max = 30000000
+    )
+    public static int pestExchangeDeskX = 0;
+
+    @Number(
+            name = "Desk Pos Y", category = AUTO_PEST_EXCHANGE,
+            min = -30000000, max = 30000000
+    )
+    public static int pestExchangeDeskY = 0;
+
+    @Number(
+            name = "Desk Pos Z", category = AUTO_PEST_EXCHANGE,
+            min = -30000000, max = 30000000
+    )
+    public static int pestExchangeDeskZ = 0;
     // </editor-fold>
 
     public FarmHelperConfig() {

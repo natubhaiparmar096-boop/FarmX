@@ -25,7 +25,7 @@ import java.util.function.IntSupplier;
 public class FarmXMobileGui extends GuiScreen {
     private static final String[] PAGE_NAMES = {
             "Keybinds", "Farming", "Rotation", "Crop Utils", "Rewarp & Spawn",
-            "Failsafe", "Detection", "Delays Rows", "Delays Rot/Rewarp", "Auto Sprayonator", "Misc"
+            "Failsafe", "Detection", "Delays Rows", "Delays Rot/Rewarp", "Auto Sprayonator", "Pests & Wardrobe", "Misc"
     };
     private int page = 0;
     /** Which keybind button is waiting for a key press; 0 = none. */
@@ -193,6 +193,15 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_SPRAY_START_M = 154;
     private static final int ID_SPRAY_START_P = 155;
 
+    private static final int ID_PEST_FARMING = 160;
+    private static final int ID_PEST_DESTROYER = 161;
+    private static final int ID_PEST_ON_TRACK = 162;
+    private static final int ID_AUTO_PEST_EXCHANGE = 163;
+    private static final int ID_PEST_ESP = 164;
+    private static final int ID_PEST_TRACERS = 165;
+    private static final int ID_PEST_SWAP_ARMOR = 166;
+    private static final int ID_PEST_TRIGGER_NOW = 167;
+
     @Override
     public void initGui() {
         this.buttonList.clear();
@@ -326,6 +335,16 @@ public class FarmXMobileGui extends GuiScreen {
                 pair(ID_SPRAY_START_M, ID_SPRAY_START_P, y, "Start Delay " + FarmHelperConfig.autoSprayonatorStartDelay + "ms");
                 break;
             case 10:
+                btn(ID_PEST_FARMING, cx, y, 200, on("Pest Farming", FarmHelperConfig.pestFarming)); y += g;
+                btn(ID_PEST_DESTROYER, cx, y, 200, on("Pests Destroyer", FarmHelperConfig.enablePestsDestroyer)); y += g;
+                btn(ID_PEST_ON_TRACK, cx, y, 200, on("Kill Pests On Track", FarmHelperConfig.pestsDestroyerOnTheTrack)); y += g;
+                btn(ID_AUTO_PEST_EXCHANGE, cx, y, 200, on("Auto Pest Exchange", FarmHelperConfig.enableAutoPestExchange)); y += g;
+                btn(ID_PEST_ESP, cx, y, 200, on("Pests ESP", FarmHelperConfig.pestsESP)); y += g;
+                btn(ID_PEST_TRACERS, cx, y, 200, on("Pests Tracers", FarmHelperConfig.pestsTracers)); y += g;
+                btn(ID_PEST_SWAP_ARMOR, cx, y, 200, on("Swap Armor Before Kill", FarmHelperConfig.pestSwapArmorBefore)); y += g;
+                btn(ID_PEST_TRIGGER_NOW, cx, y, 200, "Trigger Destroyer Now");
+                break;
+            case 11:
             default:
                 btn(ID_ANTISTUCK, cx, y, 200, on("Anti Stuck", FarmHelperConfig.tmpAntiStuckEnabled)); y += g;
                 pair(ID_AS_TRIES_M, ID_AS_TRIES_P, y, "AntiStuck Tries " + FarmHelperConfig.antiStuckTriesUntilRewarp); y += g;
@@ -659,6 +678,15 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_SPRAY_ADD_P: adjI(() -> FarmHelperConfig.autoSprayonatorAdditionalDelay, v -> FarmHelperConfig.autoSprayonatorAdditionalDelay = v, 100, 0, 5000); break;
             case ID_SPRAY_START_M: adjI(() -> FarmHelperConfig.autoSprayonatorStartDelay, v -> FarmHelperConfig.autoSprayonatorStartDelay = v, -100, 0, 5000); break;
             case ID_SPRAY_START_P: adjI(() -> FarmHelperConfig.autoSprayonatorStartDelay, v -> FarmHelperConfig.autoSprayonatorStartDelay = v, 100, 0, 5000); break;
+
+            case ID_PEST_FARMING: FarmHelperConfig.pestFarming = !FarmHelperConfig.pestFarming; button.displayString = on("Pest Farming", FarmHelperConfig.pestFarming); break;
+            case ID_PEST_DESTROYER: FarmHelperConfig.enablePestsDestroyer = !FarmHelperConfig.enablePestsDestroyer; button.displayString = on("Pests Destroyer", FarmHelperConfig.enablePestsDestroyer); break;
+            case ID_PEST_ON_TRACK: FarmHelperConfig.pestsDestroyerOnTheTrack = !FarmHelperConfig.pestsDestroyerOnTheTrack; button.displayString = on("Kill Pests On Track", FarmHelperConfig.pestsDestroyerOnTheTrack); break;
+            case ID_AUTO_PEST_EXCHANGE: FarmHelperConfig.enableAutoPestExchange = !FarmHelperConfig.enableAutoPestExchange; button.displayString = on("Auto Pest Exchange", FarmHelperConfig.enableAutoPestExchange); break;
+            case ID_PEST_ESP: FarmHelperConfig.pestsESP = !FarmHelperConfig.pestsESP; button.displayString = on("Pests ESP", FarmHelperConfig.pestsESP); break;
+            case ID_PEST_TRACERS: FarmHelperConfig.pestsTracers = !FarmHelperConfig.pestsTracers; button.displayString = on("Pests Tracers", FarmHelperConfig.pestsTracers); break;
+            case ID_PEST_SWAP_ARMOR: FarmHelperConfig.pestSwapArmorBefore = !FarmHelperConfig.pestSwapArmorBefore; button.displayString = on("Swap Armor Before Kill", FarmHelperConfig.pestSwapArmorBefore); break;
+            case ID_PEST_TRIGGER_NOW: com.jelly.farmhelperv2.config.FarmHelperConfig.triggerManuallyPestsDestroyer(); break;
 
             case ID_ANTISTUCK: FarmHelperConfig.tmpAntiStuckEnabled = !FarmHelperConfig.tmpAntiStuckEnabled; button.displayString = on("Anti Stuck", FarmHelperConfig.tmpAntiStuckEnabled); break;
             case ID_AS_TRIES_M: adjI(() -> FarmHelperConfig.antiStuckTriesUntilRewarp, v -> FarmHelperConfig.antiStuckTriesUntilRewarp = v, -1, 3, 10); break;
