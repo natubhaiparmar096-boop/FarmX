@@ -424,7 +424,7 @@ public class FakePixelPestController implements IFeature {
                     KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
                     KeyBindUtils.stopMovement();
                     currentState = State.CONFIRM_PEST_DEAD;
-                    stateTimer.schedule(400);
+                    stateTimer.schedule(200);
                     break;
                 }
                 int vacuumSlot = adapter.findPestVacuumSlot();
@@ -432,10 +432,20 @@ public class FakePixelPestController implements IFeature {
                     mc.thePlayer.inventory.currentItem = vacuumSlot;
                 }
 
+                // If pest drifted far away mid-attack, re-approach
+                double distDuringAttack = mc.thePlayer.getDistanceToEntity(targetPest.getEntity());
+                if (distDuringAttack > 5.0) {
+                    KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
+                    logDebug("Pest drifted during attack (" + String.format("%.1f", distDuringAttack) + "m), re-approaching...");
+                    currentState = State.MOVE_TO_PEST;
+                    stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs + 7000);
+                    break;
+                }
+
                 // Directly face pest every tick — exact math, always accurate for vacuum raycast
                 faceEntityDirect(targetPest.getEntity());
 
-                // Wait for brief aim settle, then hold right-click to vacuum
+                // Wait for brief aim settle, then pulse right-click to vacuum
                 if (attackTimer.passed()) {
                     KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, true);
                 }
@@ -444,7 +454,7 @@ public class FakePixelPestController implements IFeature {
                     KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
                     logDebug("Attack timer passed on pest, confirming removal...");
                     currentState = State.CONFIRM_PEST_DEAD;
-                    stateTimer.schedule(400);
+                    stateTimer.schedule(200);
                 }
                 break;
 
@@ -453,7 +463,12 @@ public class FakePixelPestController implements IFeature {
                 if (stateTimer.passed()) {
                     if (targetPest != null && targetPest.getEntity() != null) {
                         killedEntities.add(targetPest.getEntity());
-                        LogUtils.sendSuccess("[Pest Controller] Eliminated pest: " + targetPest.getPestType() + " (Total: " + killedEntities.size() + ")");
+                        boolean actuallyDead = targetPest.getEntity().isDead || !mc.theWorld.loadedEntityList.contains(targetPest.getEntity());
+                        if (actuallyDead) {
+                            LogUtils.sendSuccess("[Pest Controller] Eliminated pest: " + targetPest.getPestType() + " (Total: " + killedEntities.size() + ")");
+                        } else {
+                            LogUtils.sendWarning("[Pest Controller] Could not confirm kill of " + targetPest.getPestType() + " — skipping.");
+                        }
                     }
                     currentState = State.CHECK_NEXT_PEST;
                 }
@@ -548,7 +563,11 @@ public class FakePixelPestController implements IFeature {
         if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
             mc.thePlayer.capabilities.isFlying = true;
         }
-        directFlyTo(target.posX, target.posY + 1.0, target.posZ, 2.5);
+        // Armor stand nametag hovers ~1.5 blocks above the actual mob — fly to mob body level
+        double flyToY = (target instanceof net.minecraft.entity.item.EntityArmorStand)
+                ? target.posY - 0.5   // armor stand Y minus offset → actual mob level
+                : target.posY + 1.0;  // real mob: 1 block above
+        directFlyTo(target.posX, flyToY, target.posZ, 2.5);
     }
 
     private void directFlyTo(double targetX, double targetY, double targetZ, double stopDistance) {
@@ -592,13 +611,22 @@ public class FakePixelPestController implements IFeature {
     }
 
     /**
-     * Directly face the pest entity using exact angle math every tick.
+     * Directly face a pest entity using exact angle math every tick.
      * No RotationHandler — sets rotationYaw/Pitch directly so vacuum raycast always hits.
+     * If target is an armor stand (nametag floating above mob), aims 1.5 blocks below it.
      */
     private void faceEntityDirect(Entity target) {
         if (target == null || mc.thePlayer == null) return;
+        double aimY;
+        if (target instanceof net.minecraft.entity.item.EntityArmorStand) {
+            // Armor stand is the floating nametag — aim 1.5 blocks below it at the actual mob body
+            aimY = target.posY - 1.5;
+        } else {
+            // Real mob entity — aim at center mass
+            aimY = target.posY + target.height * 0.5;
+        }
         double dx = target.posX - mc.thePlayer.posX;
-        double dye = (target.posY + target.height * 0.5) - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+        double dye = aimY - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
         double dz = target.posZ - mc.thePlayer.posZ;
         double distXZ = Math.sqrt(dx * dx + dz * dz);
         mc.thePlayer.rotationYaw = (float) (Math.toDegrees(Math.atan2(dz, dx)) - 90.0);
