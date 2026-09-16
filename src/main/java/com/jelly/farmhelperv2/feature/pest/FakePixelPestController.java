@@ -389,17 +389,15 @@ public class FakePixelPestController implements IFeature {
 
             case MOVE_TO_PEST:
                 if (targetPest == null || adapter.isPestRemoved(targetPest) || targetPest.getEntity().isDead) {
-                    FlyPathFinderExecutor.getInstance().stop();
                     KeyBindUtils.stopMovement();
                     currentState = State.CHECK_NEXT_PEST;
                     break;
                 }
                 double dist = mc.thePlayer.getDistanceToEntity(targetPest.getEntity());
-                if (dist <= FarmHelperConfig.pestVacuumRange) {
-                    FlyPathFinderExecutor.getInstance().stop();
+                if (dist <= 3.0) {
                     KeyBindUtils.stopMovement();
                     currentState = State.ATTACK_VACUUM;
-                    attackTimer.schedule(300); // Give RotationHandler 300ms to aim before right-clicking
+                    attackTimer.schedule(250); // brief pause to settle before right-clicking
                     stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs);
                 } else {
                     int vSlotMove = adapter.findPestVacuumSlot();
@@ -408,7 +406,6 @@ public class FakePixelPestController implements IFeature {
                     }
                     rotateAndMoveToPest(targetPest.getEntity());
                     if (stateTimer.passed()) {
-                        FlyPathFinderExecutor.getInstance().stop();
                         KeyBindUtils.stopMovement();
                         retryCount++;
                         if (retryCount >= FarmHelperConfig.pestMaxRetryCount) {
@@ -435,10 +432,10 @@ public class FakePixelPestController implements IFeature {
                     mc.thePlayer.inventory.currentItem = vacuumSlot;
                 }
 
-                // Aim at the pest (self-guarded: starts RotationHandler CLIENT followTarget only once per pest)
-                rotateToPest(targetPest.getEntity());
+                // Directly face pest every tick — exact math, always accurate for vacuum raycast
+                faceEntityDirect(targetPest.getEntity());
 
-                // Wait for aim to settle before right-clicking (attackTimer was set to 300ms on entering this state)
+                // Wait for brief aim settle, then hold right-click to vacuum
                 if (attackTimer.passed()) {
                     KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, true);
                 }
@@ -547,67 +544,45 @@ public class FakePixelPestController implements IFeature {
 
     private void rotateAndMoveToPest(Entity target) {
         if (target == null || mc.thePlayer == null) return;
-
-        // rotateToPest internally guards with trackingCurrentPest — only starts a new session once per pest
-        rotateToPest(target);
-
-        // If pathfinder previously failed, use direct flight
-        if (pathfinderFailed || FlyPathFinderExecutor.getInstance().getState() == FlyPathFinderExecutor.State.FAILED) {
-            pathfinderFailed = true;
-            FlyPathFinderExecutor.getInstance().stop();
-            // directFlyTo will reset RotationHandler and trackingCurrentPest for flight, re-set after arriving
-            directFlyTo(target.posX, target.posY + 1.0, target.posZ, FarmHelperConfig.pestVacuumRange - 1.0);
-            return;
+        // FakePixel: always fly directly — FlyPathFinderExecutor flies up high then fails, causing the 'hovering above pest' bug
+        if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
+            mc.thePlayer.capabilities.isFlying = true;
         }
-
-        // Try FlyPathFinderExecutor
-        if (!FlyPathFinderExecutor.getInstance().isRunning()) {
-            if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
-                mc.thePlayer.capabilities.isFlying = true;
-            }
-            FlyPathFinderExecutor.getInstance().setSprinting(FarmHelperConfig.sprintWhileFlying);
-            FlyPathFinderExecutor.getInstance().setUseAOTV(InventoryUtils.hasItemInHotbar("Aspect of the Void", "Aspect of the End"));
-            FlyPathFinderExecutor.getInstance().findPath(target, true, true, 1.5f, true);
-        }
+        directFlyTo(target.posX, target.posY + 1.0, target.posZ, 2.5);
     }
 
     private void directFlyTo(double targetX, double targetY, double targetZ, double stopDistance) {
         if (mc.thePlayer == null) return;
+
+        // Stop any active RotationHandler so it doesn't fight us
+        if (RotationHandler.getInstance().isRotating()) {
+            RotationHandler.getInstance().reset();
+        }
+
         double dx = targetX - mc.thePlayer.posX;
         double dy = targetY - mc.thePlayer.posY;
         double dz = targetZ - mc.thePlayer.posZ;
+        double distHoriz = Math.sqrt(dx * dx + dz * dz);
         double distTotal = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-        if (mc.thePlayer.capabilities.allowFlying && !mc.thePlayer.capabilities.isFlying) {
-            mc.thePlayer.capabilities.isFlying = true;
-        }
 
         if (distTotal <= stopDistance) {
             KeyBindUtils.stopMovement();
             return;
         }
 
-        // Stop any RotationHandler rotation — we take direct control during flight so they don't fight
-        if (RotationHandler.getInstance().isRotating()) {
-            RotationHandler.getInstance().reset();
+        // Horizontal: face the target and hold forward
+        if (distHoriz > 0.2) {
+            float targetYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
+            mc.thePlayer.rotationYaw = targetYaw;
         }
-        trackingCurrentPest = false; // Reset so rotateToPest triggers fresh followTarget after flight ends
-
-        // Snap yaw directly toward target — no interpolation for movement, avoids circular drift
-        float targetYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
-        mc.thePlayer.rotationYaw = targetYaw;
-        mc.thePlayer.rotationPitch = 0.0F; // Keep pitch level during flight
-
+        mc.thePlayer.rotationPitch = 0.0F;
         KeyBindUtils.holdThese(mc.gameSettings.keyBindForward);
-        if (FarmHelperConfig.sprintWhileFlying) {
-            mc.thePlayer.setSprinting(true);
-        }
 
-        // Vertical: jump/sneak for altitude adjustment (creative flight forward doesn't follow pitch)
-        if (dy > 2.5) {
+        // Vertical: tight ±0.5 deadzone so we actually reach target altitude
+        if (dy > 0.5) {
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, true);
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, false);
-        } else if (dy < -2.5) {
+        } else if (dy < -0.5) {
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, true);
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, false);
         } else {
@@ -617,20 +592,17 @@ public class FakePixelPestController implements IFeature {
     }
 
     /**
-     * Smoothly aim at a pest entity for vacuuming.
-     * Uses CLIENT rotation type so the player visually looks at the pest (important for raycast to hit).
-     * followTarget(true) keeps tracking as the pest moves. Only starts a new session when not already tracking.
+     * Directly face the pest entity using exact angle math every tick.
+     * No RotationHandler — sets rotationYaw/Pitch directly so vacuum raycast always hits.
      */
-    private void rotateToPest(Entity target) {
+    private void faceEntityDirect(Entity target) {
         if (target == null || mc.thePlayer == null) return;
-        if (!trackingCurrentPest) {
-            trackingCurrentPest = true;
-            RotationHandler.getInstance().easeTo(new RotationConfiguration(
-                    new Target(target),
-                    200L,
-                    null
-            ).followTarget(true).rotationType(RotationConfiguration.RotationType.CLIENT));
-        }
+        double dx = target.posX - mc.thePlayer.posX;
+        double dye = (target.posY + target.height * 0.5) - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+        double dz = target.posZ - mc.thePlayer.posZ;
+        double distXZ = Math.sqrt(dx * dx + dz * dz);
+        mc.thePlayer.rotationYaw = (float) (Math.toDegrees(Math.atan2(dz, dx)) - 90.0);
+        mc.thePlayer.rotationPitch = (float) (-Math.toDegrees(Math.atan2(dye, distXZ)));
     }
 
 
