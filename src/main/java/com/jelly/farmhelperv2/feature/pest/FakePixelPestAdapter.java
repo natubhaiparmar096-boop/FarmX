@@ -138,10 +138,12 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
 
             if (isPest) {
                 Entity targetEntity = entity;
-                if (entity instanceof EntityArmorStand) {
+                if (entity.ridingEntity != null && !entity.ridingEntity.isDead) {
+                    targetEntity = entity.ridingEntity;
+                } else if (entity instanceof EntityArmorStand) {
                     Entity realEntity = com.jelly.farmhelperv2.util.PlayerUtils.getEntityCuttingOtherEntity(
                             entity,
-                            (e) -> !(e instanceof EntityArmorStand)
+                            (e) -> e instanceof net.minecraft.entity.passive.EntityBat || e instanceof net.minecraft.entity.monster.EntitySilverfish
                     );
                     if (realEntity != null && !realEntity.isDead) {
                         targetEntity = realEntity;
@@ -257,28 +259,9 @@ public class FakePixelPestAdapter implements PestPlatformAdapter {
 
     @Override
     public boolean isPestRemoved(PestInfo pest) {
-        if (pest == null || pest.getEntity() == null) return true;
+        if (pest == null || pest.getEntity() == null || mc.theWorld == null) return true;
         Entity e = pest.getEntity();
-        if (e.isDead) return true;
-        if (!mc.theWorld.loadedEntityList.contains(e)) return true;
-        // If it's an armor stand (nametag), also check nearby entities for the actual pest mob
-        // If no real mob is nearby within 2 blocks, the armor stand is just a stray nametag — treat as removed
-        if (e instanceof net.minecraft.entity.item.EntityArmorStand) {
-            boolean realMobNearby = false;
-            for (Entity nearby : mc.theWorld.loadedEntityList) {
-                if (nearby == e || nearby instanceof net.minecraft.entity.item.EntityArmorStand) continue;
-                if (nearby.isDead) continue;
-                double dx = nearby.posX - e.posX;
-                double dy = nearby.posY - e.posY;
-                double dz = nearby.posZ - e.posZ;
-                if (Math.sqrt(dx*dx + dy*dy + dz*dz) < 2.0) {
-                    realMobNearby = true;
-                    break;
-                }
-            }
-            return !realMobNearby;
-        }
-        return false;
+        return e.isDead || !mc.theWorld.loadedEntityList.contains(e);
     }
 
     @Override
