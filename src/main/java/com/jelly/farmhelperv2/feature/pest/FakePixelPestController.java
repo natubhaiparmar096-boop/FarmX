@@ -88,6 +88,7 @@ public class FakePixelPestController implements IFeature {
     private Vec3 targetWaypoint = null;
     private int fireworkTries = 0;
     private boolean pathfinderFailed = false;
+    private boolean trackingCurrentPest = false; // true when RotationHandler is already following targetPest
 
     public void resetFireworkInfo() {
         fireworkWaypoint = null;
@@ -398,7 +399,7 @@ public class FakePixelPestController implements IFeature {
                     FlyPathFinderExecutor.getInstance().stop();
                     KeyBindUtils.stopMovement();
                     currentState = State.ATTACK_VACUUM;
-                    attackTimer.schedule(100);
+                    attackTimer.schedule(300); // Give RotationHandler 300ms to aim before right-clicking
                     stateTimer.schedule(FarmHelperConfig.pestInteractionTimeoutMs);
                 } else {
                     int vSlotMove = adapter.findPestVacuumSlot();
@@ -434,12 +435,13 @@ public class FakePixelPestController implements IFeature {
                     mc.thePlayer.inventory.currentItem = vacuumSlot;
                 }
 
-                // Only start a new rotation when RotationHandler is idle — avoids constant restart glitch
-                if (!RotationHandler.getInstance().isRotating()) {
-                    rotateToPest(targetPest.getEntity());
+                // Aim at the pest (self-guarded: starts RotationHandler CLIENT followTarget only once per pest)
+                rotateToPest(targetPest.getEntity());
+
+                // Wait for aim to settle before right-clicking (attackTimer was set to 300ms on entering this state)
+                if (attackTimer.passed()) {
+                    KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, true);
                 }
-                // Hold right-click to vacuum the pest
-                KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, true);
 
                 if (stateTimer.passed()) {
                     KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
@@ -464,6 +466,7 @@ public class FakePixelPestController implements IFeature {
                 targetPest = null;
                 retryCount = 0;
                 pathfinderFailed = false;
+                trackingCurrentPest = false;
                 List<PestInfo> remaining = detector.scanPests(true);
                 remaining.removeIf(p -> p.getEntity() == null || p.getEntity().isDead || killedEntities.contains(p.getEntity()) || !p.isAlive());
 
@@ -545,15 +548,14 @@ public class FakePixelPestController implements IFeature {
     private void rotateAndMoveToPest(Entity target) {
         if (target == null || mc.thePlayer == null) return;
 
-        // Only start a new rotation when previous is done — avoids constant-restart jitter
-        if (!RotationHandler.getInstance().isRotating()) {
-            rotateToPest(target);
-        }
+        // rotateToPest internally guards with trackingCurrentPest — only starts a new session once per pest
+        rotateToPest(target);
 
         // If pathfinder previously failed, use direct flight
         if (pathfinderFailed || FlyPathFinderExecutor.getInstance().getState() == FlyPathFinderExecutor.State.FAILED) {
             pathfinderFailed = true;
             FlyPathFinderExecutor.getInstance().stop();
+            // directFlyTo will reset RotationHandler and trackingCurrentPest for flight, re-set after arriving
             directFlyTo(target.posX, target.posY + 1.0, target.posZ, FarmHelperConfig.pestVacuumRange - 1.0);
             return;
         }
@@ -585,24 +587,27 @@ public class FakePixelPestController implements IFeature {
             return;
         }
 
-        // Smooth horizontal yaw via RotationHandler — avoids fighting with RotationHandler's own interpolation
-        float targetYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
-        com.jelly.farmhelperv2.util.helper.Rotation targetRot = new com.jelly.farmhelperv2.util.helper.Rotation(targetYaw, 0.0F);
-        if (!RotationHandler.getInstance().isRotating()) {
-            RotationHandler.getInstance().easeTo(new RotationConfiguration(targetRot, 150L, null));
+        // Stop any RotationHandler rotation — we take direct control during flight so they don't fight
+        if (RotationHandler.getInstance().isRotating()) {
+            RotationHandler.getInstance().reset();
         }
+        trackingCurrentPest = false; // Reset so rotateToPest triggers fresh followTarget after flight ends
 
-        // Hold forward to fly in the horizontal direction we are facing
+        // Snap yaw directly toward target — no interpolation for movement, avoids circular drift
+        float targetYaw = (float) Math.toDegrees(Math.atan2(dz, dx)) - 90.0F;
+        mc.thePlayer.rotationYaw = targetYaw;
+        mc.thePlayer.rotationPitch = 0.0F; // Keep pitch level during flight
+
         KeyBindUtils.holdThese(mc.gameSettings.keyBindForward);
         if (FarmHelperConfig.sprintWhileFlying) {
             mc.thePlayer.setSprinting(true);
         }
 
-        // Vertical movement via jump/sneak (creative flight does NOT follow pitch for forward movement)
-        if (dy > 3.0) {
+        // Vertical: jump/sneak for altitude adjustment (creative flight forward doesn't follow pitch)
+        if (dy > 2.5) {
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, true);
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, false);
-        } else if (dy < -3.0) {
+        } else if (dy < -2.5) {
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, true);
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindJump, false);
         } else {
@@ -610,6 +615,24 @@ public class FakePixelPestController implements IFeature {
             KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindSneak, false);
         }
     }
+
+    /**
+     * Smoothly aim at a pest entity for vacuuming.
+     * Uses CLIENT rotation type so the player visually looks at the pest (important for raycast to hit).
+     * followTarget(true) keeps tracking as the pest moves. Only starts a new session when not already tracking.
+     */
+    private void rotateToPest(Entity target) {
+        if (target == null || mc.thePlayer == null) return;
+        if (!trackingCurrentPest) {
+            trackingCurrentPest = true;
+            RotationHandler.getInstance().easeTo(new RotationConfiguration(
+                    new Target(target),
+                    200L,
+                    null
+            ).followTarget(true).rotationType(RotationConfiguration.RotationType.CLIENT));
+        }
+    }
+
 
     @SubscribeEvent
     public void onSpawnObject(SpawnObjectEvent event) {
@@ -658,22 +681,15 @@ public class FakePixelPestController implements IFeature {
         }
     }
 
-    private void rotateToPest(Entity target) {
-        if (target == null || mc.thePlayer == null) return;
-        RotationHandler.getInstance().easeTo(new RotationConfiguration(
-                new Target(target),
-                180L,
-                null
-        ).followTarget(true));
-    }
-
     private void restoreState() {
         FlyPathFinderExecutor.getInstance().stop();
         KeyBindUtils.stopMovement();
         KeyBindUtils.setKeyBindState(mc.gameSettings.keyBindUseItem, false);
+        RotationHandler.getInstance().reset();
         resetFireworkInfo();
         targetWaypoint = null;
         pathfinderFailed = false;
+        trackingCurrentPest = false;
         if (originalHotbarSlot != -1 && mc.thePlayer != null) {
             mc.thePlayer.inventory.currentItem = originalHotbarSlot;
             originalHotbarSlot = -1;
