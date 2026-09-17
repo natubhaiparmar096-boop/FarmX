@@ -134,13 +134,13 @@ public class SShapeSugarcaneMacro extends AbstractMacro {
     private void updateStateTwoKey() {
         switch (currentState) {
             case A: // Go leg
-                if (transitClock.passed() && blockedForKey(FarmHelperConfig.sugarcaneGoKey)) {
+                if (transitClock.passed() && (blockedForKey(FarmHelperConfig.sugarcaneGoKey) || mc.thePlayer.isCollidedHorizontally)) {
                     changeState(State.D);
                     transitClock.schedule(400);
                 }
                 break;
             case D: // Return leg
-                if (transitClock.passed() && blockedForKey(FarmHelperConfig.sugarcaneReturnKey)) {
+                if (transitClock.passed() && (blockedForKey(FarmHelperConfig.sugarcaneReturnKey) || mc.thePlayer.isCollidedHorizontally)) {
                     changeState(State.A);
                     transitClock.schedule(400);
                 }

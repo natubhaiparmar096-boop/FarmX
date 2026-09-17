@@ -188,7 +188,8 @@ public class BlockUtils {
 
         if (allAir) return false;
 
-        if (mc.thePlayer.posY % 1 >= 0.5 && mc.thePlayer.posY % 1 <= 0.75)
+        if (mc.thePlayer.posY % 1 >= 0.5 && mc.thePlayer.posY % 1 <= 0.75
+                && !block.isFullCube())   // full-cube blocks (dirt, stone…) must NOT be treated as passable
             return true;
 
         if (Arrays.asList(initialWalkables).contains(block))
