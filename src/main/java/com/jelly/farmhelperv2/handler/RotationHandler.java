@@ -7,7 +7,6 @@ import com.jelly.farmhelperv2.util.LogUtils;
 import com.jelly.farmhelperv2.util.helper.Clock;
 import com.jelly.farmhelperv2.util.helper.Rotation;
 import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
-import lombok.Getter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
@@ -27,20 +26,21 @@ public class RotationHandler {
     private final Rotation startRotation = new Rotation(0f, 0f);
     private final Rotation targetRotation = new Rotation(0f, 0f);
     private final Clock dontRotate = new Clock();
-    @Getter
     private boolean rotating;
     private long startTime;
     private long endTime;
-    @Getter
     private float clientSideYaw = 0;
-    @Getter
     private float clientSidePitch = 0;
-    @Getter
     private float serverSideYaw = 0;
-    @Getter
     private float serverSidePitch = 0;
-    @Getter
     private RotationConfiguration configuration;
+
+    public boolean isRotating() { return rotating; }
+    public float getClientSideYaw() { return clientSideYaw; }
+    public float getClientSidePitch() { return clientSidePitch; }
+    public float getServerSideYaw() { return serverSideYaw; }
+    public float getServerSidePitch() { return serverSidePitch; }
+    public RotationConfiguration getConfiguration() { return configuration; }
 
     private final Random random = new Random();
 

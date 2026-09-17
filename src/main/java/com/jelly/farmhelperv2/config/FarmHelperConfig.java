@@ -50,6 +50,8 @@ public class FarmHelperConfig extends Config {
     private transient static final String DEBUG = "Debug";
     private transient static final String EXPERIMENTAL = "Experimental";
     private transient static final String AUTO_SPRAYONATOR = "Auto Sprayonator";
+    private transient static final String PESTS_DESTROYER = "Pests Destroyer";
+    private transient static final String PEST_FARMER = "Pest Farmer";
 
     private transient static final File configRewarpFile = new File("farmhelper_rewarp.json");
 
@@ -912,6 +914,365 @@ public class FarmHelperConfig extends Config {
     public static int autoSprayonatorStartDelay = 0;
     // </editor-fold>
 
+    // <editor-fold desc="PESTS DESTROYER">
+    @Switch(
+            name = "Enable Pests Destroyer", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Destroys pests"
+    )
+    public static boolean enablePestsDestroyer = false;
+
+    @Slider(
+            name = "Start killing pests at X pests", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "The amount of pests to start killing pests",
+            min = 1, max = 8
+    )
+    public static int startKillingPestsAt = 3;
+
+    @Slider(
+            name = "Additional GUI Delay (ms)", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Extra time to wait between clicks",
+            min = 0, max = 5000
+    )
+    public static int pestAdditionalGUIDelay = 0;
+
+    @Switch(
+            name = "Sprint while flying", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Sprints while flying"
+    )
+    public static boolean sprintWhileFlying = false;
+
+    @Switch(
+            name = "Use AOTE/V in Pests Destroyer", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Uses AOTE/V in Pests Destroyer"
+    )
+    public static boolean useAoteVInPestsDestroyer = false;
+
+    @Switch(
+            name = "Don't teleport to plots when the spawn is not obstructed", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Prevents the macro from teleporting to plots"
+    )
+    public static boolean dontTeleportToPlots = false;
+
+    @Switch(
+            name = "Pause the Pests Destroyer during Jacob's contests", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Pauses the Pests Destroyer during Jacob's contests"
+    )
+    public static boolean pausePestsDestroyerDuringJacobsContest = true;
+
+    @Switch(
+            name = "Pests Destroyer Afk Infinite mode", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            description = "Will turn on Pests Destroyer automatically when you are not farming"
+    )
+    public static boolean pestsDestroyerAfkInfiniteMode = false;
+
+    @Slider(
+            name = "Stuck Timer (minutes)", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            min = 1, max = 10
+    )
+    public static int pestsKillerStuckTime = 3;
+
+    @Slider(
+            name = "Ticks of not seeing pest while attacking", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            min = 0, max = 100
+    )
+    public static int pestsKillerTicksOfNotSeeingPestWhileAttacking = 20;
+
+    public static void triggerManuallyPestsDestroyer() {
+        if (FarmHelperConfig.fakePixelMode) {
+            if (com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance().isRunning()) {
+                com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance().stop();
+                com.jelly.farmhelperv2.util.LogUtils.sendSuccess("Manually stopped FakePixel Pest Destroyer!");
+            } else {
+                com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance().startManual();
+                com.jelly.farmhelperv2.util.LogUtils.sendSuccess("Manually started FakePixel Pest Destroyer!");
+            }
+            return;
+        }
+        if (com.jelly.farmhelperv2.feature.impl.PestsDestroyer.getInstance().isRunning()) {
+            com.jelly.farmhelperv2.feature.impl.PestsDestroyer.getInstance().stop();
+            com.jelly.farmhelperv2.util.LogUtils.sendSuccess("Manually stopped Pests Destroyer!");
+        } else {
+            com.jelly.farmhelperv2.feature.impl.PestsDestroyer.getInstance().start();
+            com.jelly.farmhelperv2.util.LogUtils.sendSuccess("Manually started Pests Destroyer!");
+        }
+    }
+
+    @Switch(
+            name = "Pests Destroyer on the track", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track",
+            description = "Will kill pests if they are in your range while farming"
+    )
+    public static boolean pestsDestroyerOnTheTrack = false;
+
+    @Slider(
+            name = "Pests Destroyer on the track FOV", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track",
+            min = 1, max = 360
+    )
+    public static int pestsDestroyerOnTheTrackFOV = 360;
+
+    @Slider(
+            name = "Time for the pest to stay in range to activate (ms)", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track",
+            min = 0, max = 2000
+    )
+    public static int pestsDestroyerOnTheTrackTimeForPestToStayInRange = 750;
+
+    @Slider(
+            name = "Stuck timer (ms)", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track",
+            min = 4000, max = 25000
+    )
+    public static int pestsDestroyerOnTheTrackStuckTimer = 5000;
+
+    @Switch(
+            name = "Don't kill pests on track during Jacob's Contest", category = PESTS_DESTROYER, subcategory = "Pests Destroyer on the track"
+    )
+    public static boolean dontKillPestsOnTrackDuringJacobsContest = true;
+
+    @KeyBind(
+            name = "Enable Pests Destroyer", category = PESTS_DESTROYER, subcategory = "Pests Destroyer",
+            size = 2
+    )
+    public static OneKeyBind enablePestsDestroyerKeyBind = new OneKeyBind(Keyboard.KEY_NONE);
+
+    @Switch(
+            name = "Swap Armor Before Killing", category = PESTS_DESTROYER, subcategory = "Armor Swapper"
+    )
+    public static boolean pestSwapArmorBefore = false;
+
+    @Slider(
+            name = "Wardrobe Slot To Kill With", category = PESTS_DESTROYER, subcategory = "Armor Swapper",
+            min = 1, max = 18
+    )
+    public static int pestArmorSlot0 = 1;
+
+    @Switch(
+            name = "Swap Armor After Killing", category = PESTS_DESTROYER, subcategory = "Armor Swapper"
+    )
+    public static boolean pestSwapArmorAfter = false;
+
+    @Slider(
+            name = "Wardrobe Slot To Farm With", category = PESTS_DESTROYER, subcategory = "Armor Swapper",
+            min = 1, max = 18
+    )
+    public static int pestArmorSlot1 = 1;
+
+    @Switch(
+            name = "Swap Equipments", category = PESTS_DESTROYER, subcategory = "Armor Swapper"
+    )
+    public static boolean pestSwapEquipments = false;
+
+    @Text(
+            name = "Pest Swap Equipments", category = PESTS_DESTROYER, subcategory = "Armor Swapper", size = 2,
+            placeholder = "Pesthunter's Necklace|Pesthunter's Cloak|Pesthunter's Belt"
+    )
+    public static String pestSwapEq = "";
+
+    @Switch(
+            name = "Pests ESP", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static boolean pestsESP = true;
+
+    @Color(
+            name = "ESP Color", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static OneColor pestsESPColor = new OneColor(255, 0, 0, 255);
+
+    @Switch(
+            name = "Pests Tracers", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static boolean pestsTracers = true;
+
+    @Color(
+            name = "Tracers Color", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static OneColor pestsTracersColor = new OneColor(255, 0, 0, 255);
+
+    @Switch(
+            name = "Highlight Plot With Pests", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static boolean highlightPlotWithPests = true;
+
+    @Color(
+            name = "Plot Highlight Color", category = PESTS_DESTROYER, subcategory = "Drawings"
+    )
+    public static OneColor plotHighlightColor = new OneColor(255, 0, 0, 100);
+
+    @Switch(
+            name = "Profit Calc Count Pest Drop", category = PESTS_DESTROYER, subcategory = "Profit Calculator"
+    )
+    public static boolean profitCalcCountPestDrop = true;
+    // </editor-fold>
+
+    // <editor-fold desc="PEST FARMER">
+    @Switch(
+            name = "Enable FakePixel Pest Farming", category = PEST_FARMER,
+            description = "Enables FakePixel-compatible pest farming system"
+    )
+    public static boolean enableFakePixelPestFarming = true;
+
+    @Switch(
+            name = "FakePixel Inline Pest Killer", category = PEST_FARMER,
+            description = "Kills pests within vacuum range WITHOUT pausing the farming macro (Tier 1). Enabled by default; Tier 2 (FakePixel Pest Farming) handles farther pests."
+    )
+    public static boolean fakePixelInlinePestKiller = true;
+
+    @Text(
+            name = "Custom Vacuum Item Keyword", category = PEST_FARMER,
+            description = "If your FakePixel vacuum item name does not contain 'vacuum', 'hooverius', 'pest', or 'destroyer', enter a keyword from its name here (case-insensitive). Leave blank to use defaults."
+    )
+    public static String fakePixelVacuumItemName = "";
+
+    @Slider(
+            name = "Start Hunting At (Pests)", category = PEST_FARMER,
+            description = "Start hunting pests when detected pest count reaches this value while farming",
+            min = 1, max = 8
+    )
+    public static int fakePixelStartHuntingPestsAt = 4;
+
+    @Switch(
+            name = "Set Home Before Hunt", category = PEST_FARMER,
+            description = "Sends /sethome at current farm position before starting to hunt pests"
+    )
+    public static boolean fakePixelSetHomeBeforeHunt = true;
+
+    @Switch(
+            name = "Rewarp After Hunt", category = PEST_FARMER,
+            description = "Sends rewarp command (e.g. /warp garden) after all pests are killed to return to spawn"
+    )
+    public static boolean fakePixelRewarpAfterHunt = true;
+
+    @Text(
+            name = "Rewarp Command After Hunt", category = PEST_FARMER,
+            description = "Command sent after hunting pests to return to spawn point"
+    )
+    public static String fakePixelRewarpCommand = "/warp garden";
+
+    @Switch(
+            name = "FakePixel Mode", category = PEST_FARMER,
+            description = "Adapts pest detection to FakePixel server entity and item mechanisms"
+    )
+    public static boolean fakePixelMode = true;
+
+    @Dropdown(
+            name = "Pest Priority", category = PEST_FARMER,
+            description = "Pest targeting priority",
+            options = {"NEAREST", "CURRENT_PLOT", "FIRST_DETECTED"}
+    )
+    public static int pestPriorityMode = 0;
+
+    @Slider(
+            name = "Max Detection Distance", category = PEST_FARMER,
+            min = 10.0F, max = 256.0F
+    )
+    public static float pestMaxDetectionDistance = 128.0F;
+
+    @Slider(
+            name = "Vacuum Range", category = PEST_FARMER,
+            min = 2.0F, max = 15.0F
+    )
+    public static float pestVacuumRange = 5.0F;
+
+    @Slider(
+            name = "Pest Scan Interval (ms)", category = PEST_FARMER,
+            min = 100, max = 2000
+    )
+    public static int pestScanThrottleMs = 500;
+
+    @Slider(
+            name = "Interaction Timeout (ms)", category = PEST_FARMER,
+            min = 1000, max = 10000
+    )
+    public static int pestInteractionTimeoutMs = 5000;
+
+    @Slider(
+            name = "Max Retry Count", category = PEST_FARMER,
+            min = 1, max = 10
+    )
+    public static int pestMaxRetryCount = 3;
+
+    @Switch(
+            name = "Pause Farming While Handling Pest", category = PEST_FARMER,
+            description = "Pauses farming macro while collecting pests"
+    )
+    public static boolean pauseFarmingWhileHandlingPest = true;
+
+    @Switch(
+            name = "Pest Debug Logging", category = PEST_FARMER,
+            description = "Enables detailed pest logging"
+    )
+    public static boolean pestDebugLogging = true;
+
+    @Switch(
+            name = "Enable Pest Farming", category = PEST_FARMER
+    )
+    public static boolean pestFarming = false;
+
+    @Switch(
+            name = "Use Squeaky Mousemat To Set Angle", category = PEST_FARMER
+    )
+    public static boolean pestFarmingUseMousemat = false;
+
+    @Slider(
+            name = "Fermento Armor Slot", category = PEST_FARMER,
+            min = 1, max = 18
+    )
+    public static int pestFarmingFermentoSlot = 1;
+
+    @Slider(
+            name = "Biohazard Armor Slot", category = PEST_FARMER,
+            min = 1, max = 18
+    )
+    public static int pestFarmingBiohazardSlot = 1;
+
+    @Slider(
+            name = "Pest Spawn Timer (In seconds)", category = PEST_FARMER,
+            min = 30, max = 300
+    )
+    public static int pestFarmingWaitTime = 255;
+
+    @Switch(
+            name = "Set Spawn After Armor Swap", category = PEST_FARMER
+    )
+    public static boolean pestFarmingSetSpawn = false;
+
+    @Switch(
+            name = "Swap Equipments", category = PEST_FARMER
+    )
+    public static boolean pestFarmingSwapEq = false;
+
+    @Text(
+            name = "Farming Fortune Equipments", category = PEST_FARMER, size = 2,
+            placeholder = "Ex: Lotus Necklace|Lotus Cloak|Lotus Belt|Lotus Bracelet"
+    )
+    public static String pestFarmingEq0 = "";
+
+    @Text(
+            name = "Pest Chance Equipments", category = PEST_FARMER, size = 2,
+            placeholder = "Ex: Pesthunter's Necklace|Pesthunter's Belt|Pesthunter's Gloves|Pest Vest"
+    )
+    public static String pestFarmingEq1 = "";
+
+    @Slider(
+            name = "Equipment Click Delay", category = PEST_FARMER,
+            min = 300, max = 2000, step = 10
+    )
+    public static int pestFarmerEquipmentClickDelay = 400;
+
+    @Switch(
+            name = "Start Pests Destroyer During Farming", category = PEST_FARMER
+    )
+    public static boolean pestFarmerKillPests = false;
+
+    @Switch(
+            name = "Cast Rod After Killing", category = PEST_FARMER
+    )
+    public static boolean pestFarmerCastRod = false;
+
+    @Slider(
+            name = "Pest Count to Start Killing At", category = PEST_FARMER,
+            min = 1, max = 8
+    )
+    public static int pestFarmerStartKillAt = 1;
+    // </editor-fold>
+
     public FarmHelperConfig() {
         super(new Mod("Farm Helper", ModType.HYPIXEL, "/farmhelper/icon-mod/icon.png"), "/farmhelper/config.json");
         initialize();
@@ -1130,7 +1491,6 @@ public class FarmHelperConfig extends Config {
         C_NORMAL_TYPE
     }
 
-    @Getter
     public enum CropEnum {
         NONE("None"),
         CARROT("Carrot"),
@@ -1151,6 +1511,8 @@ public class FarmHelperConfig extends Config {
         ;
 
         final String localizedName;
+
+        public String getLocalizedName() { return localizedName; }
 
         CropEnum(String localizedName) {
             this.localizedName = localizedName;

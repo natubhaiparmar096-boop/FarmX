@@ -25,7 +25,7 @@ import java.util.function.IntSupplier;
 public class FarmXMobileGui extends GuiScreen {
     private static final String[] PAGE_NAMES = {
             "Keybinds", "Farming", "Rotation", "Crop Utils", "Rewarp & Spawn",
-            "Failsafe", "Detection", "Delays Rows", "Delays Rot/Rewarp", "Auto Sprayonator", "Misc"
+            "Failsafe", "Detection", "Delays Rows", "Delays Rot/Rewarp", "Auto Sprayonator", "Pests & Wardrobe", "Misc"
     };
     private int page = 0;
     /** Which keybind button is waiting for a key press; 0 = none. */
@@ -193,6 +193,23 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_SPRAY_START_M = 154;
     private static final int ID_SPRAY_START_P = 155;
 
+    private static final int ID_PEST_FARMING = 160;
+    private static final int ID_PEST_DESTROYER = 161;
+    private static final int ID_PEST_ON_TRACK = 162;
+    private static final int ID_PEST_ESP = 164;
+    private static final int ID_PEST_TRACERS = 165;
+    private static final int ID_PEST_SWAP_ARMOR = 166;
+    private static final int ID_PEST_TRIGGER_NOW = 167;
+    private static final int ID_FAKEPIXEL_PEST = 168;
+    private static final int ID_FAKEPIXEL_MODE = 169;
+    private static final int ID_PEST_PRIORITY = 170;
+    private static final int ID_PEST_DEBUG = 171;
+    private static final int ID_FP_HUNT_AT_M = 172;
+    private static final int ID_FP_HUNT_AT_P = 173;
+    private static final int ID_FP_SETHOME = 174;
+    private static final int ID_FP_REWARP = 175;
+    private static final int ID_FP_INLINE_KILLER = 176;
+
     @Override
     public void initGui() {
         this.buttonList.clear();
@@ -326,6 +343,19 @@ public class FarmXMobileGui extends GuiScreen {
                 pair(ID_SPRAY_START_M, ID_SPRAY_START_P, y, "Start Delay " + FarmHelperConfig.autoSprayonatorStartDelay + "ms");
                 break;
             case 10:
+                btn(ID_FAKEPIXEL_PEST, cx, y, 200, on("FakePixel Pest Farming", FarmHelperConfig.enableFakePixelPestFarming)); y += g;
+                btn(ID_FAKEPIXEL_MODE, cx, y, 200, on("FakePixel Mode", FarmHelperConfig.fakePixelMode)); y += g;
+                btn(ID_FP_INLINE_KILLER, cx, y, 200, on("Inline Pest Killer", FarmHelperConfig.fakePixelInlinePestKiller)); y += g;
+                pair(ID_FP_HUNT_AT_M, ID_FP_HUNT_AT_P, y, "Hunt At: " + FarmHelperConfig.fakePixelStartHuntingPestsAt + " Pests"); y += g;
+                btn(ID_FP_SETHOME, cx, y, 200, on("/sethome Before Hunt", FarmHelperConfig.fakePixelSetHomeBeforeHunt)); y += g;
+                btn(ID_FP_REWARP, cx, y, 200, on("/warp garden After Hunt", FarmHelperConfig.fakePixelRewarpAfterHunt)); y += g;
+                btn(ID_PEST_PRIORITY, cx, y, 200, pestPriorityLabel()); y += g;
+                btn(ID_PEST_ESP, cx, y, 200, on("Pests ESP", FarmHelperConfig.pestsESP)); y += g;
+                btn(ID_PEST_TRACERS, cx, y, 200, on("Pests Tracers", FarmHelperConfig.pestsTracers)); y += g;
+                btn(ID_PEST_DEBUG, cx, y, 200, on("Pest Debug Logs", FarmHelperConfig.pestDebugLogging)); y += g;
+                btn(ID_PEST_TRIGGER_NOW, cx, y, 200, "Trigger Destroyer Now");
+                break;
+            case 11:
             default:
                 btn(ID_ANTISTUCK, cx, y, 200, on("Anti Stuck", FarmHelperConfig.tmpAntiStuckEnabled)); y += g;
                 pair(ID_AS_TRIES_M, ID_AS_TRIES_P, y, "AntiStuck Tries " + FarmHelperConfig.antiStuckTriesUntilRewarp); y += g;
@@ -660,6 +690,14 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_SPRAY_START_M: adjI(() -> FarmHelperConfig.autoSprayonatorStartDelay, v -> FarmHelperConfig.autoSprayonatorStartDelay = v, -100, 0, 5000); break;
             case ID_SPRAY_START_P: adjI(() -> FarmHelperConfig.autoSprayonatorStartDelay, v -> FarmHelperConfig.autoSprayonatorStartDelay = v, 100, 0, 5000); break;
 
+            case ID_PEST_FARMING: FarmHelperConfig.pestFarming = !FarmHelperConfig.pestFarming; button.displayString = on("Pest Farming", FarmHelperConfig.pestFarming); break;
+            case ID_PEST_DESTROYER: FarmHelperConfig.enablePestsDestroyer = !FarmHelperConfig.enablePestsDestroyer; button.displayString = on("Pests Destroyer", FarmHelperConfig.enablePestsDestroyer); break;
+            case ID_PEST_ON_TRACK: FarmHelperConfig.pestsDestroyerOnTheTrack = !FarmHelperConfig.pestsDestroyerOnTheTrack; button.displayString = on("Kill Pests On Track", FarmHelperConfig.pestsDestroyerOnTheTrack); break;
+            case ID_PEST_ESP: FarmHelperConfig.pestsESP = !FarmHelperConfig.pestsESP; button.displayString = on("Pests ESP", FarmHelperConfig.pestsESP); break;
+            case ID_PEST_TRACERS: FarmHelperConfig.pestsTracers = !FarmHelperConfig.pestsTracers; button.displayString = on("Pests Tracers", FarmHelperConfig.pestsTracers); break;
+            case ID_PEST_SWAP_ARMOR: FarmHelperConfig.pestSwapArmorBefore = !FarmHelperConfig.pestSwapArmorBefore; button.displayString = on("Swap Armor Before Kill", FarmHelperConfig.pestSwapArmorBefore); break;
+            case ID_PEST_TRIGGER_NOW: com.jelly.farmhelperv2.config.FarmHelperConfig.triggerManuallyPestsDestroyer(); break;
+
             case ID_ANTISTUCK: FarmHelperConfig.tmpAntiStuckEnabled = !FarmHelperConfig.tmpAntiStuckEnabled; button.displayString = on("Anti Stuck", FarmHelperConfig.tmpAntiStuckEnabled); break;
             case ID_AS_TRIES_M: adjI(() -> FarmHelperConfig.antiStuckTriesUntilRewarp, v -> FarmHelperConfig.antiStuckTriesUntilRewarp = v, -1, 3, 10); break;
             case ID_AS_TRIES_P: adjI(() -> FarmHelperConfig.antiStuckTriesUntilRewarp, v -> FarmHelperConfig.antiStuckTriesUntilRewarp = v, 1, 3, 10); break;
@@ -680,9 +718,25 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_JACOB_CROPS: FarmHelperConfig.jacobContestCurrentCropsOnly = !FarmHelperConfig.jacobContestCurrentCropsOnly; button.displayString = on("Jacob Current Crops Only", FarmHelperConfig.jacobContestCurrentCropsOnly); break;
             case ID_JACOB_HUD: FarmHelperConfig.showJacobsContestHud = !FarmHelperConfig.showJacobsContestHud; button.displayString = on("Jacob's Contest HUD", FarmHelperConfig.showJacobsContestHud); break;
             case ID_PDOTT: FarmHelperConfig.showDebugLogsAboutPDOTT = !FarmHelperConfig.showDebugLogsAboutPDOTT; button.displayString = on("PD OTT Debug Logs", FarmHelperConfig.showDebugLogsAboutPDOTT); break;
+            case ID_FAKEPIXEL_PEST: FarmHelperConfig.enableFakePixelPestFarming = !FarmHelperConfig.enableFakePixelPestFarming; button.displayString = on("FakePixel Pest Farming", FarmHelperConfig.enableFakePixelPestFarming); break;
+            case ID_FAKEPIXEL_MODE: FarmHelperConfig.fakePixelMode = !FarmHelperConfig.fakePixelMode; button.displayString = on("FakePixel Mode", FarmHelperConfig.fakePixelMode); break;
+            case ID_FP_INLINE_KILLER: FarmHelperConfig.fakePixelInlinePestKiller = !FarmHelperConfig.fakePixelInlinePestKiller; button.displayString = on("Inline Pest Killer", FarmHelperConfig.fakePixelInlinePestKiller); break;
+            case ID_FP_HUNT_AT_M: adjI(() -> FarmHelperConfig.fakePixelStartHuntingPestsAt, v -> FarmHelperConfig.fakePixelStartHuntingPestsAt = v, -1, 1, 8); break;
+            case ID_FP_HUNT_AT_P: adjI(() -> FarmHelperConfig.fakePixelStartHuntingPestsAt, v -> FarmHelperConfig.fakePixelStartHuntingPestsAt = v, 1, 1, 8); break;
+            case ID_FP_SETHOME: FarmHelperConfig.fakePixelSetHomeBeforeHunt = !FarmHelperConfig.fakePixelSetHomeBeforeHunt; button.displayString = on("/sethome Before Hunt", FarmHelperConfig.fakePixelSetHomeBeforeHunt); break;
+            case ID_FP_REWARP: FarmHelperConfig.fakePixelRewarpAfterHunt = !FarmHelperConfig.fakePixelRewarpAfterHunt; button.displayString = on("/warp garden After Hunt", FarmHelperConfig.fakePixelRewarpAfterHunt); break;
+            case ID_PEST_PRIORITY: FarmHelperConfig.pestPriorityMode = (FarmHelperConfig.pestPriorityMode + 1) % 3; button.displayString = pestPriorityLabel(); break;
+            case ID_PEST_DEBUG: FarmHelperConfig.pestDebugLogging = !FarmHelperConfig.pestDebugLogging; button.displayString = on("Pest Debug Logs", FarmHelperConfig.pestDebugLogging); break;
             default:
                 break;
         }
+    }
+
+    private String pestPriorityLabel() {
+        String[] priorities = {"Nearest", "Current Plot", "First Detected"};
+        int p = FarmHelperConfig.pestPriorityMode;
+        if (p < 0 || p >= priorities.length) p = 0;
+        return "Pest Priority: " + priorities[p];
     }
 
     private String listeningLabel(int id, String name, OneKeyBind bind) {

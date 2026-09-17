@@ -10,8 +10,6 @@ import com.jelly.farmhelperv2.mixin.client.EntityPlayerAccessor;
 import com.jelly.farmhelperv2.mixin.pathfinder.PathfinderAccessor;
 import com.jelly.farmhelperv2.util.*;
 import com.jelly.farmhelperv2.util.helper.*;
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCactus;
 import net.minecraft.block.BlockFenceGate;
@@ -53,7 +51,6 @@ public class FlyPathFinderExecutor {
     private final Minecraft mc = Minecraft.getMinecraft();
     private Thread pathfinderTask;
     private Thread timeoutTask;
-    @Getter
     private State state = State.NONE;
     private int tick = 0;
     private final CopyOnWriteArrayList<Vec3> path = new CopyOnWriteArrayList<>();
@@ -61,16 +58,11 @@ public class FlyPathFinderExecutor {
     private Entity targetEntity;
     private boolean follow;
     private boolean smooth;
-    @Setter
     private boolean sprinting = false;
-    @Setter
-    @Getter
     private boolean useAOTV = false;
-    @Getter
     private long lastTpTime = 0;
     private final FlyNodeProcessor flyNodeProcessor = new FlyNodeProcessor();
     private final PathFinder pathFinder = new PathFinder(flyNodeProcessor);
-    @Getter
     private float neededYaw = Integer.MIN_VALUE;
     private final int MAX_DISTANCE = 1500;
     private int ticksAtLastPos = 0;
@@ -78,13 +70,21 @@ public class FlyPathFinderExecutor {
     private float yModifier = 0;
     private final Clock stuckBreak = new Clock();
     private final Clock stuckCheckDelay = new Clock();
-    @Getter
-    @Setter
     private boolean dontRotate = false;
     private final EvictingQueue<Position> lastPositions = EvictingQueue.create(100);
     private Position lastPosition;
-    @Setter
     private float stoppingPositionThreshold = 0.75f;
+
+    public State getState() { return state; }
+    public boolean isSprinting() { return sprinting; }
+    public void setSprinting(boolean sprinting) { this.sprinting = sprinting; }
+    public boolean isUseAOTV() { return useAOTV; }
+    public void setUseAOTV(boolean useAOTV) { this.useAOTV = useAOTV; }
+    public long getLastTpTime() { return lastTpTime; }
+    public float getNeededYaw() { return neededYaw; }
+    public boolean isDontRotate() { return dontRotate; }
+    public void setDontRotate(boolean dontRotate) { this.dontRotate = dontRotate; }
+    public void setStoppingPositionThreshold(float stoppingPositionThreshold) { this.stoppingPositionThreshold = stoppingPositionThreshold; }
 
 
     public void findPath(Vec3 pos, boolean follow, boolean smooth) {

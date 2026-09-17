@@ -18,9 +18,10 @@ public class FeatureManager {
         return instance;
     }
 
-    @Getter
-    @Setter
     private Set<IFeature> pauseExecutionFeatures = new HashSet<>();
+
+    public Set<IFeature> getPauseExecutionFeatures() { return pauseExecutionFeatures; }
+    public void setPauseExecutionFeatures(Set<IFeature> pauseExecutionFeatures) { this.pauseExecutionFeatures = pauseExecutionFeatures; }
 
     public List<IFeature> fillFeatures() {
         List<IFeature> featuresList = Arrays.asList(
@@ -28,7 +29,12 @@ public class FeatureManager {
                 BPSTracker.getInstance(),
                 DesyncChecker.getInstance(),
                 LagDetector.getInstance(),
-                AutoSprayonator.getInstance()
+                AutoSprayonator.getInstance(),
+                PestsDestroyer.getInstance(),
+                PestFarmer.getInstance(),
+                PestsDestroyerOnTheTrack.getInstance(),
+                com.jelly.farmhelperv2.feature.pest.FakePixelPestController.getInstance(),
+                FakePixelInlinePestKiller.getInstance()
         );
         features.addAll(featuresList);
         return features;

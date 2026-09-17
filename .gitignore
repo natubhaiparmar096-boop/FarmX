@@ -4,3 +4,5 @@ run/
 build/
 .gradle/
 *.swp
+latestlog.txt
+launcher_logs/

@@ -18,9 +18,6 @@ import com.jelly.farmhelperv2.util.RenderUtils;
 import com.jelly.farmhelperv2.util.helper.AudioManager;
 import com.jelly.farmhelperv2.util.helper.Clock;
 import com.jelly.farmhelperv2.util.helper.Timer;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundCategory;
 import net.minecraft.util.BlockPos;
@@ -40,18 +37,10 @@ import java.util.concurrent.TimeUnit;
 public class MacroHandler {
     private static MacroHandler instance;
     private final Minecraft mc = Minecraft.getMinecraft();
-    @Getter
     private final Timer macroingTimer = new Timer();
-    @Getter
     private final Timer analyticsTimer = new Timer();
-    @Getter
-    @Setter
     private Optional<AbstractMacro> currentMacro = Optional.empty();
-    @Getter
-    @Setter
     private boolean isMacroToggled = false;
-    @Getter
-    @Setter
     private boolean startingUp = false;
     Runnable startCurrent = () -> {
         KeyBindUtils.stopMovement();
@@ -60,9 +49,18 @@ public class MacroHandler {
         }
         startingUp = false;
     };
-    @Getter
-    @Setter
     private FarmHelperConfig.CropEnum crop = FarmHelperConfig.CropEnum.NONE;
+
+    public Timer getMacroingTimer() { return macroingTimer; }
+    public Timer getAnalyticsTimer() { return analyticsTimer; }
+    public Optional<AbstractMacro> getCurrentMacro() { return currentMacro; }
+    public void setCurrentMacro(Optional<AbstractMacro> currentMacro) { this.currentMacro = currentMacro; }
+    public boolean isMacroToggled() { return isMacroToggled; }
+    public void setMacroToggled(boolean isMacroToggled) { this.isMacroToggled = isMacroToggled; }
+    public boolean isStartingUp() { return startingUp; }
+    public void setStartingUp(boolean startingUp) { this.startingUp = startingUp; }
+    public FarmHelperConfig.CropEnum getCrop() { return crop; }
+    public void setCrop(FarmHelperConfig.CropEnum crop) { this.crop = crop; }
 
     public static MacroHandler getInstance() {
         if (instance == null) {
@@ -205,8 +203,8 @@ public class MacroHandler {
         pauseMacro(false);
     }
 
-    @Getter
     private boolean resume = false;
+    public boolean isResume() { return resume; }
 
     public void resumeMacro() {
         currentMacro.ifPresent(cm -> {
@@ -355,13 +353,14 @@ public class MacroHandler {
         });
     }
 
-    @Setter
     private Optional<BlockPos> beforeTeleportationPos = Optional.empty();
-    @Getter
     private final Clock afterRewarpDelay = new Clock();
-    @Setter
-    @Getter
     private boolean rewarpTeleport = false;
+
+    public void setBeforeTeleportationPos(Optional<BlockPos> beforeTeleportationPos) { this.beforeTeleportationPos = beforeTeleportationPos; }
+    public Clock getAfterRewarpDelay() { return afterRewarpDelay; }
+    public boolean isRewarpTeleport() { return rewarpTeleport; }
+    public void setRewarpTeleport(boolean rewarpTeleport) { this.rewarpTeleport = rewarpTeleport; }
 
     public void onTickCheckTeleport() {
         checkForTeleport();
@@ -415,8 +414,8 @@ public class MacroHandler {
         }
     }
 
-    @Getter
     private long lastTpTry = 0;
+    public long getLastTpTry() { return lastTpTry; }
 
     public void triggerWarpGarden(boolean force, boolean rewarpTeleport) {
         triggerWarpGarden(force, rewarpTeleport, true);
@@ -449,7 +448,6 @@ public class MacroHandler {
         return false;
     }
 
-    @AllArgsConstructor
     public enum Macros {
         S_SHAPE_MUSHROOM_ROTATE_MACRO(SShapeMushroomRotateMacro.class),
         S_SHAPE_MUSHROOM_MACRO(SShapeMushroomMacro.class),
@@ -462,6 +460,10 @@ public class MacroHandler {
 
         private static final Map<Macros, AbstractMacro> macros = new HashMap<>();
         private final Class<? extends AbstractMacro> macroClass;
+
+        Macros(Class<? extends AbstractMacro> macroClass) {
+            this.macroClass = macroClass;
+        }
 
         public <T extends AbstractMacro> T getMacro() {
             if (!macros.containsKey(this)) {

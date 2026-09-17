@@ -1,8 +1,6 @@
 package com.jelly.farmhelperv2.util.helper;
 
 import com.jelly.farmhelperv2.config.FarmHelperConfig;
-import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundCategory;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -19,13 +17,14 @@ public class AudioManager {
         return instance;
     }
 
-    @Getter
     private boolean minecraftSoundEnabled = false;
 
     private final Clock delayBetweenPings = new Clock();
     private int numSounds = 15;
-    @Setter
     private float soundBeforeChange = 0;
+
+    public boolean isMinecraftSoundEnabled() { return minecraftSoundEnabled; }
+    public void setSoundBeforeChange(float soundBeforeChange) { this.soundBeforeChange = soundBeforeChange; }
 
     public void resetSound() {
         minecraftSoundEnabled = false;

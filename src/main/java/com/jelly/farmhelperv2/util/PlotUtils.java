@@ -17,10 +17,11 @@ import java.util.*;
 
 public class PlotUtils {
     private static final File plotsFile = new File("config/farmhelperv2/plots.json");
-    @Getter
     private static final HashMap<Integer, Plot> PLOTS = new HashMap<>();
-    @Getter
     private static final ArrayList<Integer> PLOT_NUMBERS = new ArrayList<>(Arrays.asList(21, 13, 9, 14, 22, 15, 5, 1, 6, 16, 10, 2, 0, 3, 11, 17, 7, 4, 8, 18, 23, 19, 12, 20, 24));
+
+    public static HashMap<Integer, Plot> getPLOTS() { return PLOTS; }
+    public static ArrayList<Integer> getPLOT_NUMBERS() { return PLOT_NUMBERS; }
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     public static void init() {
