@@ -16,8 +16,8 @@ public class LagDetector implements IFeature {
     private static LagDetector instance;
     private final Minecraft mc = Minecraft.getMinecraft();
     private final Clock recentlyLagged = new Clock();
-    @Getter
     private long lastReceivedPacketTime = -1;
+    public long getLastReceivedPacketTime() { return lastReceivedPacketTime; }
     private Vec3 lastPacketPosition = null;
     private final FifoQueue<Float> tpsHistory = new FifoQueue<>(20);
     private float timeJoined = 0;

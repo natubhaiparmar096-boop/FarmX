@@ -40,73 +40,81 @@ public class GameStateHandler {
     private final Pattern areaPattern = Pattern.compile("Area:\\s(.+)");
     private final Timer notMovingTimer = new Timer();
     private final Timer reWarpTimer = new Timer();
-    @Getter
     private final Clock jacobContestLeftClock = new Clock();
     public final Pattern jacobsRemainingTimePattern = Pattern.compile("([0-9]|[1-2][0-9])m([0-9]|[1-5][0-9])s");
     public final Pattern jacobsStartsInTimePattern = Pattern.compile("Starts In: ([1-3]?[0-9])?m ?([1-5]?[0-9])?s?");
     private final Pattern serverClosingPattern = Pattern.compile("Server closing: (?<minutes>\\d+):(?<seconds>\\d+) .*");
-    @Getter
     private Location lastLocation = Location.TELEPORTING;
-    @Getter
     private Location location = Location.TELEPORTING;
-    @Getter
     private long lastTimeInGarden = -1;
 
     private boolean isInJacobContest = false;
     private boolean isGuestInGarden = false;
-    @Getter
     private boolean frontWalkable;
-    @Getter
     private boolean rightWalkable;
-    @Getter
     private boolean backWalkable;
-    @Getter
     private boolean leftWalkable;
-    @Getter
     private double dx;
-    @Getter
     private double dz;
-    @Getter
     private double dy;
-    @Getter
     private String serverIP;
     private long randomValueToWait = -1;
     private long randomRewarpValueToWait = -1;
-    @Getter
     private BuffState cookieBuffState = BuffState.UNKNOWN;
-    @Getter
     private BuffState godPotState = BuffState.UNKNOWN;
-    @Getter
     private BuffState sprayonatorState = BuffState.UNKNOWN;
-    @Getter
     private double currentPurse = 0;
-    @Getter
     private double previousPurse = 0;
-    @Getter
     private long bits = 0;
-    @Getter
     private long copper = 0;
-    @Getter
     private int currentPlot = 0;
-    @Getter
     private Optional<FarmHelperConfig.CropEnum> jacobsContestCrop = Optional.empty();
-    @Getter
     private List<FarmHelperConfig.CropEnum> jacobsContestNextCrop = new ArrayList<>();
-    @Getter
     private int jacobsContestCropNumber = 0;
-    @Getter
     private JacobMedal jacobMedal = JacobMedal.NONE;
     private long randomValueToWaitNextTime = -1;
-    @Getter
-    @Setter
     private boolean wasInJacobContest = false;
-    @Getter
-    @Setter
     private Optional<Integer> serverClosingSeconds = Optional.empty();
-    @Getter
     private int speed = 0;
-    @Setter
+    private int pestsCount = 0;
+    private int currentPlotPestsCount = 0;
+    private List<Integer> infestedPlots = new ArrayList<>();
     private boolean updatedState = false;
+
+    public Clock getJacobContestLeftClock() { return jacobContestLeftClock; }
+    public Location getLastLocation() { return lastLocation; }
+    public Location getLocation() { return location; }
+    public long getLastTimeInGarden() { return lastTimeInGarden; }
+    public boolean isFrontWalkable() { return frontWalkable; }
+    public boolean isRightWalkable() { return rightWalkable; }
+    public boolean isBackWalkable() { return backWalkable; }
+    public boolean isLeftWalkable() { return leftWalkable; }
+    public double getDx() { return dx; }
+    public double getDz() { return dz; }
+    public double getDy() { return dy; }
+    public String getServerIP() { return serverIP; }
+    public BuffState getCookieBuffState() { return cookieBuffState; }
+    public BuffState getGodPotState() { return godPotState; }
+    public BuffState getSprayonatorState() { return sprayonatorState; }
+    public double getCurrentPurse() { return currentPurse; }
+    public double getPreviousPurse() { return previousPurse; }
+    public long getBits() { return bits; }
+    public long getCopper() { return copper; }
+    public int getCurrentPlot() { return currentPlot; }
+    public Optional<FarmHelperConfig.CropEnum> getJacobsContestCrop() { return jacobsContestCrop; }
+    public List<FarmHelperConfig.CropEnum> getJacobsContestNextCrop() { return jacobsContestNextCrop; }
+    public int getJacobsContestCropNumber() { return jacobsContestCropNumber; }
+    public JacobMedal getJacobMedal() { return jacobMedal; }
+    public boolean isWasInJacobContest() { return wasInJacobContest; }
+    public void setWasInJacobContest(boolean wasInJacobContest) { this.wasInJacobContest = wasInJacobContest; }
+    public Optional<Integer> getServerClosingSeconds() { return serverClosingSeconds; }
+    public void setServerClosingSeconds(Optional<Integer> serverClosingSeconds) { this.serverClosingSeconds = serverClosingSeconds; }
+    public int getSpeed() { return speed; }
+    public int getPestsCount() { return pestsCount; }
+    public int getCurrentPlotPestsCount() { return currentPlotPestsCount; }
+    public List<Integer> getInfestedPlots() { return infestedPlots; }
+    public boolean isUpdatedState() { return updatedState; }
+    public void setUpdatedState(boolean updatedState) { this.updatedState = updatedState; }
 
     public static GameStateHandler getInstance() {
         if (INSTANCE == null) {
@@ -190,6 +198,7 @@ public class GameStateHandler {
             if (cleanedLine.contains("Starts In")) {
                 nextJacobCropFound = 0;
             }
+            checkInfestedPlotsTabList(cleanedLine);
             if (cleanedLine.startsWith(" Spray: ")) {
                 sprayonatorState = cleanedLine.endsWith("None") ? BuffState.NOT_ACTIVE : BuffState.ACTIVE;
                 foundSpray = true;
@@ -220,9 +229,7 @@ public class GameStateHandler {
         checkJacob(updatedLine);
     }
 
-    @SubscribeEvent
-    public void onUpdateScoreboardList(UpdateScoreboardListEvent event) {
-    }
+
 
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event) {
@@ -594,8 +601,8 @@ public class GameStateHandler {
     }
 
 
-    @Getter
     private HashMap<String, Long> currentCultivating = new HashMap<>();
+    public HashMap<String, Long> getCurrentCultivating() { return currentCultivating; }
 
     public Long getCultivating(ItemStack item) {
         if (mc.theWorld == null || mc.thePlayer == null)
@@ -613,7 +620,61 @@ public class GameStateHandler {
         return 0L;
     }
 
-    @Getter
+    @SubscribeEvent
+    public void onUpdateScoreboardList(UpdateScoreboardListEvent event) {
+        checkCurrentPests(event.cleanScoreboardLines);
+    }
+
+    private void checkCurrentPests(List<String> list) {
+        int pestsCountTemp = 0;
+        for (String cleanedLine : list) {
+            if (cleanedLine.contains("The Garden") && cleanedLine.contains("ൠ")) {
+                try {
+                    String[] split = cleanedLine.trim().split(" ");
+                    int temp = Integer.parseInt(split[split.length - 1].trim().replace("x", ""));
+                    pestsCount = temp;
+                    pestsCountTemp = temp;
+                } catch (NumberFormatException ignored) {
+                    pestsCount = 0;
+                }
+            }
+            if (cleanedLine.contains("Plot") && cleanedLine.contains("x")) {
+                String[] split = cleanedLine.trim().split(" ");
+                String last = split[split.length - 1];
+                try {
+                    currentPlotPestsCount = Integer.parseInt(last.replace("x", ""));
+                } catch (NumberFormatException ignored) {
+                    currentPlotPestsCount = 0;
+                }
+            } else if (cleanedLine.contains("Plot")) {
+                currentPlotPestsCount = 0;
+            }
+        }
+        if (pestsCountTemp != pestsCount) {
+            pestsCount = pestsCountTemp;
+        }
+        if (pestsCount == 0) {
+            infestedPlots.clear();
+        }
+    }
+
+    private void checkInfestedPlotsTabList(String cleanedLine) {
+        if (cleanedLine.contains("Plots:")) {
+            try {
+                String[] split = cleanedLine.trim().split(" ");
+                infestedPlots.clear();
+                for (int i = 1; i < split.length; i++) {
+                    try {
+                        infestedPlots.add(Integer.parseInt(split[i].replace(",", "")));
+                    } catch (Exception ignored) {
+                    }
+                }
+            } catch (Exception ignored) {
+                infestedPlots.clear();
+            }
+        }
+    }
+
     public enum Location {
         PRIVATE_ISLAND("Private Island"),
         HUB("Hub"),
@@ -636,6 +697,8 @@ public class GameStateHandler {
         TELEPORTING("Teleporting");
 
         private final String name;
+
+        public String getName() { return name; }
 
         Location(String name) {
             this.name = name;
