@@ -5,6 +5,8 @@ import com.jelly.farmhelperv2.macro.AbstractMacro;
 import com.jelly.farmhelperv2.util.KeyBindUtils;
 import com.jelly.farmhelperv2.util.LogUtils;
 import com.jelly.farmhelperv2.util.helper.Clock;
+import com.jelly.farmhelperv2.util.helper.Rotation;
+import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
@@ -58,8 +60,22 @@ public class AceWheatMacro extends AbstractMacro {
         lastTriggerWasDoor = false;
         lastTriggerWasDirt = false;
         if (!isPitchSet()) {
-            // Standard downward pitch for wheat harvesting
+            // Fallback downward pitch for wheat harvesting when nothing is configured
             setPitch((float) (25f + Math.random() * 5f));
+        }
+        // Apply configured yaw/pitch immediately.
+        // Ace Wheat bypasses the rewarp flow, so the normal TELEPORTED rotation in
+        // AbstractMacro.onTick() never fires. Mirror what working macros do: call
+        // easeTo() right here, after super.onEnable() has loaded the config values.
+        if (isYawSet() || isPitchSet()) {
+            LogUtils.sendDebug("[AceWheat] Applying initial rotation: yaw=" + getYaw() + " pitch=" + getPitch());
+            getRotation().easeTo(
+                    new RotationConfiguration(
+                            new Rotation(getYaw(), getPitch()),
+                            FarmHelperConfig.getRandomRotationTime(),
+                            null
+                    ).easeOutBack(true)
+            );
         }
     }
 
@@ -260,8 +276,11 @@ public class AceWheatMacro extends AbstractMacro {
     // ────────────────────────────────────────────────────────────────────────
 
     private void armDebounce(boolean door, boolean dirt) {
-        lastTriggerWasDoor = door;
-        lastTriggerWasDirt = dirt;
+        // Always clear both flags so they never carry over into the next state.
+        // The transitionClock provides the actual debounce; keeping the booleans
+        // true after a transition was the root cause of WD → WA being blocked.
+        lastTriggerWasDoor = false;
+        lastTriggerWasDirt = false;
         transitionClock.schedule(getTransitionDelay());
     }
 
