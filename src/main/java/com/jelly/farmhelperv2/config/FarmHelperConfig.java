@@ -83,7 +83,8 @@ public class FarmHelperConfig extends Config {
                     "S Shape - Mushroom (45°)", // 10
                     "S Shape - Mushroom (30° with rotations)", // 11
                     "S Shape - Mushroom SDS", // 12
-                    "Circle - Crops (Wheat, Carrot, Potato, NW)" // 13
+                    "Circle - Crops (Wheat, Carrot, Potato, NW)", // 13
+                    "Ace Wheat" // 14
             }, size = 2
     )
     public static int macroType = 0;
@@ -640,6 +641,15 @@ public class FarmHelperConfig extends Config {
     public static float randomTimeBetweenChangingRowsDuringJacob = 200f;
     //</editor-fold>
 
+    //<editor-fold desc="Ace Wheat">
+    @Slider(
+            name = "Ace Wheat Transition Delay", category = DELAYS, subcategory = "Ace Wheat",
+            description = "Delay when changing direction at physical triggers (in milliseconds)",
+            min = 0, max = 1000, step = 10
+    )
+    public static float aceWheatTransitionDelay = 50f;
+    //</editor-fold>
+
     //<editor-fold desc="Rotation Time">
     @Slider(
             name = "Rotation Time", category = DELAYS, subcategory = "Rotations",
@@ -927,6 +937,7 @@ public class FarmHelperConfig extends Config {
         this.hideIf("sugarcaneLaneKey", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode != 1);
         this.hideIf("sugarcaneStartOnGoLeg", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode == 0);
         this.hideIf("sugarcaneInvertLaneSide", () -> getMacro() != MacroEnum.S_SUGAR_CANE || sugarcaneControlMode != 0);
+        this.hideIf("aceWheatTransitionDelay", () -> getMacro() != MacroEnum.ACE_WHEAT);
 
         this.addDependency("customPitchLevel", "customPitch");
         this.addDependency("customYawLevel", "customYaw");
@@ -1127,7 +1138,8 @@ public class FarmHelperConfig extends Config {
         S_MUSHROOM,
         S_MUSHROOM_ROTATE,
         S_MUSHROOM_SDS,
-        C_NORMAL_TYPE
+        C_NORMAL_TYPE,
+        ACE_WHEAT
     }
 
     @Getter

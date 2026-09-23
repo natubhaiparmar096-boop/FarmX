@@ -42,7 +42,7 @@ public class FarmXMobileGui extends GuiScreen {
             "S Vert Crops", "S Pumpkin/Melon", "S Melongkingde", "S Default Plot",
             "S Sugar Cane", "S Cactus", "S Cactus SunTzu", "S Cocoa",
             "S Cocoa Trapdoors", "S Cocoa L/R", "S Mushroom 45", "S Mushroom 30",
-            "S Mushroom SDS", "Circle Crops"
+            "S Mushroom SDS", "Circle Crops", "Ace Wheat"
     };
     private static final String[] SOUND_LABELS = {"Sound: Orb", "Sound: Anvil"};
     private static final String[] SPRAY_MATERIALS = {
@@ -193,6 +193,10 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_SPRAY_START_M = 154;
     private static final int ID_SPRAY_START_P = 155;
 
+    private static final int ID_ACE_DELAY_M = 310;
+    private static final int ID_ACE_DELAY_P = 311;
+    private static final int ID_TOGGLE_MACRO_EXEC = 312;
+
     @Override
     public void initGui() {
         this.buttonList.clear();
@@ -224,12 +228,16 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_PROFILE, cx, y, 200, "Profile: " + com.jelly.farmhelperv2.config.ProfileManager.getActiveProfileName()); y += g;
                 btn(ID_PROFILE_SAVE, this.width / 2 - 105, y, half, "Save Profile");
                 btn(ID_PROFILE_DELETE, this.width / 2 + 7, y, half, "Delete Profile"); y += g;
+                btn(ID_TOGGLE_MACRO_EXEC, cx, y, 200, macroToggleLabel()); y += g;
                 btn(ID_MACRO, cx, y, 200, macroLabel()); y += g;
                 btn(ID_ALWAYS_W, cx, y, 200, on("Always Hold W", FarmHelperConfig.alwaysHoldW)); y += g;
                 btn(ID_HOLD_LMB, cx, y, 200, on("Hold LMB Row Change", FarmHelperConfig.holdLeftClickWhenChangingRow)); y += g;
                 btn(ID_ROT_WARP, cx, y, 200, on("Rotate After Warp", FarmHelperConfig.rotateAfterWarped)); y += g;
                 btn(ID_ROT_DROP, cx, y, 200, on("Rotate After Drop", FarmHelperConfig.rotateAfterDrop)); y += g;
                 btn(ID_DONT_FIX, cx, y, 200, on("Don't Fix After Warp", FarmHelperConfig.dontFixAfterWarping)); y += g;
+                if (FarmHelperConfig.getMacro() == FarmHelperConfig.MacroEnum.ACE_WHEAT) {
+                    pair(ID_ACE_DELAY_M, ID_ACE_DELAY_P, y, "Ace Trans Delay " + fmt(FarmHelperConfig.aceWheatTransitionDelay) + "ms"); y += g;
+                }
                 if (FarmHelperConfig.getMacro() == FarmHelperConfig.MacroEnum.S_SUGAR_CANE) {
                     btn(ID_SC_MODE, cx, y, 200, sugarcaneModeLabel()); y += g;
                     btn(ID_SC_KEY1, cx, y, 200, sugarcaneKey1Label()); y += g;
@@ -302,6 +310,7 @@ public class FarmXMobileGui extends GuiScreen {
             case 7:
                 pair(ID_ROW_T_M, ID_ROW_T_P, y, "Row Delay " + fmt(FarmHelperConfig.timeBetweenChangingRows) + "ms"); y += g;
                 pair(ID_ROW_R_M, ID_ROW_R_P, y, "Row Random +" + fmt(FarmHelperConfig.randomTimeBetweenChangingRows) + "ms"); y += g;
+                pair(ID_ACE_DELAY_M, ID_ACE_DELAY_P, y, "Ace Trans Delay " + fmt(FarmHelperConfig.aceWheatTransitionDelay) + "ms"); y += g;
                 btn(ID_ROW_JACOB, cx, y, 200, on("Custom Row Delays Jacob", FarmHelperConfig.customRowChangeDelaysDuringJacob)); y += g;
                 pair(ID_ROW_JT_M, ID_ROW_JT_P, y, "Jacob Row " + fmt(FarmHelperConfig.timeBetweenChangingRowsDuringJacob) + "ms"); y += g;
                 pair(ID_ROW_JR_M, ID_ROW_JR_P, y, "Jacob Row Rand +" + fmt(FarmHelperConfig.randomTimeBetweenChangingRowsDuringJacob) + "ms");
@@ -625,6 +634,14 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_ROW_JR_M: adjF(() -> FarmHelperConfig.randomTimeBetweenChangingRowsDuringJacob, v -> FarmHelperConfig.randomTimeBetweenChangingRowsDuringJacob = (float) v, -50, 0, 2000); break;
             case ID_ROW_JR_P: adjF(() -> FarmHelperConfig.randomTimeBetweenChangingRowsDuringJacob, v -> FarmHelperConfig.randomTimeBetweenChangingRowsDuringJacob = (float) v, 50, 0, 2000); break;
 
+            case ID_ACE_DELAY_M: adjF(() -> FarmHelperConfig.aceWheatTransitionDelay, v -> FarmHelperConfig.aceWheatTransitionDelay = (float) v, -10, 0, 1000); break;
+            case ID_ACE_DELAY_P: adjF(() -> FarmHelperConfig.aceWheatTransitionDelay, v -> FarmHelperConfig.aceWheatTransitionDelay = (float) v, 10, 0, 1000); break;
+
+            case ID_TOGGLE_MACRO_EXEC:
+                com.jelly.farmhelperv2.handler.MacroHandler.getInstance().toggleMacro();
+                button.displayString = macroToggleLabel();
+                break;
+
             case ID_ROT_T_M: adjF(() -> FarmHelperConfig.rotationTime, v -> FarmHelperConfig.rotationTime = (float) v, -50, 200, 2000); break;
             case ID_ROT_T_P: adjF(() -> FarmHelperConfig.rotationTime, v -> FarmHelperConfig.rotationTime = (float) v, 50, 200, 2000); break;
             case ID_ROT_R_M: adjF(() -> FarmHelperConfig.rotationTimeRandomness, v -> FarmHelperConfig.rotationTimeRandomness = (float) v, -50, 0, 2000); break;
@@ -835,6 +852,11 @@ public class FarmXMobileGui extends GuiScreen {
     }
 
     private static String on(String name, boolean v) { return name + ": " + (v ? "ON" : "OFF"); }
+
+    private static String macroToggleLabel() {
+        boolean toggled = com.jelly.farmhelperv2.handler.MacroHandler.getInstance().isMacroToggled();
+        return toggled ? "§cStop Macro" : "§aStart Macro";
+    }
 
     private static String macroLabel() {
         int i = FarmHelperConfig.macroType;

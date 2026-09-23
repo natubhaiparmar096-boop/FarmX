@@ -103,6 +103,15 @@ public abstract class AbstractMacro {
         this.pitch = Optional.of(pitch);
     }
 
+    /**
+     * Override and return {@code false} in macros that do not rely on the rewarp system
+     * (e.g. Ace Wheat). When false, the rewarp-location guard and related teleport logic
+     * are skipped, so the macro does not require {@code rewarpList} to be populated.
+     */
+    public boolean requiresRewarp() {
+        return true;
+    }
+
     public void onTick() {
         if (FailsafeManager.getInstance().triggeredFailsafe.isPresent() || FailsafeManager.getInstance().getChooseEmergencyDelay().isScheduled()) {
             if (!sentWarning) {
@@ -127,7 +136,7 @@ public abstract class AbstractMacro {
             KeyBindUtils.holdThese(mc.gameSettings.keyBindSneak);
             return;
         }
-        if (!PlayerUtils.isRewarpLocationSet()) {
+        if (requiresRewarp() && !PlayerUtils.isRewarpLocationSet()) {
             LogUtils.sendError("Your rewarp position is not set!");
             MacroHandler.getInstance().disableMacro();
             return;
@@ -406,7 +415,12 @@ public abstract class AbstractMacro {
         A,
         D,
         S,
-        W
+        W,
+
+        // Ace Wheat Looping States
+        SD,
+        WD,
+        WA
     }
 
     public enum RewarpState {

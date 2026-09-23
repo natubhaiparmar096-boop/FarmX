@@ -108,6 +108,8 @@ public class MacroHandler {
                 return Macros.S_SHAPE_MUSHROOM_SDS.getMacro();
             case C_NORMAL_TYPE:
                 return Macros.CIRCLE_CROP_MACRO.getMacro();
+            case ACE_WHEAT:
+                return Macros.ACE_WHEAT_MACRO.getMacro();
             default:
                 throw new IllegalArgumentException("Invalid crop type: " + FarmHelperConfig.macroType);
         }
@@ -458,7 +460,8 @@ public class MacroHandler {
         S_SHAPE_VERTICAL_CROP_MACRO(SShapeVerticalCropMacro.class),
         S_SHAPE_MELON_PUMPKIN_DEFAULT_MACRO(SShapeMelonPumpkinDefaultMacro.class),
         S_SHAPE_MUSHROOM_SDS(SShapeMushroomSDSMacro.class),
-        CIRCLE_CROP_MACRO(CircularCropMacro.class);
+        CIRCLE_CROP_MACRO(CircularCropMacro.class),
+        ACE_WHEAT_MACRO(AceWheatMacro.class);
 
         private static final Map<Macros, AbstractMacro> macros = new HashMap<>();
         private final Class<? extends AbstractMacro> macroClass;
