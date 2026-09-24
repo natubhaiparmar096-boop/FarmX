@@ -90,13 +90,7 @@ dependencies {
 
     implementation("me.djtheredstoner:DevAuth-forge-legacy:1.2.1")
 
-    implementation(files("libs/baritone-deobf-nirox-fly-SNAPSHOT.jar"))
-    shadowImpl("com.github.onixiya1337.baritone-fly:baritone-api-forge:nirox-fly-SNAPSHOT") {
-        exclude(module = "fastutil")
-        exclude(module = "lwjgl")
-        exclude(module = "SimpleTweaker")
-        exclude(module = "launchwrapper")
-    }
+    shadowImpl(files("libs/baritone-deobf-nirox-fly-SNAPSHOT.jar"))
 }
 
 // Tasks:
