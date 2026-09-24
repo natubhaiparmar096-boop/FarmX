@@ -28,7 +28,8 @@ public class FeatureManager {
                 BPSTracker.getInstance(),
                 DesyncChecker.getInstance(),
                 LagDetector.getInstance(),
-                AutoSprayonator.getInstance()
+                AutoSprayonator.getInstance(),
+                com.jelly.farmhelperv2.feature.impl.pest.PestDestroyer.getInstance()
         );
         features.addAll(featuresList);
         return features;

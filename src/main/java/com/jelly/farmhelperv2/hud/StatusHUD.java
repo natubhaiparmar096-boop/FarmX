@@ -60,6 +60,8 @@ public class StatusHUD extends TextHud {
             return Lists.newArrayList(
                     "Restart: " + LogUtils.formatTime(FailsafeManager.getInstance().getRestartMacroAfterFailsafeDelay().getRemainingTime())
             );
+        } else if (com.jelly.farmhelperv2.feature.impl.pest.PestDestroyer.getInstance().isRunning()) {
+            return Lists.newArrayList("Pest Macro: §c" + com.jelly.farmhelperv2.feature.impl.pest.PestDestroyer.getInstance().getState().name());
         } else if (!MacroHandler.getInstance().isMacroToggled()) {
             return Lists.newArrayList("Idling");
         } else {

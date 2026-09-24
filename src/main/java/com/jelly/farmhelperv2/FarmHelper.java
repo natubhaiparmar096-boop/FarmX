@@ -114,6 +114,10 @@ public class FarmHelper {
         MinecraftForge.EVENT_BUS.register(new ScoreboardUtils());
         MinecraftForge.EVENT_BUS.register(MobileStatusOverlay.getInstance());
         MinecraftForge.EVENT_BUS.register(com.jelly.farmhelperv2.hud.JacobsContestHUD.getInstance());
+        MinecraftForge.EVENT_BUS.register(com.jelly.farmhelperv2.hud.PestHUD.getInstance());
+        MinecraftForge.EVENT_BUS.register(com.jelly.farmhelperv2.feature.impl.pest.PestManager.getInstance());
+        MinecraftForge.EVENT_BUS.register(com.jelly.farmhelperv2.feature.impl.pest.helpers.PestEspManager.getInstance());
+        MinecraftForge.EVENT_BUS.register(com.jelly.farmhelperv2.feature.impl.pest.helpers.PestTrackerAbility.getInstance());
     }
 
     private void initializeFields() {
@@ -127,6 +131,7 @@ public class FarmHelper {
         ClientCommandHandler.instance.registerCommand(new RotationCommand());
         ClientCommandHandler.instance.registerCommand(new com.jelly.farmhelperv2.command.ProfileCommand());
         ClientCommandHandler.instance.registerCommand(new com.jelly.farmhelperv2.command.JacobCommand());
+        ClientCommandHandler.instance.registerCommand(new com.jelly.farmhelperv2.command.PestCommand());
         CommandManager.register(new FarmHelperMainCommand());
     }
 

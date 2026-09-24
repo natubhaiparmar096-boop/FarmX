@@ -50,6 +50,7 @@ public class FarmHelperConfig extends Config {
     private transient static final String DEBUG = "Debug";
     private transient static final String EXPERIMENTAL = "Experimental";
     private transient static final String AUTO_SPRAYONATOR = "Auto Sprayonator";
+    private transient static final String PEST_DESTROYER = "Pest Destroyer";
 
     private transient static final File configRewarpFile = new File("farmhelper_rewarp.json");
 
@@ -1123,6 +1124,59 @@ public class FarmHelperConfig extends Config {
         }
         return json;
     }
+
+    //<editor-fold desc="PEST_DESTROYER">
+    @Switch(name = "Enable Pest Destroyer", category = PEST_DESTROYER, subcategory = "General", description = "Automatically hunts and cleans pests")
+    public static boolean enablePestDestroyer = true;
+
+    @Switch(name = "Trigger on Chat", category = PEST_DESTROYER, subcategory = "General", description = "Start pest cleanup on pest spawn chat message")
+    public static boolean pestTriggerOnChat = true;
+
+    @Switch(name = "Trigger on Tab Threshold", category = PEST_DESTROYER, subcategory = "General", description = "Start pest cleanup when alive pests reach threshold")
+    public static boolean pestTriggerOnTabThreshold = true;
+
+    @Number(name = "Pest Threshold", category = PEST_DESTROYER, subcategory = "General", description = "Alive pest count required to trigger", min = 1, max = 8)
+    public static int pestThreshold = 2;
+
+    @Switch(name = "Manual Pest Mode", category = PEST_DESTROYER, subcategory = "General", description = "Allow cleaning pests even when farm macro is not running")
+    public static boolean manualPestMode = false;
+
+    @Switch(name = "Ballsack Shredder", category = PEST_DESTROYER, subcategory = "Ballsack Shredder", description = "Rapid AOTV roof look-down vacuum clearing route")
+    public static boolean pestBallsackShredder = false;
+
+    @Text(name = "Ballsack Shredder Plots", category = PEST_DESTROYER, subcategory = "Ballsack Shredder", description = "Plots enabled for Ballsack Shredder (comma separated or *)")
+    public static String pestBallsackPlots = "*";
+
+    @Number(name = "Ballsack Shredder Warps", category = PEST_DESTROYER, subcategory = "Ballsack Shredder", description = "Number of AOTV warps upward", min = 1, max = 10)
+    public static int pestBallsackWarps = 3;
+
+    @Number(name = "Ballsack Vacuum Duration (ms)", category = PEST_DESTROYER, subcategory = "Ballsack Shredder", description = "Duration to hold vacuum looking down", min = 500, max = 10000)
+    public static int pestBallsackVacuumDurationMs = 2500;
+
+    @Switch(name = "AOTV Hops Between Pests", category = PEST_DESTROYER, subcategory = "Combat", description = "Use AOTV to close distance between distant pests")
+    public static boolean pestAotvHops = true;
+
+    @Switch(name = "Auto Pest Exchange", category = PEST_DESTROYER, subcategory = "Exchange & Traps", description = "Automatically turn in pests to Phillip NPC at Barn")
+    public static boolean autoPestExchange = false;
+
+    @Switch(name = "Auto Pest Traps", category = PEST_DESTROYER, subcategory = "Exchange & Traps", description = "Automatically check and clear pest traps")
+    public static boolean enablePestTraps = false;
+
+    @Text(name = "Pest Traps Plot", category = PEST_DESTROYER, subcategory = "Exchange & Traps", description = "Plot number where traps are located")
+    public static String pestTrapsPlot = "1";
+
+    @Switch(name = "Pest ESP", category = PEST_DESTROYER, subcategory = "Visuals", description = "Draw 3D bounding box around loaded pests")
+    public static boolean pestEsp = true;
+
+    @Switch(name = "Pest ESP Tracers", category = PEST_DESTROYER, subcategory = "Visuals", description = "Draw tracer line to loaded pests")
+    public static boolean pestEspTracers = true;
+
+    @Switch(name = "Pest ESP Route", category = PEST_DESTROYER, subcategory = "Visuals", description = "Draw multi-pest planned route lines")
+    public static boolean pestEspRoute = true;
+
+    @Switch(name = "Show Pest HUD", category = PEST_DESTROYER, subcategory = "Visuals", description = "Show live pest HUD overlay")
+    public static boolean pestShowHud = true;
+    //</editor-fold>
 
     public enum MacroEnum {
         S_V_NORMAL_TYPE,

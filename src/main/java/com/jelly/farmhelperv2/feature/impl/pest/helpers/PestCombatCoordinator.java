@@ -1,0 +1,104 @@
+package com.jelly.farmhelperv2.feature.impl.pest.helpers;
+
+import com.jelly.farmhelperv2.config.FarmHelperConfig;
+import com.jelly.farmhelperv2.handler.RotationHandler;
+import com.jelly.farmhelperv2.util.AngleUtils;
+import com.jelly.farmhelperv2.util.KeyBindUtils;
+import com.jelly.farmhelperv2.util.helper.Clock;
+import com.jelly.farmhelperv2.util.helper.Rotation;
+import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
+import net.minecraft.client.Minecraft;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.Vec3;
+
+public final class PestCombatCoordinator {
+    private static final Minecraft mc = Minecraft.getMinecraft();
+    private static final Clock aotvCooldown = new Clock();
+    private static final Clock vacuumHoldClock = new Clock();
+    private static final Clock attackDelayClock = new Clock();
+
+    private PestCombatCoordinator() {}
+
+    public static void aimAtPest(Entity target, int rotationTime) {
+        if (target == null || mc.thePlayer == null) return;
+
+        Vec3 targetPos = target.getPositionVector().addVector(0, target.getEyeHeight() * 0.5, 0);
+        double dX = targetPos.xCoord - mc.thePlayer.posX;
+        double dY = targetPos.yCoord - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+        double dZ = targetPos.zCoord - mc.thePlayer.posZ;
+        double dist = MathHelper.sqrt_double(dX * dX + dZ * dZ);
+
+        float targetYaw = (float) (MathHelper.atan2(dZ, dX) * (180.0D / Math.PI)) - 90.0F;
+        float targetPitch = (float) (-(MathHelper.atan2(dY, dist) * (180.0D / Math.PI)));
+
+        RotationHandler.getInstance().easeTo(new RotationConfiguration(
+                new Rotation(targetYaw, targetPitch),
+                rotationTime,
+                null
+        ));
+    }
+
+    public static boolean isAimingAt(Entity target, float tolerance) {
+        if (target == null || mc.thePlayer == null) return false;
+
+        Vec3 targetPos = target.getPositionVector().addVector(0, target.getEyeHeight() * 0.5, 0);
+        double dX = targetPos.xCoord - mc.thePlayer.posX;
+        double dY = targetPos.yCoord - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+        double dZ = targetPos.zCoord - mc.thePlayer.posZ;
+        double dist = MathHelper.sqrt_double(dX * dX + dZ * dZ);
+
+        float neededYaw = (float) (MathHelper.atan2(dZ, dX) * (180.0D / Math.PI)) - 90.0F;
+        float neededPitch = (float) (-(MathHelper.atan2(dY, dist) * (180.0D / Math.PI)));
+
+        float yawDiff = Math.abs(MathHelper.wrapAngleTo180_float(mc.thePlayer.rotationYaw - neededYaw));
+        float pitchDiff = Math.abs(mc.thePlayer.rotationPitch - neededPitch);
+
+        return yawDiff <= tolerance && pitchDiff <= tolerance;
+    }
+
+    public static void startVacuum() {
+        KeyBindUtils.holdThese(mc.gameSettings.keyBindUseItem);
+        vacuumHoldClock.schedule(500);
+    }
+
+    public static void stopVacuum() {
+        KeyBindUtils.stopMovement();
+    }
+
+    public static boolean performAotvHop(Vec3 targetPos) {
+        if (mc.thePlayer == null || targetPos == null) return false;
+        if (!aotvCooldown.passed()) return false;
+
+        int aotvSlot = PestLoadoutHelper.findAotvSlot();
+        if (aotvSlot < 0) return false;
+
+        int prevSlot = mc.thePlayer.inventory.currentItem;
+        PestLoadoutHelper.equipSlot(aotvSlot);
+
+        // Aim towards hop target
+        double dX = targetPos.xCoord - mc.thePlayer.posX;
+        double dY = targetPos.yCoord - (mc.thePlayer.posY + mc.thePlayer.getEyeHeight());
+        double dZ = targetPos.zCoord - mc.thePlayer.posZ;
+        double dist = MathHelper.sqrt_double(dX * dX + dZ * dZ);
+
+        float yaw = (float) (MathHelper.atan2(dZ, dX) * (180.0D / Math.PI)) - 90.0F;
+        float pitch = (float) (-(MathHelper.atan2(dY, dist) * (180.0D / Math.PI)));
+
+        mc.thePlayer.rotationYaw = yaw;
+        mc.thePlayer.rotationPitch = pitch;
+
+        // Right click AOTV
+        KeyBindUtils.rightClick();
+        aotvCooldown.schedule(300);
+
+        // Swap back to vacuum
+        int vacSlot = PestLoadoutHelper.findVacuumSlot();
+        if (vacSlot >= 0) {
+            PestLoadoutHelper.equipSlot(vacSlot);
+        } else {
+            PestLoadoutHelper.equipSlot(prevSlot);
+        }
+        return true;
+    }
+}
