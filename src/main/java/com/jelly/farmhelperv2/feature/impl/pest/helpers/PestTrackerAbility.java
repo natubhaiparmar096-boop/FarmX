@@ -40,8 +40,7 @@ public final class PestTrackerAbility {
 
     @SubscribeEvent
     public void onInteract(net.minecraftforge.event.entity.player.PlayerInteractEvent event) {
-        if (event.action == net.minecraftforge.event.entity.player.PlayerInteractEvent.Action.LEFT_CLICK_BLOCK ||
-            event.action == net.minecraftforge.event.entity.player.PlayerInteractEvent.Action.LEFT_CLICK_AIR) {
+        if (event.action == net.minecraftforge.event.entity.player.PlayerInteractEvent.Action.LEFT_CLICK_BLOCK) {
             onLeftClick();
         }
     }
