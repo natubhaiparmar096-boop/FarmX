@@ -208,9 +208,10 @@ public class PestDestroyer implements IFeature {
                     return;
                 }
 
+                double roofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
+
                 // 3. Acoustic Radar check (cooldown prevents infinite re-injection)
                 if (acousticInjectionCooldown.passed()) {
-                    double roofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
                     Vec3 soundWp = PestTargetTracker.getAcousticRadarWaypoint(plotBounds, 3000, roofY);
                     if (soundWp != null && plotNavigator != null) {
                         plotNavigator.injectPriorityWaypoint(soundWp);
@@ -403,21 +404,7 @@ public class PestDestroyer implements IFeature {
 
                 Set<String> currentlyInfested = checkTab.getInfestedPlots();
 
-                // TABLIST GROUND TRUTH: If the current plot is STILL in infested list, do NOT abandon it!
-                if (currentPlot != null && currentlyInfested.contains(PestPlotId.normalize(currentPlot)) && plotRetryAttempts < 3) {
-                    plotRetryAttempts++;
-                    LogUtils.sendWarning("[Pest] Tablist reports Plot " + currentPlot + " is still infested (Attempt " + plotRetryAttempts + "/3). Re-scanning with radar...");
-                    if (plotNavigator != null) {
-                        plotNavigator.reset();
-                    }
-                    // Trigger tracker pulse to pinpoint hidden pest
-                    PestTrackerAbility.triggerPulse();
-                    state = State.SCAN_PESTS;
-                    stateClock.schedule(500);
-                    return;
-                }
-
-                // Re-populate queue with remaining infested plots
+                // Re-populate queue with remaining infested plots first
                 for (String p : currentlyInfested) {
                     String norm = PestPlotId.normalize(p);
                     if (!plotQueue.contains(norm) && !PestPlotId.equals(norm, currentPlot)) {
@@ -425,16 +412,35 @@ public class PestDestroyer implements IFeature {
                     }
                 }
 
+                // If other plots are queued, visit the next one immediately
                 if (!plotQueue.isEmpty()) {
+                    // Re-queue current plot at the back if still listed as infested and under retry limit
+                    if (currentPlot != null && currentlyInfested.contains(PestPlotId.normalize(currentPlot)) && plotRetryAttempts < 2) {
+                        plotRetryAttempts++;
+                        plotQueue.add(PestPlotId.normalize(currentPlot));
+                    }
                     currentPlot = plotQueue.poll();
                     plotNavigator = new PestPlotNavigator(currentPlot);
-                    plotRetryAttempts = 0;
                     state = State.TELEPORT_TO_PLOT;
                     stateClock.schedule(500);
-                } else {
-                    state = State.FINISH;
-                    stateClock.schedule(200);
+                    return;
                 }
+
+                // If no other plots and current plot is still reported as infested, do one re-scan
+                if (currentPlot != null && currentlyInfested.contains(PestPlotId.normalize(currentPlot)) && plotRetryAttempts < 2) {
+                    plotRetryAttempts++;
+                    LogUtils.sendWarning("[Pest] Re-scanning plot " + currentPlot + " (Attempt " + plotRetryAttempts + "/2)...");
+                    if (plotNavigator != null) {
+                        plotNavigator.reset();
+                    }
+                    PestTrackerAbility.triggerPulse();
+                    state = State.SCAN_PESTS;
+                    stateClock.schedule(500);
+                    return;
+                }
+
+                state = State.FINISH;
+                stateClock.schedule(200);
                 break;
 
             case FINISH:

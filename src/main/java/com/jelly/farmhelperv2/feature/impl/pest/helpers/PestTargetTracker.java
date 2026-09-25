@@ -168,6 +168,20 @@ public final class PestTargetTracker {
                 closest = pest;
             }
         }
+
+        // Fallback: If no pest was found within strict plot bounds, check ALL loaded pests within 64 blocks
+        if (closest == null && bounds != null) {
+            List<Entity> allPests = getLoadedPestsWithinBounds(null);
+            for (Entity pest : allPests) {
+                if (excluded != null && excluded.contains(pest)) continue;
+                double distSq = mc.thePlayer.getDistanceSqToEntity(pest);
+                if (distSq <= 4096.0 && distSq < bestDistSq) { // within 64 blocks
+                    bestDistSq = distSq;
+                    closest = pest;
+                }
+            }
+        }
+
         return closest;
     }
 
