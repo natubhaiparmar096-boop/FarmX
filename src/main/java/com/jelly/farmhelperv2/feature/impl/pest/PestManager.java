@@ -20,9 +20,9 @@ public final class PestManager {
     private static final Minecraft mc = Minecraft.getMinecraft();
 
     private static final Pattern SPAWN_PATTERN_1 =
-            Pattern.compile("(?i)(?:Gross! )?A Pest has appeared in Plot (?:(?:#?|plot ))?([0-9]{1,2})!?");
+            Pattern.compile("(?i)(?:Gross! )?A Pest has appeared in (?:Plot (?:#?|plot ))?([0-9]{1,2}|barn)!?");
     private static final Pattern SPAWN_PATTERN_2 =
-            Pattern.compile("(?i)(?:There are pests in Plot |You feel a strange vibration... A Pest has appeared in Plot )([0-9]{1,2})");
+            Pattern.compile("(?i)(?:There are pests in Plot |You feel a strange vibration... A Pest has appeared in (?:Plot )?)([0-9]{1,2}|barn)");
     private static final Pattern KILL_PATTERN =
             Pattern.compile("(?i)(?:You killed a Pest!|You eliminated a Pest!|RARE DROP! .+)");
 

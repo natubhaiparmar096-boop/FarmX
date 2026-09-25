@@ -142,15 +142,30 @@ public class PestDestroyer implements IFeature {
         }
 
         if (plotQueue.isEmpty()) {
-            LogUtils.sendWarning("[Pest] No infested plots detected in queue.");
-            stop();
-            return;
+            PestTabSnapshot tab = PestTabSnapshot.read();
+            if (tab.getAliveCount() > 0) {
+                // If pests are alive but tablist didn't specify the plot, start from current plot
+                com.jelly.farmhelperv2.util.PlotUtils.Plot cur = com.jelly.farmhelperv2.util.PlotUtils.getPlotNumberBasedOnLocation();
+                if (cur != null && cur.number != null) {
+                    plotQueue.add(String.valueOf(cur.number));
+                }
+                for (int i = 0; i <= 24; i++) {
+                    String pStr = String.valueOf(i);
+                    if (!plotQueue.contains(pStr)) {
+                        plotQueue.add(pStr);
+                    }
+                }
+            } else {
+                LogUtils.sendWarning("[Pest] No infested plots detected in queue.");
+                stop();
+                return;
+            }
         }
 
         currentPlot = plotQueue.poll();
         plotNavigator = new PestPlotNavigator(currentPlot);
         state = State.TELEPORT_TO_PLOT;
-        stateClock.schedule(1000);
+        stateClock.schedule(200);
     }
 
     @SubscribeEvent
@@ -166,7 +181,14 @@ public class PestDestroyer implements IFeature {
                     state = State.CHECK_NEXT_PLOT;
                     return;
                 }
-                mc.thePlayer.sendChatMessage("/plottp " + currentPlot);
+                // If player is already within the target plot, skip /plottp command
+                if (plotBounds != null && plotBounds.contains(mc.thePlayer.posX, mc.thePlayer.posZ, 2.0)) {
+                    state = State.WAIT_TELEPORT;
+                    stateClock.schedule(200);
+                    return;
+                }
+                String tpArg = "0".equals(currentPlot) ? "barn" : currentPlot;
+                mc.thePlayer.sendChatMessage("/plottp " + tpArg);
                 state = State.WAIT_TELEPORT;
                 stateClock.schedule(2500);
                 break;

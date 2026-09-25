@@ -94,6 +94,11 @@ public final class PestTabSnapshot {
                 String rawGroup = plotsMatcher.group(1).trim();
                 if (!rawGroup.toLowerCase().contains("none")) {
                     for (String part : rawGroup.split(",")) {
+                        String trimmed = part.trim().toLowerCase();
+                        if (trimmed.contains("barn")) {
+                            infestedPlots.add("0");
+                            continue;
+                        }
                         Matcher plotNumMatcher = PLOT_NUMBER_EXTRACT.matcher(part.trim());
                         if (plotNumMatcher.find()) {
                             int plotNum = parseInt(plotNumMatcher.group(1));

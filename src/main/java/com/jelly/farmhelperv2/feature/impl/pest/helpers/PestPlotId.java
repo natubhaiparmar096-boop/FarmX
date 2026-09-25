@@ -5,6 +5,7 @@ public final class PestPlotId {
 
     public static String normalize(String plot) {
         if (plot == null) return "";
+        if (plot.trim().toLowerCase().contains("barn")) return "0";
         return plot.replaceAll("\\D", "").trim();
     }
 
