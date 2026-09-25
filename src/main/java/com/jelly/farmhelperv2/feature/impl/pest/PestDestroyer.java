@@ -26,13 +26,14 @@ public class PestDestroyer implements IFeature {
     private final Clock stateClock = new Clock();
     private final Clock killTimeout = new Clock();
     private final Clock sweepWaypointTimeout = new Clock();
+    private final Clock trackerPulseCooldown = new Clock();
 
     private final Queue<String> plotQueue = new LinkedList<>();
     private String currentPlot = null;
     private PestPlotNavigator plotNavigator = null;
     private Entity currentTarget = null;
     private final Set<Entity> killedEntities = new HashSet<>();
-    private int sweepCount = 0;
+    private int plotRetryAttempts = 0;
 
     public enum State {
         IDLE,
@@ -42,6 +43,7 @@ public class PestDestroyer implements IFeature {
         SCAN_PESTS,
         APPROACH_PEST,
         KILL_PEST,
+        REPOSITION_PEST,
         SWEEP_WAYPOINTS,
         SWEEPING,
         CHECK_NEXT_PLOT,
@@ -95,6 +97,8 @@ public class PestDestroyer implements IFeature {
         FlyPathFinderExecutor.getInstance().stop();
         PestBallsackShredder.reset();
         sweepWaypointTimeout.reset();
+        PestSoundTracker.getInstance().clear();
+        PestTrackerAbility.clear();
     }
 
     @Override
@@ -122,6 +126,7 @@ public class PestDestroyer implements IFeature {
         start();
         plotQueue.clear();
         killedEntities.clear();
+        plotRetryAttempts = 0;
 
         Set<String> infested = PestTabSnapshot.read().getInfestedPlots();
         if (PestPlotId.isUsable(initialPlot)) {
@@ -142,7 +147,6 @@ public class PestDestroyer implements IFeature {
 
         currentPlot = plotQueue.poll();
         plotNavigator = new PestPlotNavigator(currentPlot);
-        sweepCount = 0;
         state = State.TELEPORT_TO_PLOT;
         stateClock.schedule(1000);
     }
@@ -151,6 +155,8 @@ public class PestDestroyer implements IFeature {
     public void onTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.START || !enabled || mc.thePlayer == null || mc.theWorld == null) return;
         if (!stateClock.passed()) return;
+
+        GardenPlots.Bounds plotBounds = plotNavigator != null ? plotNavigator.getBounds() : null;
 
         switch (state) {
             case TELEPORT_TO_PLOT:
@@ -183,19 +189,49 @@ public class PestDestroyer implements IFeature {
                 break;
 
             case SCAN_PESTS:
-                currentTarget = PestTargetTracker.findClosestPest(killedEntities);
+                // 1. Check physical loaded entities in memory
+                currentTarget = PestTargetTracker.findClosestPest(plotBounds, killedEntities);
                 if (currentTarget != null) {
                     FlyPathFinderExecutor.getInstance().stop();
                     state = State.APPROACH_PEST;
                     stateClock.schedule(50);
                     return;
                 }
+
+                // 2. Check tablist: if alive count is 0, we're done
                 PestTabSnapshot scanTab = PestTabSnapshot.read();
                 if (scanTab.getAliveCount() == 0) {
                     state = State.FINISH;
                     stateClock.schedule(50);
                     return;
                 }
+
+                // 3. Acoustic Radar check
+                double roofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
+                Vec3 soundWp = PestTargetTracker.getAcousticRadarWaypoint(plotBounds, 5000, roofY);
+                if (soundWp != null && plotNavigator != null) {
+                    plotNavigator.injectPriorityWaypoint(soundWp);
+                    state = State.SWEEP_WAYPOINTS;
+                    stateClock.schedule(50);
+                    return;
+                }
+
+                // 4. Vacuum Tracker Scent Pulse check
+                if (trackerPulseCooldown.passed()) {
+                    PestTrackerAbility.triggerPulse();
+                    trackerPulseCooldown.schedule(1500);
+                }
+                if (PestTrackerAbility.hasFreshTrail(1200)) {
+                    Vec3 projected = PestTrackerAbility.getProjectedWaypoint(45.0, plotBounds, roofY);
+                    if (projected != null && plotNavigator != null) {
+                        plotNavigator.injectPriorityWaypoint(projected);
+                        state = State.SWEEP_WAYPOINTS;
+                        stateClock.schedule(50);
+                        return;
+                    }
+                }
+
+                // 5. Normal sweep waypoints
                 if (plotNavigator != null && plotNavigator.hasNextWaypoint()) {
                     state = State.SWEEP_WAYPOINTS;
                     stateClock.schedule(50);
@@ -213,78 +249,120 @@ public class PestDestroyer implements IFeature {
                     stateClock.schedule(100);
                     return;
                 }
+
+                double pRoofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
+                double targetY = FarmHelperConfig.pestRoofVacuuming ? pRoofY : currentTarget.posY + 1.5;
+                Vec3 approachVec = new Vec3(currentTarget.posX, targetY, currentTarget.posZ);
+
                 double distSq = mc.thePlayer.getDistanceSqToEntity(currentTarget);
-                if (distSq <= 16.0) { // Within 4 blocks (attack range)
+                double horizDistSq = (mc.thePlayer.posX - currentTarget.posX) * (mc.thePlayer.posX - currentTarget.posX)
+                        + (mc.thePlayer.posZ - currentTarget.posZ) * (mc.thePlayer.posZ - currentTarget.posZ);
+
+                // Attack range: within 16 distSq OR hovering directly above in roof mode with horiz dist <= 20
+                if (distSq <= 20.0 || (FarmHelperConfig.pestRoofVacuuming && horizDistSq <= 20.0 && distSq <= 144.0)) {
                     FlyPathFinderExecutor.getInstance().stop();
                     state = State.KILL_PEST;
                     killTimeout.schedule(6000);
                     PestCombatCoordinator.startVacuum();
                     stateClock.schedule(50);
-                } else if (FarmHelperConfig.pestAotvHops && distSq > 36.0 && PestCombatCoordinator.performAotvHop(currentTarget.getPositionVector())) {
+                } else if (FarmHelperConfig.pestAotvHops && distSq > 36.0 && PestCombatCoordinator.performAotvHop(approachVec)) {
                     stateClock.schedule(200);
                 } else {
                     if (!FlyPathFinderExecutor.getInstance().isRunning() || FlyPathFinderExecutor.getInstance().getState() == FlyPathFinderExecutor.State.FAILED) {
                         FlyPathFinderExecutor.getInstance().setSprinting(true);
-                        FlyPathFinderExecutor.getInstance().findPath(currentTarget, true, true);
+                        FlyPathFinderExecutor.getInstance().findPath(approachVec, true, true);
                     }
-                    stateClock.schedule(100);
+                    stateClock.schedule(80);
                 }
                 break;
 
             case KILL_PEST:
-                if (currentTarget == null || currentTarget.isDead || killTimeout.passed()) {
+                if (currentTarget == null || currentTarget.isDead || !mc.theWorld.loadedEntityList.contains(currentTarget)) {
                     if (currentTarget != null) {
                         killedEntities.add(currentTarget);
-                        if (mc.theWorld != null) {
-                            for (Entity e : mc.theWorld.loadedEntityList) {
-                                if (e != null && e.getDistanceSqToEntity(currentTarget) <= 16.0) {
-                                    killedEntities.add(e);
-                                }
-                            }
-                        }
                     }
                     PestCombatCoordinator.stopVacuum();
                     currentTarget = null;
                     state = State.SCAN_PESTS;
-                    stateClock.schedule(150);
+                    stateClock.schedule(100);
                     return;
                 }
-                double currentDistSq = mc.thePlayer.getDistanceSqToEntity(currentTarget);
-                if (currentDistSq > 25.0) { // Pest moved away (> 5 blocks)
+
+                // If 6-second kill timeout passed, do NOT blacklist. Reposition!
+                if (killTimeout.passed()) {
+                    PestCombatCoordinator.stopVacuum();
+                    state = State.REPOSITION_PEST;
+                    stateClock.schedule(50);
+                    return;
+                }
+
+                double curDistSq = mc.thePlayer.getDistanceSqToEntity(currentTarget);
+                double curHorizSq = (mc.thePlayer.posX - currentTarget.posX) * (mc.thePlayer.posX - currentTarget.posX)
+                        + (mc.thePlayer.posZ - currentTarget.posZ) * (mc.thePlayer.posZ - currentTarget.posZ);
+
+                // If pest escaped range
+                if (curDistSq > 160.0 || (!FarmHelperConfig.pestRoofVacuuming && curDistSq > 36.0) || (FarmHelperConfig.pestRoofVacuuming && curHorizSq > 36.0)) {
                     PestCombatCoordinator.stopVacuum();
                     state = State.APPROACH_PEST;
                     stateClock.schedule(50);
                     return;
                 }
-                PestCombatCoordinator.aimAtPest(currentTarget, 80);
+
+                // Aim and vacuum
+                if (FarmHelperConfig.pestRoofVacuuming) {
+                    PestCombatCoordinator.aimAtDownward(currentTarget.getPositionVector(), 60);
+                } else {
+                    PestCombatCoordinator.aimAtPest(currentTarget, 60);
+                }
                 PestCombatCoordinator.startVacuum();
                 stateClock.schedule(50);
                 break;
 
+            case REPOSITION_PEST:
+                if (currentTarget == null || currentTarget.isDead) {
+                    state = State.SCAN_PESTS;
+                    stateClock.schedule(50);
+                    return;
+                }
+                // Gain altitude or shift offset to clear glass/wall obstruction
+                Vec3 repoPos = new Vec3(
+                        currentTarget.posX + (Math.random() - 0.5) * 6.0,
+                        Math.max(78.0, mc.thePlayer.posY + 2.5),
+                        currentTarget.posZ + (Math.random() - 0.5) * 6.0
+                );
+                FlyPathFinderExecutor.getInstance().findPath(repoPos, false, true);
+                state = State.APPROACH_PEST;
+                stateClock.schedule(500);
+                break;
+
             case SWEEP_WAYPOINTS:
-                Vec3 wp = plotNavigator.nextWaypoint(mc.thePlayer.posY);
+                double defaultRoofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
+                Vec3 wp = plotNavigator != null ? plotNavigator.nextWaypoint(defaultRoofY) : null;
                 if (wp != null) {
-                    double flightY = Math.max(74.0, mc.thePlayer.posY + 2.0);
-                    Vec3 sweepWp = new Vec3(wp.xCoord, flightY, wp.zCoord);
                     FlyPathFinderExecutor.getInstance().setSprinting(true);
-                    FlyPathFinderExecutor.getInstance().findPath(sweepWp, false, true);
-                    sweepWaypointTimeout.schedule(10000);
+                    if (FarmHelperConfig.pestAotvHops && mc.thePlayer.getDistance(wp.xCoord, wp.yCoord, wp.zCoord) > 20.0) {
+                        PestCombatCoordinator.performAotvHop(wp);
+                    }
+                    FlyPathFinderExecutor.getInstance().findPath(wp, false, true);
+                    sweepWaypointTimeout.schedule(8000);
                     state = State.SWEEPING;
                     stateClock.schedule(100);
                 } else {
                     state = State.CHECK_NEXT_PLOT;
-                    stateClock.schedule(200);
+                    stateClock.schedule(150);
                 }
                 break;
 
             case SWEEPING:
-                currentTarget = PestTargetTracker.findClosestPest(killedEntities);
+                currentTarget = PestTargetTracker.findClosestPest(plotBounds, killedEntities);
                 if (currentTarget != null) {
                     FlyPathFinderExecutor.getInstance().stop();
                     state = State.APPROACH_PEST;
                     stateClock.schedule(50);
                     return;
                 }
+
+                // Check tablist: if all alive pests cleared, finish immediately
                 PestTabSnapshot sweepTab = PestTabSnapshot.read();
                 if (sweepTab.getAliveCount() == 0) {
                     FlyPathFinderExecutor.getInstance().stop();
@@ -292,6 +370,18 @@ public class PestDestroyer implements IFeature {
                     stateClock.schedule(50);
                     return;
                 }
+
+                // Active acoustic/particle pulse during sweep
+                double swRoofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
+                Vec3 freshSound = PestTargetTracker.getAcousticRadarWaypoint(plotBounds, 4000, swRoofY);
+                if (freshSound != null && plotNavigator != null) {
+                    FlyPathFinderExecutor.getInstance().stop();
+                    plotNavigator.injectPriorityWaypoint(freshSound);
+                    state = State.SWEEP_WAYPOINTS;
+                    stateClock.schedule(50);
+                    return;
+                }
+
                 if (!FlyPathFinderExecutor.getInstance().isRunning() || sweepWaypointTimeout.passed()) {
                     state = State.SWEEP_WAYPOINTS;
                     stateClock.schedule(100);
@@ -307,17 +397,35 @@ public class PestDestroyer implements IFeature {
                     stateClock.schedule(50);
                     return;
                 }
+
                 Set<String> currentlyInfested = checkTab.getInfestedPlots();
+
+                // TABLIST GROUND TRUTH: If the current plot is STILL in infested list, do NOT abandon it!
+                if (currentPlot != null && currentlyInfested.contains(PestPlotId.normalize(currentPlot)) && plotRetryAttempts < 3) {
+                    plotRetryAttempts++;
+                    LogUtils.sendWarning("[Pest] Tablist reports Plot " + currentPlot + " is still infested (Attempt " + plotRetryAttempts + "/3). Re-scanning with radar...");
+                    if (plotNavigator != null) {
+                        plotNavigator.reset();
+                    }
+                    // Trigger tracker pulse to pinpoint hidden pest
+                    PestTrackerAbility.triggerPulse();
+                    state = State.SCAN_PESTS;
+                    stateClock.schedule(500);
+                    return;
+                }
+
+                // Re-populate queue with remaining infested plots
                 for (String p : currentlyInfested) {
                     String norm = PestPlotId.normalize(p);
                     if (!plotQueue.contains(norm) && !PestPlotId.equals(norm, currentPlot)) {
                         plotQueue.add(norm);
                     }
                 }
+
                 if (!plotQueue.isEmpty()) {
                     currentPlot = plotQueue.poll();
                     plotNavigator = new PestPlotNavigator(currentPlot);
-                    sweepCount = 0;
+                    plotRetryAttempts = 0;
                     state = State.TELEPORT_TO_PLOT;
                     stateClock.schedule(500);
                 } else {

@@ -96,6 +96,7 @@ public final class PestManager {
         // Lifecycle & return tick
         PestLifecycleManager.onTick();
         PestReturnManager.onTick();
+        PestPetManager.getInstance().onTick();
         PestExchangeManager.onTick();
         PestTrapManager.onTick();
         AutoPestExchangeManager.onTick();

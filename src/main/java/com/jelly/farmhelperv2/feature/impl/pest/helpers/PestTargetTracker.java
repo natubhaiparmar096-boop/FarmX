@@ -1,8 +1,8 @@
 package com.jelly.farmhelperv2.feature.impl.pest.helpers;
 
+import com.jelly.farmhelperv2.util.GardenPlots;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.monster.EntitySilverfish;
 import net.minecraft.entity.passive.EntityBat;
@@ -10,7 +10,6 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.Vec3;
 
@@ -42,6 +41,10 @@ public final class PestTargetTracker {
     private PestTargetTracker() {}
 
     public static List<Entity> getLoadedPests() {
+        return getLoadedPestsWithinBounds(null);
+    }
+
+    public static List<Entity> getLoadedPestsWithinBounds(GardenPlots.Bounds bounds) {
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.theWorld == null || mc.thePlayer == null) return Collections.emptyList();
 
@@ -51,7 +54,9 @@ public final class PestTargetTracker {
         List<Entity> livingPests = new ArrayList<>();
         for (Entity entity : allEntities) {
             if (entity == null || entity.isDead || entity == mc.thePlayer) continue;
-            if (entity.posY < 50) continue;
+            if (entity.posY < 40) continue;
+            if (bounds != null && !bounds.contains(entity.posX, entity.posZ, 4.0)) continue;
+
             if (entity instanceof EntitySilverfish || entity instanceof EntityBat) {
                 livingPests.add(entity);
             }
@@ -59,7 +64,8 @@ public final class PestTargetTracker {
 
         for (Entity entity : allEntities) {
             if (entity == null || entity.isDead || entity == mc.thePlayer) continue;
-            if (entity.posY < 50) continue;
+            if (entity.posY < 40) continue;
+            if (bounds != null && !bounds.contains(entity.posX, entity.posZ, 4.0)) continue;
 
             if (entity instanceof EntitySilverfish || entity instanceof EntityBat) {
                 list.add(entity);
@@ -143,10 +149,14 @@ public final class PestTargetTracker {
     }
 
     public static Entity findClosestPest(Collection<Entity> excluded) {
+        return findClosestPest(null, excluded);
+    }
+
+    public static Entity findClosestPest(GardenPlots.Bounds bounds, Collection<Entity> excluded) {
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.thePlayer == null) return null;
 
-        List<Entity> pests = getLoadedPests();
+        List<Entity> pests = getLoadedPestsWithinBounds(bounds);
         Entity closest = null;
         double bestDistSq = Double.MAX_VALUE;
 
@@ -161,11 +171,24 @@ public final class PestTargetTracker {
         return closest;
     }
 
+    public static Vec3 getAcousticRadarWaypoint(GardenPlots.Bounds bounds, long maxAgeMs, double targetY) {
+        PestSoundTracker.AcousticSignal signal = PestSoundTracker.getInstance().getLatestSignalWithin(maxAgeMs, bounds);
+        if (signal != null) {
+            Vec3 p = signal.getPosition();
+            return new Vec3(p.xCoord, targetY, p.zCoord);
+        }
+        return null;
+    }
+
     public static List<Entity> buildOptimizedRoute(Collection<Entity> excluded) {
+        return buildOptimizedRoute(null, excluded);
+    }
+
+    public static List<Entity> buildOptimizedRoute(GardenPlots.Bounds bounds, Collection<Entity> excluded) {
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.thePlayer == null) return Collections.emptyList();
 
-        List<Entity> remaining = new ArrayList<>(getLoadedPests());
+        List<Entity> remaining = new ArrayList<>(getLoadedPestsWithinBounds(bounds));
         if (excluded != null) {
             remaining.removeAll(excluded);
         }

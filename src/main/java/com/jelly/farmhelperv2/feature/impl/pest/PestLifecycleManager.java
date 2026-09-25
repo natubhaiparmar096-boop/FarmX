@@ -4,6 +4,7 @@ import com.jelly.farmhelperv2.config.FarmHelperConfig;
 import com.jelly.farmhelperv2.feature.impl.pest.helpers.AutoPestExchangeManager;
 import com.jelly.farmhelperv2.feature.impl.pest.helpers.PestExchangeManager;
 import com.jelly.farmhelperv2.feature.impl.pest.helpers.PestLoadoutHelper;
+import com.jelly.farmhelperv2.feature.impl.pest.helpers.PestPetManager;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.util.KeyBindUtils;
 import com.jelly.farmhelperv2.util.LogUtils;
@@ -18,10 +19,14 @@ public final class PestLifecycleManager {
 
     public enum Stage {
         IDLE,
-        PRE_SETHOME,
-        WAIT_SETHOME,
+        PRE_PAUSE,
+        SWAP_HUNTING_PET,
+        WAIT_PET_HUNT,
+        START_CLEANING,
         CLEANING,
         POST_CHECK_EXCHANGE,
+        SWAP_FARMING_PET,
+        WAIT_PET_FARM,
         FINISH
     }
 
@@ -34,7 +39,7 @@ public final class PestLifecycleManager {
     public static void start(String plot) {
         if (stage != Stage.IDLE || mc.thePlayer == null) return;
         targetPlot = plot;
-        stage = Stage.PRE_SETHOME;
+        stage = Stage.PRE_PAUSE;
         stageClock.schedule(100);
 
         PestReturnManager.saveFarmingState();
@@ -44,6 +49,7 @@ public final class PestLifecycleManager {
     public static void reset() {
         stage = Stage.IDLE;
         targetPlot = null;
+        PestPetManager.getInstance().reset();
     }
 
     public static void onTick() {
@@ -51,18 +57,34 @@ public final class PestLifecycleManager {
         if (!stageClock.passed()) return;
 
         switch (stage) {
-            case PRE_SETHOME:
-                // Stop movement and pause farming macro before setting home checkpoint
+            case PRE_PAUSE:
+                // Stop movement and pause farming macro
                 if (MacroHandler.getInstance().isMacroToggled() && !MacroHandler.getInstance().isCurrentMacroPaused()) {
                     MacroHandler.getInstance().pauseMacro();
                 }
                 KeyBindUtils.stopMovement();
-                mc.thePlayer.sendChatMessage("/sethome");
-                stage = Stage.WAIT_SETHOME;
-                stageClock.schedule(1500);
+                stage = Stage.SWAP_HUNTING_PET;
+                stageClock.schedule(300);
                 break;
 
-            case WAIT_SETHOME:
+            case SWAP_HUNTING_PET:
+                if (FarmHelperConfig.autoPetSwap) {
+                    stage = Stage.WAIT_PET_HUNT;
+                    PestPetManager.getInstance().equipHuntingPet(() -> {
+                        stage = Stage.START_CLEANING;
+                        stageClock.schedule(300);
+                    });
+                } else {
+                    stage = Stage.START_CLEANING;
+                    stageClock.schedule(100);
+                }
+                break;
+
+            case WAIT_PET_HUNT:
+                // PestPetManager processes in its own tick
+                break;
+
+            case START_CLEANING:
                 // Equip vacuum
                 int vacSlot = PestLoadoutHelper.findVacuumSlot();
                 if (vacSlot >= 0) {
@@ -85,8 +107,25 @@ public final class PestLifecycleManager {
                 if (FarmHelperConfig.autoPestExchange && !PestExchangeManager.isActive()) {
                     AutoPestExchangeManager.onTick();
                 }
-                stage = Stage.FINISH;
+                stage = Stage.SWAP_FARMING_PET;
                 stageClock.schedule(300);
+                break;
+
+            case SWAP_FARMING_PET:
+                if (FarmHelperConfig.autoPetSwap) {
+                    stage = Stage.WAIT_PET_FARM;
+                    PestPetManager.getInstance().equipFarmingPet(() -> {
+                        stage = Stage.FINISH;
+                        stageClock.schedule(300);
+                    });
+                } else {
+                    stage = Stage.FINISH;
+                    stageClock.schedule(100);
+                }
+                break;
+
+            case WAIT_PET_FARM:
+                // PestPetManager processes in its own tick
                 break;
 
             case FINISH:

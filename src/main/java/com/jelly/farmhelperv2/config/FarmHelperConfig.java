@@ -1171,6 +1171,21 @@ public class FarmHelperConfig extends Config {
     @Text(name = "Pest Traps Plot", category = PEST_DESTROYER, subcategory = "Exchange & Traps", description = "Plot number where traps are located")
     public static String pestTrapsPlot = "1";
 
+    @Switch(name = "Auto Pet Swap", category = PEST_DESTROYER, subcategory = "Pet Swapper", description = "Automatically swap pets between farming and pest hunting")
+    public static boolean autoPetSwap = true;
+
+    @Text(name = "Farming Pet", category = PEST_DESTROYER, subcategory = "Pet Swapper", description = "Pet equipped during farming (e.g. Slug)")
+    public static String pestFarmingPet = "Slug";
+
+    @Text(name = "Hunting Pet", category = PEST_DESTROYER, subcategory = "Pet Swapper", description = "Pet equipped during pest hunting (e.g. Hedgehog)")
+    public static String pestHuntingPet = "Hedgehog";
+
+    @Switch(name = "Acoustic Pest Radar", category = PEST_DESTROYER, subcategory = "Detection", description = "Triangulate pest locations from server sound packets")
+    public static boolean pestAcousticRadar = true;
+
+    @Switch(name = "Roof Vacuuming", category = PEST_DESTROYER, subcategory = "Combat", description = "Navigate above glass roof and vacuum pests downward")
+    public static boolean pestRoofVacuuming = true;
+
     @Switch(name = "Pest ESP", category = PEST_DESTROYER, subcategory = "Visuals", description = "Draw 3D bounding box around loaded pests")
     public static boolean pestEsp = true;
 

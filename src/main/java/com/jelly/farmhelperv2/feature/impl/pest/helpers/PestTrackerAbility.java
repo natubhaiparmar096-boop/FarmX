@@ -1,8 +1,10 @@
 package com.jelly.farmhelperv2.feature.impl.pest.helpers;
 
-import com.jelly.farmhelperv2.config.FarmHelperConfig;
 import com.jelly.farmhelperv2.event.SpawnParticleEvent;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
+import com.jelly.farmhelperv2.util.GardenPlots;
+import com.jelly.farmhelperv2.util.KeyBindUtils;
+import com.jelly.farmhelperv2.util.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.Vec3;
@@ -17,6 +19,25 @@ public final class PestTrackerAbility {
 
     public static PestTrackerAbility getInstance() {
         return INSTANCE;
+    }
+
+    public static boolean triggerPulse() {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer == null || !GameStateHandler.getInstance().inGarden()) return false;
+
+        long now = System.currentTimeMillis();
+        if (now < nextUseAt) return false;
+        nextUseAt = now + 1200L;
+
+        int vacSlot = PestLoadoutHelper.findVacuumSlot();
+        if (vacSlot >= 0) {
+            PestLoadoutHelper.equipSlot(vacSlot);
+        }
+
+        TRAIL.begin(mc.thePlayer.getPositionVector(), now);
+        KeyBindUtils.leftClick();
+        LogUtils.sendDebug("[PestTracker] Pulsed vacuum tracker scent ability.");
+        return true;
     }
 
     public static void onLeftClick() {
@@ -55,6 +76,16 @@ public final class PestTrackerAbility {
 
     public static PestTrackerTrail getTrail() {
         return TRAIL;
+    }
+
+    public static boolean hasFreshTrail(long maxAgeMs) {
+        return TRAIL.isFresh(maxAgeMs);
+    }
+
+    public static Vec3 getProjectedWaypoint(double distance, GardenPlots.Bounds bounds, double targetY) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.thePlayer == null) return null;
+        return TRAIL.projectWaypoint(mc.thePlayer.getPositionVector(), distance, bounds, targetY);
     }
 
     public static void clear() {

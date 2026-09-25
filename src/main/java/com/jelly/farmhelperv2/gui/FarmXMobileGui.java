@@ -220,6 +220,9 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_PEST_HUD = 615;
     private static final int ID_PEST_START_NOW = 616;
     private static final int ID_PEST_STOP_NOW = 617;
+    private static final int ID_PEST_PET_SWAP = 618;
+    private static final int ID_PEST_ROOF_VAC = 619;
+    private static final int ID_PEST_RADAR = 620;
 
     @Override
     public void initGui() {
@@ -372,14 +375,17 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_PEST_START_NOW, this.width / 2 - 105, y, half, "Start Pest Macro");
                 btn(ID_PEST_STOP_NOW, this.width / 2 + 7, y, half, "Stop Pest Macro");
                 break;
-            case 11: // Pest Combat
+            case 11: // Pest Combat & Detection
+                btn(ID_PEST_ROOF_VAC, cx, y, 200, on("Roof Vacuuming", FarmHelperConfig.pestRoofVacuuming)); y += g;
+                btn(ID_PEST_RADAR, cx, y, 200, on("Acoustic Sound Radar", FarmHelperConfig.pestAcousticRadar)); y += g;
                 btn(ID_PEST_AOTV_HOPS, cx, y, 200, on("AOTV Hops to Pests", FarmHelperConfig.pestAotvHops)); y += g;
                 btn(ID_PEST_ESP, cx, y, 200, on("Pest 3D ESP", FarmHelperConfig.pestEsp)); y += g;
                 btn(ID_PEST_TRACERS, cx, y, 200, on("Pest Tracers", FarmHelperConfig.pestEspTracers)); y += g;
                 btn(ID_PEST_ROUTE, cx, y, 200, on("Pest Route Lines", FarmHelperConfig.pestEspRoute)); y += g;
                 btn(ID_PEST_HUD, cx, y, 200, on("Show Pest HUD", FarmHelperConfig.pestShowHud));
                 break;
-            case 12: // Pest Exchange & Traps
+            case 12: // Pest Exchange, Traps & Pets
+                btn(ID_PEST_PET_SWAP, cx, y, 200, on("Auto Pet Swap", FarmHelperConfig.autoPetSwap)); y += g;
                 btn(ID_PEST_EXCHANGE, cx, y, 200, on("Auto Pest Exchange", FarmHelperConfig.autoPestExchange)); y += g;
                 btn(ID_PEST_TRAPS, cx, y, 200, on("Auto Pest Traps", FarmHelperConfig.enablePestTraps));
                 break;
@@ -745,12 +751,15 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_PEST_START_NOW: com.jelly.farmhelperv2.feature.impl.pest.ManualPestManager.triggerManualCleanup(); break;
             case ID_PEST_STOP_NOW: com.jelly.farmhelperv2.feature.impl.pest.ManualPestManager.stop(); break;
 
+            case ID_PEST_ROOF_VAC: FarmHelperConfig.pestRoofVacuuming = !FarmHelperConfig.pestRoofVacuuming; button.displayString = on("Roof Vacuuming", FarmHelperConfig.pestRoofVacuuming); break;
+            case ID_PEST_RADAR: FarmHelperConfig.pestAcousticRadar = !FarmHelperConfig.pestAcousticRadar; button.displayString = on("Acoustic Sound Radar", FarmHelperConfig.pestAcousticRadar); break;
             case ID_PEST_AOTV_HOPS: FarmHelperConfig.pestAotvHops = !FarmHelperConfig.pestAotvHops; button.displayString = on("AOTV Hops to Pests", FarmHelperConfig.pestAotvHops); break;
             case ID_PEST_ESP: FarmHelperConfig.pestEsp = !FarmHelperConfig.pestEsp; button.displayString = on("Pest 3D ESP", FarmHelperConfig.pestEsp); break;
             case ID_PEST_TRACERS: FarmHelperConfig.pestEspTracers = !FarmHelperConfig.pestEspTracers; button.displayString = on("Pest Tracers", FarmHelperConfig.pestEspTracers); break;
             case ID_PEST_ROUTE: FarmHelperConfig.pestEspRoute = !FarmHelperConfig.pestEspRoute; button.displayString = on("Pest Route Lines", FarmHelperConfig.pestEspRoute); break;
             case ID_PEST_HUD: FarmHelperConfig.pestShowHud = !FarmHelperConfig.pestShowHud; button.displayString = on("Show Pest HUD", FarmHelperConfig.pestShowHud); break;
 
+            case ID_PEST_PET_SWAP: FarmHelperConfig.autoPetSwap = !FarmHelperConfig.autoPetSwap; button.displayString = on("Auto Pet Swap", FarmHelperConfig.autoPetSwap); break;
             case ID_PEST_EXCHANGE: FarmHelperConfig.autoPestExchange = !FarmHelperConfig.autoPestExchange; button.displayString = on("Auto Pest Exchange", FarmHelperConfig.autoPestExchange); break;
             case ID_PEST_TRAPS: FarmHelperConfig.enablePestTraps = !FarmHelperConfig.enablePestTraps; button.displayString = on("Auto Pest Traps", FarmHelperConfig.enablePestTraps); break;
 

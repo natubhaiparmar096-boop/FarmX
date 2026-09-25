@@ -118,6 +118,7 @@ public class FarmHelper {
         MinecraftForge.EVENT_BUS.register(com.jelly.farmhelperv2.feature.impl.pest.PestManager.getInstance());
         MinecraftForge.EVENT_BUS.register(com.jelly.farmhelperv2.feature.impl.pest.helpers.PestEspManager.getInstance());
         MinecraftForge.EVENT_BUS.register(com.jelly.farmhelperv2.feature.impl.pest.helpers.PestTrackerAbility.getInstance());
+        MinecraftForge.EVENT_BUS.register(com.jelly.farmhelperv2.feature.impl.pest.helpers.PestSoundTracker.getInstance());
     }
 
     private void initializeFields() {

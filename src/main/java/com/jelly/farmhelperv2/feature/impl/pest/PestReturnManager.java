@@ -3,9 +3,12 @@ package com.jelly.farmhelperv2.feature.impl.pest;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.handler.RotationHandler;
+import com.jelly.farmhelperv2.macro.AbstractMacro;
+import com.jelly.farmhelperv2.macro.impl.AceWheatMacro;
 import com.jelly.farmhelperv2.pathfinder.FlyPathFinderExecutor;
 import com.jelly.farmhelperv2.util.KeyBindUtils;
 import com.jelly.farmhelperv2.util.LogUtils;
+import com.jelly.farmhelperv2.util.PlayerUtils;
 import com.jelly.farmhelperv2.util.helper.Clock;
 import com.jelly.farmhelperv2.util.helper.Rotation;
 import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
@@ -83,8 +86,15 @@ public final class PestReturnManager {
             case RESUME_MACRO:
                 returning = false;
                 state = State.IDLE;
+                PlayerUtils.getTool();
                 LogUtils.sendSuccess("[Pest] Returned to farm. Resuming macro...");
+
                 if (MacroHandler.getInstance().isMacroToggled()) {
+                    MacroHandler.getInstance().getCurrentMacro().ifPresent(macro -> {
+                        if (macro instanceof AceWheatMacro) {
+                            ((AceWheatMacro) macro).changeState(AbstractMacro.State.WD);
+                        }
+                    });
                     MacroHandler.getInstance().resumeMacro();
                 }
                 break;
