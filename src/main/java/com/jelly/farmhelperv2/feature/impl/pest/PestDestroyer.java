@@ -25,6 +25,7 @@ public class PestDestroyer implements IFeature {
     private State state = State.IDLE;
     private final Clock stateClock = new Clock();
     private final Clock killTimeout = new Clock();
+    private final Clock sweepWaypointTimeout = new Clock();
 
     private final Queue<String> plotQueue = new LinkedList<>();
     private String currentPlot = null;
@@ -42,6 +43,7 @@ public class PestDestroyer implements IFeature {
         APPROACH_PEST,
         KILL_PEST,
         SWEEP_WAYPOINTS,
+        SWEEPING,
         CHECK_NEXT_PLOT,
         FINISH
     }
@@ -92,6 +94,7 @@ public class PestDestroyer implements IFeature {
         PestCombatCoordinator.stopVacuum();
         FlyPathFinderExecutor.getInstance().stop();
         PestBallsackShredder.reset();
+        sweepWaypointTimeout.reset();
     }
 
     @Override
@@ -182,11 +185,12 @@ public class PestDestroyer implements IFeature {
             case SCAN_PESTS:
                 currentTarget = PestTargetTracker.findClosestPest(killedEntities);
                 if (currentTarget != null) {
+                    FlyPathFinderExecutor.getInstance().stop();
                     state = State.APPROACH_PEST;
-                    stateClock.schedule(100);
+                    stateClock.schedule(50);
                 } else if (plotNavigator != null && plotNavigator.hasNextWaypoint()) {
                     state = State.SWEEP_WAYPOINTS;
-                    stateClock.schedule(100);
+                    stateClock.schedule(50);
                 } else {
                     state = State.CHECK_NEXT_PLOT;
                     stateClock.schedule(200);
@@ -195,20 +199,27 @@ public class PestDestroyer implements IFeature {
 
             case APPROACH_PEST:
                 if (currentTarget == null || currentTarget.isDead) {
+                    FlyPathFinderExecutor.getInstance().stop();
+                    currentTarget = null;
                     state = State.SCAN_PESTS;
+                    stateClock.schedule(100);
                     return;
                 }
                 double distSq = mc.thePlayer.getDistanceSqToEntity(currentTarget);
-                if (distSq <= 16.0) { // Within 4 blocks
+                if (distSq <= 16.0) { // Within 4 blocks (attack range)
                     FlyPathFinderExecutor.getInstance().stop();
                     state = State.KILL_PEST;
-                    killTimeout.schedule(5000);
+                    killTimeout.schedule(6000);
                     PestCombatCoordinator.startVacuum();
+                    stateClock.schedule(50);
                 } else if (FarmHelperConfig.pestAotvHops && distSq > 36.0 && PestCombatCoordinator.performAotvHop(currentTarget.getPositionVector())) {
-                    stateClock.schedule(250);
+                    stateClock.schedule(200);
                 } else {
-                    FlyPathFinderExecutor.getInstance().findPath(currentTarget, true, true);
-                    stateClock.schedule(300);
+                    if (!FlyPathFinderExecutor.getInstance().isRunning() || FlyPathFinderExecutor.getInstance().getState() == FlyPathFinderExecutor.State.FAILED) {
+                        FlyPathFinderExecutor.getInstance().setSprinting(true);
+                        FlyPathFinderExecutor.getInstance().findPath(currentTarget, true, true);
+                    }
+                    stateClock.schedule(100);
                 }
                 break;
 
@@ -223,16 +234,26 @@ public class PestDestroyer implements IFeature {
                     stateClock.schedule(200);
                     return;
                 }
-                PestCombatCoordinator.aimAtPest(currentTarget, 120);
+                double currentDistSq = mc.thePlayer.getDistanceSqToEntity(currentTarget);
+                if (currentDistSq > 25.0) { // Pest moved away (> 5 blocks)
+                    PestCombatCoordinator.stopVacuum();
+                    state = State.APPROACH_PEST;
+                    stateClock.schedule(50);
+                    return;
+                }
+                PestCombatCoordinator.aimAtPest(currentTarget, 80);
                 PestCombatCoordinator.startVacuum();
+                stateClock.schedule(50);
                 break;
 
             case SWEEP_WAYPOINTS:
                 Vec3 wp = plotNavigator.nextWaypoint(mc.thePlayer.posY);
                 if (wp != null) {
+                    FlyPathFinderExecutor.getInstance().setSprinting(true);
                     FlyPathFinderExecutor.getInstance().findPath(wp, false, true);
-                    state = State.SCAN_PESTS;
-                    stateClock.schedule(2000);
+                    sweepWaypointTimeout.schedule(12000);
+                    state = State.SWEEPING;
+                    stateClock.schedule(100);
                 } else {
                     sweepCount++;
                     if (sweepCount < 2) {
@@ -242,6 +263,22 @@ public class PestDestroyer implements IFeature {
                         state = State.CHECK_NEXT_PLOT;
                     }
                     stateClock.schedule(500);
+                }
+                break;
+
+            case SWEEPING:
+                currentTarget = PestTargetTracker.findClosestPest(killedEntities);
+                if (currentTarget != null) {
+                    FlyPathFinderExecutor.getInstance().stop();
+                    state = State.APPROACH_PEST;
+                    stateClock.schedule(50);
+                    return;
+                }
+                if (!FlyPathFinderExecutor.getInstance().isRunning() || sweepWaypointTimeout.passed()) {
+                    state = State.SWEEP_WAYPOINTS;
+                    stateClock.schedule(100);
+                } else {
+                    stateClock.schedule(100);
                 }
                 break;
 

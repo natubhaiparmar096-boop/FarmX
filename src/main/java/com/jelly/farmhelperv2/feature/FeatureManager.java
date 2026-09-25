@@ -72,7 +72,11 @@ public class FeatureManager {
     }
 
     public boolean shouldIgnoreFalseCheck() {
-        return false;
+        return features.stream().anyMatch(feature -> feature.isRunning() && !feature.shouldCheckForFailsafes())
+                || com.jelly.farmhelperv2.feature.impl.pest.PestDestroyer.getInstance().isRunning()
+                || com.jelly.farmhelperv2.feature.impl.pest.PestLifecycleManager.getStage() != com.jelly.farmhelperv2.feature.impl.pest.PestLifecycleManager.Stage.IDLE
+                || com.jelly.farmhelperv2.feature.impl.pest.PestReturnManager.isReturning()
+                || com.jelly.farmhelperv2.pathfinder.FlyPathFinderExecutor.getInstance().isRunning();
     }
 
     public void enableAll() {

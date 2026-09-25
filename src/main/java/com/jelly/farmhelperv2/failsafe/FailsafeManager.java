@@ -196,6 +196,7 @@ public class FailsafeManager {
     }
 
     public void possibleDetection(Failsafe failsafe) {
+        if (FeatureManager.getInstance().shouldIgnoreFalseCheck()) return;
         if (emergencyQueue.contains(failsafe)) return;
 
         MacroHandler.getInstance().getCurrentMacro().ifPresent(AbstractMacro::saveState);
