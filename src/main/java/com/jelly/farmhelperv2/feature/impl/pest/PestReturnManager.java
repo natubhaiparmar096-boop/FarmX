@@ -1,5 +1,6 @@
 package com.jelly.farmhelperv2.feature.impl.pest;
 
+import com.jelly.farmhelperv2.config.FarmHelperConfig;
 import com.jelly.farmhelperv2.handler.GameStateHandler;
 import com.jelly.farmhelperv2.handler.MacroHandler;
 import com.jelly.farmhelperv2.handler.RotationHandler;
@@ -46,7 +47,10 @@ public final class PestReturnManager {
         stateClock.schedule(200);
         FlyPathFinderExecutor.getInstance().stop();
         KeyBindUtils.stopMovement();
-        LogUtils.sendSuccess("[Pest] Slaying complete. Returning to farm via /warp garden...");
+        String cmd = (FarmHelperConfig.pestReturnCommand != null && !FarmHelperConfig.pestReturnCommand.isEmpty())
+                ? FarmHelperConfig.pestReturnCommand
+                : "/home";
+        LogUtils.sendSuccess("[Pest] Slaying complete. Returning to farm via " + cmd + "...");
     }
 
     public static void reset() {
@@ -60,7 +64,10 @@ public final class PestReturnManager {
 
         switch (state) {
             case WARP_GARDEN:
-                mc.thePlayer.sendChatMessage("/warp garden");
+                String cmd = (FarmHelperConfig.pestReturnCommand != null && !FarmHelperConfig.pestReturnCommand.isEmpty())
+                        ? FarmHelperConfig.pestReturnCommand
+                        : "/home";
+                mc.thePlayer.sendChatMessage(cmd);
                 state = State.WAIT_WARP;
                 stateClock.schedule(2500);
                 break;

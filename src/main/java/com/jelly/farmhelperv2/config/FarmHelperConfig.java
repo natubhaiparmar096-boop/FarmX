@@ -320,6 +320,11 @@ public class FarmHelperConfig extends Config {
             description = "Cancels failsafe and continues macroing", size = 2
     )
     public static OneKeyBind cancelFailsafeKeybind = new OneKeyBind(Keyboard.KEY_NONE);
+    @KeyBind(
+            name = "Pause / Resume Macro", category = MISCELLANEOUS, subcategory = "Keybinds",
+            description = "Pauses or resumes the macro from where it stopped", size = 2
+    )
+    public static OneKeyBind pauseMacroKeybind = new OneKeyBind(Keyboard.KEY_P);
 
     //</editor-fold>
 
@@ -1005,6 +1010,7 @@ public class FarmHelperConfig extends Config {
             registerKeyBind(openGuiKeybind, this::openGui);
         }
         registerKeyBind(toggleMacro, () -> MacroHandler.getInstance().toggleMacro());
+        registerKeyBind(pauseMacroKeybind, () -> MacroHandler.getInstance().togglePause());
         registerKeyBind(debugKeybind, () -> {
         });
         registerKeyBind(cancelFailsafeKeybind, () -> {
@@ -1140,6 +1146,9 @@ public class FarmHelperConfig extends Config {
 
     @Switch(name = "Manual Pest Mode", category = PEST_DESTROYER, subcategory = "General", description = "Allow cleaning pests even when farm macro is not running")
     public static boolean manualPestMode = false;
+
+    @Text(name = "Pest Return Command", category = PEST_DESTROYER, subcategory = "General", description = "Command executed to return to farm after pest hunting")
+    public static String pestReturnCommand = "/home";
 
     @Switch(name = "Ballsack Shredder", category = PEST_DESTROYER, subcategory = "Ballsack Shredder", description = "Rapid AOTV roof look-down vacuum clearing route")
     public static boolean pestBallsackShredder = false;

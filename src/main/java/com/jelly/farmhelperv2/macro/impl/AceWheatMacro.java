@@ -50,7 +50,9 @@ public class AceWheatMacro extends AbstractMacro {
             );
         }
 
-        changeState(State.WD);
+        if (!isRestoredState()) {
+            changeState(State.WD);
+        }
         setLayerY(mc.thePlayer.getPosition().getY());
     }
 

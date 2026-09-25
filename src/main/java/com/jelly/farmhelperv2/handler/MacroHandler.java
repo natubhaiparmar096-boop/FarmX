@@ -191,9 +191,9 @@ public class MacroHandler {
 
     public void pauseMacro(boolean scheduler) {
         currentMacro.ifPresent(cm -> {
-            KeyBindUtils.stopMovement();
             if (cm.isPaused()) return;
             cm.saveState();
+            KeyBindUtils.stopMovement();
             cm.onDisable();
             beforeTeleportationPos = Optional.empty();
             macroingTimer.pause();
@@ -205,6 +205,20 @@ public class MacroHandler {
 
     public void pauseMacro() {
         pauseMacro(false);
+    }
+
+    public void togglePause() {
+        if (!isMacroToggled()) {
+            LogUtils.sendWarning("Macro is not running!");
+            return;
+        }
+        if (isCurrentMacroPaused()) {
+            LogUtils.sendSuccess("Resuming macro...");
+            resumeMacro();
+        } else {
+            LogUtils.sendWarning("Pausing macro...");
+            pauseMacro();
+        }
     }
 
     @Getter

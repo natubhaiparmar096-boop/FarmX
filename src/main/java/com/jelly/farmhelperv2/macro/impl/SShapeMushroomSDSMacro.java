@@ -29,7 +29,6 @@ public class SShapeMushroomSDSMacro extends AbstractMacro {
         }
 
         if (MacroHandler.getInstance().isTeleporting()) return;
-        setRestoredState(false);
         if (FarmHelperConfig.dontFixAfterWarping && Math.abs(getYaw() - AngleUtils.get360RotationYaw()) < 0.1) return;
         getRotation().easeTo(
                 new RotationConfiguration(

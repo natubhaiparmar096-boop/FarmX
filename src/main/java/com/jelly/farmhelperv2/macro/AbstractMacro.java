@@ -19,9 +19,12 @@ import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.init.Blocks;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -45,6 +48,7 @@ public abstract class AbstractMacro {
     private Optional<SavedState> savedState = Optional.empty();
     @Setter
     private boolean restoredState = false;
+    private final Clock restoredStateClock = new Clock();
     @Setter
     private int layerY = 0;
     private Optional<Float> yaw = Optional.empty();
@@ -244,6 +248,23 @@ public abstract class AbstractMacro {
 
         PlayerUtils.getTool();
 
+        // If state was just restored from pause, bypass direction recalculation / lane switching
+        // and immediately continue invoking the restored state and keys until the player is moving
+        if (restoredState) {
+            if (getCurrentState() != State.NONE) {
+                invokeState();
+                if (!GameStateHandler.getInstance().notMoving()) {
+                    restoredState = false;
+                    GameStateHandler.getInstance().scheduleNotMoving();
+                } else if (restoredStateClock.passed()) {
+                    restoredState = false;
+                }
+                return;
+            } else {
+                restoredState = false;
+            }
+        }
+
         // Update or invoke state, based on if player is moving or not
         if (GameStateHandler.getInstance().canChangeDirection()) {
             KeyBindUtils.stopMovement(FarmHelperConfig.holdLeftClickWhenChangingRow);
@@ -310,12 +331,17 @@ public abstract class AbstractMacro {
         FarmHelperConfig.CropEnum crop;
         if (savedState.isPresent()) {
             LogUtils.sendDebug("Restoring state: " + savedState.get());
-            changeState(savedState.get().getState());
-            setYaw(savedState.get().getYaw());
-            setPitch(savedState.get().getPitch());
-            setClosest90Deg(savedState.get().getClosest90Deg());
-            crop = savedState.get().getCrop();
+            SavedState ss = savedState.get();
+            changeState(ss.getState());
+            setYaw(ss.getYaw());
+            setPitch(ss.getPitch());
+            setClosest90Deg(ss.getClosest90Deg());
+            crop = ss.getCrop();
             restoredState = true;
+            restoredStateClock.schedule(2000);
+            if (!ss.getHeldKeybinds().isEmpty()) {
+                KeyBindUtils.holdThese(ss.getHeldKeybinds().toArray(new KeyBinding[0]));
+            }
             savedState = Optional.empty();
             GameStateHandler.getInstance().setUpdatedState(true);
             float randomTime = FarmHelperConfig.getRandomTimeBetweenChangingRows();
@@ -351,7 +377,8 @@ public abstract class AbstractMacro {
     public void saveState() {
         if (!savedState.isPresent()) {
             LogUtils.sendDebug("Saving state: " + currentState);
-            savedState = Optional.of(new SavedState(currentState, getYaw(), getPitch(), closest90Deg.orElse(AngleUtils.getClosest()), MacroHandler.getInstance().getCrop()));
+            KeyBinding[] keys = KeyBindUtils.getHoldingKeybinds();
+            savedState = Optional.of(new SavedState(currentState, getYaw(), getPitch(), closest90Deg.orElse(AngleUtils.getClosest()), MacroHandler.getInstance().getCrop(), keys));
         }
     }
 
@@ -443,6 +470,7 @@ public abstract class AbstractMacro {
         private float pitch;
         private Optional<Float> closest90Deg;
         private FarmHelperConfig.CropEnum crop;
+        private final List<KeyBinding> heldKeybinds = new ArrayList<>();
 
         public SavedState(State state, float yaw, float pitch, float closest90Deg, FarmHelperConfig.CropEnum crop) {
             this.state = state;
@@ -450,6 +478,17 @@ public abstract class AbstractMacro {
             this.pitch = pitch;
             this.closest90Deg = Optional.of(closest90Deg);
             this.crop = crop;
+        }
+
+        public SavedState(State state, float yaw, float pitch, float closest90Deg, FarmHelperConfig.CropEnum crop, KeyBinding[] keys) {
+            this(state, yaw, pitch, closest90Deg, crop);
+            if (keys != null) {
+                for (KeyBinding k : keys) {
+                    if (k != null) {
+                        this.heldKeybinds.add(k);
+                    }
+                }
+            }
         }
 
         @Override
@@ -460,6 +499,7 @@ public abstract class AbstractMacro {
                     ", pitch=" + pitch +
                     ", closest90Deg=" + closest90Deg +
                     ", crop=" + crop +
+                    ", heldKeybinds=" + heldKeybinds.size() +
                     '}';
         }
     }

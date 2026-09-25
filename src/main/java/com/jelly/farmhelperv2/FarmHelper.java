@@ -132,6 +132,7 @@ public class FarmHelper {
         ClientCommandHandler.instance.registerCommand(new com.jelly.farmhelperv2.command.ProfileCommand());
         ClientCommandHandler.instance.registerCommand(new com.jelly.farmhelperv2.command.JacobCommand());
         ClientCommandHandler.instance.registerCommand(new com.jelly.farmhelperv2.command.PestCommand());
+        ClientCommandHandler.instance.registerCommand(new com.jelly.farmhelperv2.command.PauseCommand());
         CommandManager.register(new FarmHelperMainCommand());
     }
 

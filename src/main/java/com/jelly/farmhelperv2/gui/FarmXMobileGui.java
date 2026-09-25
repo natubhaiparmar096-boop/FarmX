@@ -59,6 +59,8 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_KB_CLEAR_GUI = 205;
     private static final int ID_KB_CLEAR_CANCEL = 206;
     private static final int ID_KB_CLEAR_DEBUG = 207;
+    private static final int ID_KB_PAUSE = 208;
+    private static final int ID_KB_CLEAR_PAUSE = 209;
 
     // Farming
     private static final int ID_MACRO = 1;
@@ -197,6 +199,7 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_ACE_DELAY_M = 310;
     private static final int ID_ACE_DELAY_P = 311;
     private static final int ID_TOGGLE_MACRO_EXEC = 312;
+    private static final int ID_PAUSE_MACRO_EXEC = 313;
 
     // Pest Destroyer IDs
     private static final int ID_PEST_ENABLE = 600;
@@ -217,6 +220,7 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_PEST_HUD = 615;
     private static final int ID_PEST_START_NOW = 616;
     private static final int ID_PEST_STOP_NOW = 617;
+    private static final int ID_PEST_RETURN_CMD = 618;
 
     @Override
     public void initGui() {
@@ -238,6 +242,8 @@ public class FarmXMobileGui extends GuiScreen {
             case 0: // Keybinds
                 btn(ID_KB_TOGGLE, cx, y, 160, listeningLabel(ID_KB_TOGGLE, "Toggle Macro", FarmHelperConfig.toggleMacro));
                 btn(ID_KB_CLEAR_TOGGLE, this.width / 2 + 65, y, 35, "Clr"); y += g;
+                btn(ID_KB_PAUSE, cx, y, 160, listeningLabel(ID_KB_PAUSE, "Pause / Resume", FarmHelperConfig.pauseMacroKeybind));
+                btn(ID_KB_CLEAR_PAUSE, this.width / 2 + 65, y, 35, "Clr"); y += g;
                 btn(ID_KB_GUI, cx, y, 160, listeningLabel(ID_KB_GUI, "Open GUI", FarmHelperConfig.openGuiKeybind));
                 btn(ID_KB_CLEAR_GUI, this.width / 2 + 65, y, 35, "Clr"); y += g;
                 btn(ID_KB_CANCEL_FS, cx, y, 160, listeningLabel(ID_KB_CANCEL_FS, "Cancel Failsafe", FarmHelperConfig.cancelFailsafeKeybind));
@@ -249,7 +255,8 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_PROFILE, cx, y, 200, "Profile: " + com.jelly.farmhelperv2.config.ProfileManager.getActiveProfileName()); y += g;
                 btn(ID_PROFILE_SAVE, this.width / 2 - 105, y, half, "Save Profile");
                 btn(ID_PROFILE_DELETE, this.width / 2 + 7, y, half, "Delete Profile"); y += g;
-                btn(ID_TOGGLE_MACRO_EXEC, cx, y, 200, macroToggleLabel()); y += g;
+                btn(ID_TOGGLE_MACRO_EXEC, this.width / 2 - 105, y, half, macroToggleLabel());
+                btn(ID_PAUSE_MACRO_EXEC, this.width / 2 + 7, y, half, macroPauseLabel()); y += g;
                 btn(ID_MACRO, cx, y, 200, macroLabel()); y += g;
                 btn(ID_ALWAYS_W, cx, y, 200, on("Always Hold W", FarmHelperConfig.alwaysHoldW)); y += g;
                 btn(ID_HOLD_LMB, cx, y, 200, on("Hold LMB Row Change", FarmHelperConfig.holdLeftClickWhenChangingRow)); y += g;
@@ -361,6 +368,7 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_PEST_TAB, cx, y, 200, on("Trigger on Tablist", FarmHelperConfig.pestTriggerOnTabThreshold)); y += g;
                 pair(ID_PEST_THRESH_M, ID_PEST_THRESH_P, y, "Pest Threshold: " + FarmHelperConfig.pestThreshold); y += g;
                 btn(ID_PEST_MANUAL, cx, y, 200, on("Manual Pest Mode", FarmHelperConfig.manualPestMode)); y += g;
+                btn(ID_PEST_RETURN_CMD, cx, y, 200, "Return Cmd: " + FarmHelperConfig.pestReturnCommand); y += g;
                 btn(ID_PEST_SHREDDER, cx, y, 200, on("Ballsack Shredder", FarmHelperConfig.pestBallsackShredder)); y += g;
                 pair(ID_PEST_WARPS_M, ID_PEST_WARPS_P, y, "Shredder Warps: " + FarmHelperConfig.pestBallsackWarps); y += g;
                 btn(ID_PEST_START_NOW, this.width / 2 - 105, y, half, "Start Pest Macro");
@@ -535,6 +543,7 @@ public class FarmXMobileGui extends GuiScreen {
                 return;
 
             case ID_KB_TOGGLE:
+            case ID_KB_PAUSE:
             case ID_KB_GUI:
             case ID_KB_CANCEL_FS:
             case ID_KB_DEBUG:
@@ -542,6 +551,7 @@ public class FarmXMobileGui extends GuiScreen {
                 initGui();
                 break;
             case ID_KB_CLEAR_TOGGLE: clearBind(FarmHelperConfig.toggleMacro); break;
+            case ID_KB_CLEAR_PAUSE: clearBind(FarmHelperConfig.pauseMacroKeybind); break;
             case ID_KB_CLEAR_GUI: clearBind(FarmHelperConfig.openGuiKeybind); break;
             case ID_KB_CLEAR_CANCEL: clearBind(FarmHelperConfig.cancelFailsafeKeybind); break;
             case ID_PROFILE:
@@ -682,7 +692,12 @@ public class FarmXMobileGui extends GuiScreen {
 
             case ID_TOGGLE_MACRO_EXEC:
                 com.jelly.farmhelperv2.handler.MacroHandler.getInstance().toggleMacro();
-                button.displayString = macroToggleLabel();
+                updateMacroExecButtons();
+                break;
+
+            case ID_PAUSE_MACRO_EXEC:
+                com.jelly.farmhelperv2.handler.MacroHandler.getInstance().togglePause();
+                updateMacroExecButtons();
                 break;
 
             case ID_ROT_T_M: adjF(() -> FarmHelperConfig.rotationTime, v -> FarmHelperConfig.rotationTime = (float) v, -50, 200, 2000); break;
@@ -726,6 +741,14 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_PEST_THRESH_M: adjI(() -> FarmHelperConfig.pestThreshold, v -> FarmHelperConfig.pestThreshold = v, -1, 1, 8); break;
             case ID_PEST_THRESH_P: adjI(() -> FarmHelperConfig.pestThreshold, v -> FarmHelperConfig.pestThreshold = v, 1, 1, 8); break;
             case ID_PEST_MANUAL: FarmHelperConfig.manualPestMode = !FarmHelperConfig.manualPestMode; button.displayString = on("Manual Pest Mode", FarmHelperConfig.manualPestMode); break;
+            case ID_PEST_RETURN_CMD:
+                if ("/home".equalsIgnoreCase(FarmHelperConfig.pestReturnCommand)) {
+                    FarmHelperConfig.pestReturnCommand = "/warp garden";
+                } else {
+                    FarmHelperConfig.pestReturnCommand = "/home";
+                }
+                button.displayString = "Return Cmd: " + FarmHelperConfig.pestReturnCommand;
+                break;
             case ID_PEST_SHREDDER: FarmHelperConfig.pestBallsackShredder = !FarmHelperConfig.pestBallsackShredder; button.displayString = on("Ballsack Shredder", FarmHelperConfig.pestBallsackShredder); break;
             case ID_PEST_WARPS_M: adjI(() -> FarmHelperConfig.pestBallsackWarps, v -> FarmHelperConfig.pestBallsackWarps = v, -1, 1, 10); break;
             case ID_PEST_WARPS_P: adjI(() -> FarmHelperConfig.pestBallsackWarps, v -> FarmHelperConfig.pestBallsackWarps = v, 1, 1, 10); break;
@@ -780,6 +803,7 @@ public class FarmXMobileGui extends GuiScreen {
     private OneKeyBind keybindFor(int id) {
         switch (id) {
             case ID_KB_TOGGLE: return FarmHelperConfig.toggleMacro;
+            case ID_KB_PAUSE: return FarmHelperConfig.pauseMacroKeybind;
             case ID_KB_GUI: return FarmHelperConfig.openGuiKeybind;
             case ID_KB_CANCEL_FS: return FarmHelperConfig.cancelFailsafeKeybind;
             case ID_KB_DEBUG: return FarmHelperConfig.debugKeybind;
@@ -920,6 +944,27 @@ public class FarmXMobileGui extends GuiScreen {
     private static String macroToggleLabel() {
         boolean toggled = com.jelly.farmhelperv2.handler.MacroHandler.getInstance().isMacroToggled();
         return toggled ? "§cStop Macro" : "§aStart Macro";
+    }
+
+    private static String macroPauseLabel() {
+        if (!com.jelly.farmhelperv2.handler.MacroHandler.getInstance().isMacroToggled()) {
+            return "§7Pause: Inactive";
+        }
+        boolean paused = com.jelly.farmhelperv2.handler.MacroHandler.getInstance().isCurrentMacroPaused();
+        return paused ? "§aResume Macro" : "§ePause Macro";
+    }
+
+    private void updateMacroExecButtons() {
+        for (Object obj : this.buttonList) {
+            if (obj instanceof GuiButton) {
+                GuiButton b = (GuiButton) obj;
+                if (b.id == ID_TOGGLE_MACRO_EXEC) {
+                    b.displayString = macroToggleLabel();
+                } else if (b.id == ID_PAUSE_MACRO_EXEC) {
+                    b.displayString = macroPauseLabel();
+                }
+            }
+        }
     }
 
     private static String macroLabel() {
