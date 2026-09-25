@@ -342,7 +342,9 @@ public class BlockUtils {
         }
 
         try {
-            return !block.isPassable(blockAccess, blockPos) || block.getCollisionBoundingBox((World) blockAccess, blockPos, blockState) != null;
+            World world = (blockAccess instanceof World) ? (World) blockAccess : mc.theWorld;
+            if (world == null) return true;
+            return !block.isPassable(blockAccess, blockPos) || block.getCollisionBoundingBox(world, blockPos, blockState) != null;
         } catch (Exception e) {
             return true;
         }
@@ -825,7 +827,7 @@ public class BlockUtils {
     public static boolean isFree(float x, float y, float z, IBlockAccess blockaccess) {
         GameStateHandler.Location location = GameStateHandler.getInstance().getLocation();
         if (location.equals(GameStateHandler.Location.GARDEN)) {
-            if (y < 65 || x < -300 || x > 300 || z < -300 || z > 300) return false;
+            if (y < 60 || y > 255 || x < -500 || x > 800 || z < -500 || z > 800) return false;
         }
         BlockPos blockpos = new BlockPos(x, y, z);
         IBlockState blockState = blockaccess.getBlockState(blockpos);

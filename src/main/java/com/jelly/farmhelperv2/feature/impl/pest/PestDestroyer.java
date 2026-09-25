@@ -207,7 +207,7 @@ public class PestDestroyer implements IFeature {
                 } else if (FarmHelperConfig.pestAotvHops && distSq > 36.0 && PestCombatCoordinator.performAotvHop(currentTarget.getPositionVector())) {
                     stateClock.schedule(250);
                 } else {
-                    FlyPathFinderExecutor.getInstance().findPath(currentTarget.getPositionVector(), true, true);
+                    FlyPathFinderExecutor.getInstance().findPath(currentTarget, true, true);
                     stateClock.schedule(300);
                 }
                 break;

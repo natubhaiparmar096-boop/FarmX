@@ -18,7 +18,7 @@ public class FlyNodeProcessor extends NodeProcessor {
 
     @Override
     public PathPoint getPathPointToCoords(Entity entityIn, double x, double y, double z) {
-        return this.openPoint(MathHelper.floor_double(x - (entityIn.width / 2.0D)), MathHelper.floor_double(y - (entityIn.height / 2.0D)), MathHelper.floor_double(z - (entityIn.width / 2.0D)));
+        return this.openPoint(MathHelper.floor_double(x - (entityIn.width / 2.0D)), MathHelper.floor_double(y + 0.5D), MathHelper.floor_double(z - (entityIn.width / 2.0D)));
     }
 
     @Override
