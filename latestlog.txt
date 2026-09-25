@@ -1,0 +1,340 @@
+--------- Start launching the game
+Info: Launcher version: 1.4.1.4 (141400)
+Info: Architecture: arm64
+Info: Device model: vivo V2437
+Info: API version: 36
+Info: Renderer: GL4ES
+Info: Selected Minecraft version: 1.8.9 Forge
+Info: Minecraft Info: 1.8.9, Forge - 11.15.1.2318
+Info: Game Path: /storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/versions/1.8.9 Forge (Isolation: true)
+Info: Custom Java arguments: NONE
+Info: Java Runtime: Internal-8
+Info: Account: Hitesh9078 (Local)
+---------
+
+Added custom env: INST_FORGE=1
+Added custom env: ZALITH_VERSION_CODE=141400
+Added custom env: TMPDIR=/data/user/0/com.movtery.zalithlauncher/cache
+Added custom env: AWTSTUB_WIDTH=1604
+Added custom env: FORCE_VSYNC=false
+Added custom env: POJAV_NATIVEDIR=/data/app/~~7ufCGfxSOGJyzaiUIo7znw==/com.movtery.zalithlauncher-tp4nGAp79KOQ3O_LLmaXOA==/lib/arm64
+Added custom env: DRIVER_PATH=/data/app/~~7ufCGfxSOGJyzaiUIo7znw==/com.movtery.zalithlauncher-tp4nGAp79KOQ3O_LLmaXOA==/lib/arm64
+Added custom env: LIBGL_MIPMAP=3
+Added custom env: HOME=/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files
+Added custom env: PATH=/data/user/0/com.movtery.zalithlauncher/runtimes/Internal-8/bin:/product/bin:/apex/com.android.runtime/bin:/apex/com.android.art/bin:/apex/com.android.virt/bin:/system_ext/bin:/system/bin:/system/xbin:/odm/bin:/vendor/bin:/vendor/xbin
+Added custom env: LIBGL_NOINTOVLHACK=1
+Added custom env: MOD_ANDROID_RUNTIME=/data/user/0/com.movtery.zalithlauncher/app_runtime_mod
+Added custom env: LIBGL_NORMALIZE=1
+Added custom env: LD_LIBRARY_PATH=/data/user/0/com.movtery.zalithlauncher/runtimes/Internal-8/lib/aarch64/jli:/data/user/0/com.movtery.zalithlauncher/runtimes/Internal-8/lib/aarch64:/system/lib64:/vendor/lib64:/vendor/lib64/hw:/data/user/0/com.movtery.zalithlauncher/app_runtime_mod:/data/app/~~7ufCGfxSOGJyzaiUIo7znw==/com.movtery.zalithlauncher-tp4nGAp79KOQ3O_LLmaXOA==/lib/arm64
+Added custom env: LIBGL_NOERROR=1
+Added custom env: POJAV_RENDERER=opengles2
+Added custom env: LIBGL_ES=2
+Added custom env: JAVA_HOME=/data/user/0/com.movtery.zalithlauncher/runtimes/Internal-8
+Added custom env: AWTSTUB_HEIGHT=718
+Initialising gl4es
+v1.1.5 built on Jul 14 2024 19:34:14
+Using GLES 2.0 backend
+loaded: libGLESv2.so
+loaded: libEGL.so
+Using GLES 2.0 backend
+Hardware Full NPOT detected and used
+FBO are in core, and so used
+PointSprite are in core, and so used
+CubeMap are in core, and so used
+BlendColor is in core, and so used
+Blend Subtract is in core, and so used
+Blend Function and Equation Separation is in core, and so used
+Texture Mirrored Repeat is in core, and so used
+Extension GL_OES_mapbuffer  detected
+Extension GL_OES_element_index_uint  detected and used
+Extension GL_OES_packed_depth_stencil  detected and used
+Extension GL_OES_depth24  detected and used
+Extension GL_OES_rgb8_rgba8  detected and used
+Extension GL_EXT_texture_format_BGRA8888  detected and used
+Extension GL_OES_depth_texture  detected and used
+Extension GL_OES_texture_stencil8  detected and used
+Extension GL_EXT_texture_rg  detected and used
+Extension GL_EXT_color_buffer_float  detected and used
+Extension GL_EXT_color_buffer_half_float  detected and used
+high precision float in fragment shader available and used
+Max vertex attrib: 32
+Extension GL_OES_standard_derivatives  detected and used
+Extension GL_ARM_shader_framebuffer_fetch detected and used
+Extension GL_OES_get_program_binary  detected and used
+Number of supported Program Binary Format: 1
+Max texture size: 16384
+Max Varying Vector: 31
+Texture Units: 16/16 (hardware: 16), Max lights: 8, Max planes: 6
+Extension GL_EXT_texture_filter_anisotropic  detected and used
+Max Anisotropic filtering: 16
+Hardware vendor is ARM
+GLSL 300 es supported
+GLSL 310 es supported and used
+GLSL 320 es supported
+Max Color Attachments: 8 / Draw buffers: 8
+sRGB surface supported
+EGLImage to Texture2D supported
+EGLImage to RenderBuffer supported
+ignore MipMap
+glGetError() always return GL_NOERROR
+Targeting OpenGL 2.1
+No hack in shader converter to define overloaded function with int
+Not trying to batch small subsequent glDrawXXXX
+try to use VBO
+glXMakeCurrent FBO workaround enabled
+FBO workaround for using binded texture enabled
+Force texture for Attachment color0 on FBO
+Hack to trigger a SwapBuffers when a Full Framebuffer Blit on default FBO is done
+Force normals to be normalized on FPE shaders
+glX Will try to recycle EGL Surface
+Current folder is:/
+JVMArg: -Djava.home=/data/user/0/com.movtery.zalithlauncher/runtimes/Internal-8
+JVMArg: -Djava.io.tmpdir=/data/user/0/com.movtery.zalithlauncher/cache
+JVMArg: -Djna.boot.library.path=/data/app/~~7ufCGfxSOGJyzaiUIo7znw==/com.movtery.zalithlauncher-tp4nGAp79KOQ3O_LLmaXOA==/lib/arm64
+JVMArg: -Duser.home=/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files
+JVMArg: -Duser.language=en
+JVMArg: -Dos.name=Linux
+JVMArg: -Dos.version=Android-16
+JVMArg: -Dpojav.path.minecraft=/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft
+JVMArg: -Dpojav.path.private.account=/data/user/0/com.movtery.zalithlauncher/files/accounts
+JVMArg: -Duser.timezone=Asia/Kolkata
+JVMArg: -Dorg.lwjgl.vulkan.libname=libvulkan.so
+JVMArg: -Dglfwstub.windowWidth=1604
+JVMArg: -Dglfwstub.windowHeight=718
+JVMArg: -Dglfwstub.initEgl=false
+JVMArg: -Dext.net.resolvPath=/data/user/0/com.movtery.zalithlauncher/resolv.conf
+JVMArg: -Dlog4j2.formatMsgNoLookups=true
+JVMArg: -Dnet.minecraft.clientmodname=ZalithLauncher
+JVMArg: -Dfml.earlyprogresswindow=false
+JVMArg: -Dloader.disable_forked_guis=true
+JVMArg: -Djdk.lang.Process.launchMechanism=FORK
+JVMArg: -Dsodium.checks.issue2561=false
+JVMArg: -javaagent:/data/user/0/com.movtery.zalithlauncher/components/MioLibPatcher.jar
+JVMArg: -Xms800M
+JVMArg: -Xmx800M
+JVMArg: -Dorg.lwjgl.opengl.libname=libgl4es_114.so
+JVMArg: -Dorg.lwjgl.freetype.libname=/data/app/~~7ufCGfxSOGJyzaiUIo7znw==/com.movtery.zalithlauncher-tp4nGAp79KOQ3O_LLmaXOA==/lib/arm64/libfreetype.so
+JVMArg: -XX:ActiveProcessorCount=8
+JVMArg: -Djava.awt.headless=false
+JVMArg: -Dcacio.managed.screensize=1283x575
+JVMArg: -Dcacio.font.fontmanager=sun.awt.X11FontManager
+JVMArg: -Dcacio.font.fontscaler=sun.font.FreetypeFontScaler
+JVMArg: -Dswing.defaultlaf=javax.swing.plaf.nimbus.NimbusLookAndFeel
+JVMArg: -Dawt.toolkit=net.java.openjdk.cacio.ctc.CTCToolkit
+JVMArg: -Djava.awt.graphicsenv=net.java.openjdk.cacio.ctc.CTCGraphicsEnvironment
+JVMArg: -Xbootclasspath/p:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/caciocavallo/ResConfHack.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/caciocavallo/cacio-androidnw-1.10-SNAPSHOT.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/caciocavallo/cacio-shared-1.10-SNAPSHOT.jar
+JVMArg: -Dlog4j.configurationFile=/data/user/0/com.movtery.zalithlauncher/components/log4j-rce-patch-1.7.xml
+JVMArg: -Djava.library.path=/data/user/0/com.movtery.zalithlauncher/cache/natives/1.8.9 Forge:/data/app/~~7ufCGfxSOGJyzaiUIo7znw==/com.movtery.zalithlauncher-tp4nGAp79KOQ3O_LLmaXOA==/lib/arm64
+JVMArg: -Djna.boot.library.path=/data/user/0/com.movtery.zalithlauncher/cache/natives/1.8.9 Forge
+JVMArg: -cp
+JVMArg: /storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/lwjgl3/lwjgl-glfw-classes.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/mojang/netty/1.8.8/netty-1.8.8.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/oshi-project/oshi-core/1.1/oshi-core-1.1.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/net/java/dev/jna/platform/3.4.0/platform-3.4.0.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/ibm/icu/icu4j-core-mojang/51.2/icu4j-core-mojang-51.2.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/paulscode/codecjorbis/20101023/codecjorbis-20101023.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/paulscode/codecwav/20101023/codecwav-20101023.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/paulscode/libraryjavasound/20101123/libraryjavasound-20101123.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/paulscode/librarylwjglopenal/20100824/librarylwjglopenal-20100824.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/paulscode/soundsystem/20120107/soundsystem-20120107.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/io/netty/netty-all/4.0.23.Final/netty-all-4.0.23.Final.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/google/guava/guava/17.0/guava-17.0.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/apache/commons/commons-lang3/3.3.2/commons-lang3-3.3.2.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/commons-io/commons-io/2.4/commons-io-2.4.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/commons-codec/commons-codec/1.9/commons-codec-1.9.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/net/java/jinput/jinput/2.0.5/jinput-2.0.5.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/net/java/jutils/jutils/1.0.0/jutils-1.0.0.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/mojang/authlib/1.5.21/authlib-1.5.21.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/mojang/realms/1.7.59/realms-1.7.59.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/apache/commons/commons-compress/1.8.1/commons-compress-1.8.1.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/apache/httpcomponents/httpclient/4.3.3/httpclient-4.3.3.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/apache/httpcomponents/httpcore/4.3.2/httpcore-4.3.2.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/apache/logging/log4j/log4j-api/2.0-beta9/log4j-api-2.0-beta9.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/apache/logging/log4j/log4j-core/2.0-beta9/log4j-core-2.0-beta9.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/tv/twitch/twitch/6.5/twitch-6.5.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/net/minecraftforge/forge/1.8.9-11.15.1.2318-1.8.9/forge-1.8.9-11.15.1.2318-1.8.9.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/ow2/asm/asm-all/5.0.3/asm-all-5.0.3.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/jline/jline/2.13/jline-2.13.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/typesafe/akka/akka-actor_2.11/2.3.3/akka-actor_2.11-2.3.3.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/com/typesafe/config/1.2.1/config-1.2.1.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/scala-lang/scala-actors-migration_2.11/1.1.0/scala-actors-migration_2.11-1.1.0.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/scala-lang/scala-compiler/2.11.1/scala-compiler-2.11.1.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/scala-lang/plugins/scala-continuations-library_2.11/1.0.2/scala-continuations-library_2.11-1.0.2.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/scala-lang/plugins/scala-continuations-plugin_2.11.1/1.0.2/scala-continuations-plugin_2.11.1-1.0.2.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/scala-lang/scala-library/2.11.1/scala-library-2.11.1.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/scala-lang/scala-parser-combinators_2.11/1.0.1/scala-parser-combinators_2.11-1.0.1.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/scala-lang/scala-reflect/2.11.1/scala-reflect-2.11.1.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/scala-lang/scala-swing_2.11/1.0.1/scala-swing_2.11-1.0.1.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/org/scala-lang/scala-xml_2.11/1.0.2/scala-xml_2.11-1.0.2.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/lzma/lzma/0.0.1/lzma-0.0.1.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/net/sf/jopt-simple/jopt-simple/4.6/jopt-simple-4.6.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/java3d/vecmath/1.5.2/vecmath-1.5.2.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/libraries/net/sf/trove4j/trove4j/3.0.3/trove4j-3.0.3.jar:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/versions/1.8.9 Forge/1.8.9 Forge.jar
+JVMArg: net.minecraft.launchwrapper.Launch
+JVMArg: --username
+JVMArg: Hitesh9078
+JVMArg: --version
+JVMArg: 1.8.9
+JVMArg: --gameDir
+JVMArg: /storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/versions/1.8.9 Forge
+JVMArg: --assetsDir
+JVMArg: /storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/assets
+JVMArg: --assetIndex
+JVMArg: 1.8
+JVMArg: --uuid
+JVMArg: 00000000000000000000000000000000
+JVMArg: --accessToken
+JVMArg: --userProperties
+JVMArg: {}
+JVMArg: --userType
+JVMArg: msa
+JVMArg: --tweakClass
+JVMArg: net.minecraftforge.fml.common.launcher.FMLTweaker
+OpenJDK 64-Bit Server VM warning: No monotonic clock was available - timed services may be adversely affected if the time-of-day clock changes
+--------- beginning of main
+I/jrelog  (26858): dlopen /data/user/0/com.movtery.zalithlauncher/runtimes/Internal-8/lib/aarch64/jli/libjli.so success
+
+[MioPatcher]: MioPatcher is running!
+2026-09-24 19:30:38,587 ERROR appender Console has no parameter that matches element Policies
+[19:30:38] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.FMLTweaker
+[19:30:38] [main/INFO]: Using primary tweak class name net.minecraftforge.fml.common.launcher.FMLTweaker
+[19:30:38] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLTweaker
+[19:30:38] [main/INFO]: Forge Mod Loader version 11.15.1.2318 for Minecraft 1.8.9 loading
+[19:30:38] [main/INFO]: Java is OpenJDK 64-Bit Server VM, version 1.8.0_442-internal, running on Linux:aarch64:Android-16, installed at /data/user/0/com.movtery.zalithlauncher/runtimes/Internal-8
+[19:30:39] [main/INFO]: Loading tweaker cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker from FarmHelperV2-2.10.0.jar
+[19:30:39] [main/INFO]: Loading tweaker optifine.OptiFineForgeTweaker from OptiFine_1.8.9_HD_U_L5.jar
+[19:30:39] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[19:30:39] [main/INFO]: Loading tweak class name cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker
+[19:30:39] [main/INFO]: [cc.polyfrost.oneconfig.loader.stage0.OneConfigWrapperBase:addSSLStore:258]: Attempting to load Polyfrost certificate.
+[19:30:39] [main/INFO]: [cc.polyfrost.oneconfig.loader.stage0.OneConfigWrapperBase:<init>:49]: OneConfig has detected the version 1.8.9. If this is false, report this at https://inv.wtf/polyfrost
+2026-09-24 19:30:41,836 ERROR appender Console has no parameter that matches element Policies
+[19:30:41] [main/INFO]: [cc.polyfrost.oneconfig.loader.OneConfigWrapperBase:<init>:49]: OneConfig has detected the version 1.8.9. If this is false, report this at https://inv.wtf/polyfrost
+[19:30:42] [main/INFO]: [cc.polyfrost.oneconfig.internal.plugin.asm.OneConfigTweaker:injectMixinTweaker:186]: Injecting MixinTweaker from EssentialSetupTweaker
+[19:30:42] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.7.11 Source=file:/storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/versions/1.8.9%20Forge/./OneConfig/OneConfig%20(1.8.9-forge).jar Service=LaunchWrapper Env=CLIENT
+[19:30:42] [main/DEBUG]: Instantiating coremod class FMLCore
+[19:30:42] [main/WARN]: The coremod com.jelly.farmhelperv2.transformer.FMLCore does not have a MCVersion annotation, it may cause issues with this version of Minecraft
+[19:30:42] [main/DEBUG]: Enqueued coremod FMLCore
+[19:30:42] [main/INFO]: [cc.polyfrost.oneconfig.loader.OneConfigLoaderBase:<init>:44]: OneConfig has detected the version 1.8.9. If this is false, report this at https://inv.wtf/polyfrost
+[19:30:42] [main/INFO]: Loading tweak class name optifine.OptiFineForgeTweaker
+[19:30:42] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[19:30:42] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[19:30:42] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLInjectionAndSortingTweaker
+[19:30:42] [main/INFO]: Calling tweak class optifine.OptiFineForgeTweaker
+[19:30:42] [main/INFO]: [optifine.OptiFineForgeTweaker:dbg:56]: OptiFineForgeTweaker: acceptOptions
+[19:30:42] [main/INFO]: [optifine.OptiFineForgeTweaker:dbg:56]: OptiFineForgeTweaker: injectIntoClassLoader
+[19:30:42] [main/INFO]: [optifine.OptiFineClassTransformer:dbg:242]: OptiFine ClassTransformer
+[19:30:42] [main/INFO]: [optifine.OptiFineClassTransformer:dbg:242]: OptiFine ZIP file: /storage/emulated/0/Android/data/com.movtery.zalithlauncher/files/.minecraft/versions/1.8.9 Forge/mods/OptiFine_1.8.9_HD_U_L5.jar
+[19:30:42] [main/INFO]: Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[19:30:42] [main/DEBUG]: Injecting coremod FMLCorePlugin {net.minecraftforge.fml.relauncher.FMLCorePlugin} class transformers
+[19:30:42] [main/TRACE]: Registering transformer net.minecraftforge.fml.common.asm.transformers.BlamingTransformer
+[19:30:42] [main/TRACE]: Registering transformer net.minecraftforge.fml.common.asm.transformers.SideTransformer
+[19:30:42] [main/TRACE]: Registering transformer net.minecraftforge.fml.common.asm.transformers.EventSubscriptionTransformer
+[19:30:42] [main/TRACE]: Registering transformer net.minecraftforge.fml.common.asm.transformers.EventSubscriberTransformer
+[19:30:42] [main/DEBUG]: Injection complete
+[19:30:42] [main/DEBUG]: Running coremod plugin for FMLCorePlugin {net.minecraftforge.fml.relauncher.FMLCorePlugin}
+[19:30:42] [main/DEBUG]: Running coremod plugin FMLCorePlugin
+[19:30:43] [main/DEBUG]: Read 825 binary patches
+[19:30:43] [main/DEBUG]: Loading deobfuscation resource /deobfuscation_data-1.8.9.lzma with 27891 records
+[19:30:44] [main/INFO]: Found valid fingerprint for Minecraft. Certificate fingerprint cd99959656f753dc28d863b46769f7f8fbaefcfc
+[19:30:44] [main/ERROR]: FML appears to be missing any signature data. This is not a good thing
+[19:30:44] [main/DEBUG]: Coremod plugin class FMLCorePlugin run successfully
+[19:30:44] [main/INFO]: Calling tweak class net.minecraftforge.fml.relauncher.CoreModManager$FMLPluginWrapper
+[19:30:44] [main/DEBUG]: Injecting coremod FMLForgePlugin {net.minecraftforge.classloading.FMLForgePlugin} class transformers
+[19:30:44] [main/DEBUG]: Injection complete
+[19:30:44] [main/DEBUG]: Running coremod plugin for FMLForgePlugin {net.minecraftforge.classloading.FMLForgePlugin}
+[19:30:44] [main/DEBUG]: Running coremod plugin FMLForgePlugin
+[19:30:44] [main/DEBUG]: Coremod plugin class FMLForgePlugin run successfully
+[19:30:44] [main/INFO]: Calling tweak class org.spongepowered.asm.launch.MixinTweaker
+[19:30:44] [main/INFO]: Compatibility level set to JAVA_8
+[19:30:44] [main/INFO]: Initialised Mixin FML Remapper Adapter with net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper@1654a892
+[19:30:44] [main/DEBUG]: Injecting coremod FMLCore {com.jelly.farmhelperv2.transformer.FMLCore} class transformers
+[19:30:44] [main/TRACE]: Registering transformer com.jelly.farmhelperv2.transformer.NetworkManagerTransformer
+[19:30:44] [main/DEBUG]: Injection complete
+[19:30:44] [main/DEBUG]: Running coremod plugin for FMLCore {com.jelly.farmhelperv2.transformer.FMLCore}
+[19:30:44] [main/DEBUG]: Running coremod plugin FMLCore
+[19:30:44] [main/DEBUG]: Coremod plugin class FMLCore run successfully
+[19:30:44] [main/INFO]: Calling tweak class cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker
+[19:30:44] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.FMLDeobfTweaker
+[19:30:44] [main/DEBUG]: Loaded 165 rules from AccessTransformer config file forge_at.cfg
+[19:30:45] [main/DEBUG]: Validating minecraft
+[19:30:45] [main/INFO]: Loading tweak class name net.minecraftforge.fml.common.launcher.TerminalTweaker
+[19:30:45] [main/INFO]: Loading tweak class name org.spongepowered.asm.mixin.EnvironmentStateTweaker
+[19:30:45] [main/INFO]: Calling tweak class net.minecraftforge.fml.common.launcher.TerminalTweaker
+[19:30:45] [main/INFO]: Calling tweak class org.spongepowered.asm.mixin.EnvironmentStateTweaker
+[19:30:45] [main/INFO]: [optifine.OptiFineForgeTweaker:dbg:56]: OptiFineForgeTweaker: getLaunchArguments
+[19:30:46] [main/WARN]: Error loading class: net/wyvest/redaction/features/NameHighlight (java.lang.ClassNotFoundException: The specified class 'net.wyvest.redaction.features.NameHighlight' was not found)
+[19:30:46] [main/WARN]: Error loading class: org/polyfrost/redaction/features/NameHighlight (java.lang.ClassNotFoundException: The specified class 'org.polyfrost.redaction.features.NameHighlight' was not found)
+[19:30:46] [main/WARN]: Error loading class: co/skyclient/scc/gui/SkyClientMainMenu (java.lang.ClassNotFoundException: The specified class 'co.skyclient.scc.gui.SkyClientMainMenu' was not found)
+[19:30:46] [main/WARN]: Error loading class: mynameisjeff/skyblockclientupdater/UpdateChecker (java.lang.ClassNotFoundException: The specified class 'mynameisjeff.skyblockclientupdater.UpdateChecker' was not found)
+[19:30:46] [main/INFO]: Launching wrapped minecraft {net.minecraft.client.main.Main}
+[19:30:47] [main/INFO]: Mixing MinecraftMixin from mixins.oneconfig.json into net.minecraft.client.Minecraft
+[19:30:47] [main/FATAL]: Mixin apply failed mixins.baritone.json:MixinMinecraft -> net.minecraft.client.Minecraft: org.spongepowered.asm.mixin.transformer.throwables.InvalidMixinException Shadow field thePlayer was not located in the target class net.minecraft.client.Minecraft. Using refmap mixins.baritone.refmap.json
+org.spongepowered.asm.mixin.transformer.throwables.InvalidMixinException: Shadow field thePlayer was not located in the target class net.minecraft.client.Minecraft. Using refmap mixins.baritone.refmap.json
+	at org.spongepowered.asm.mixin.transformer.MixinPreProcessorStandard.attachFields(MixinPreProcessorStandard.java:563) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinPreProcessorStandard.attach(MixinPreProcessorStandard.java:263) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinPreProcessorStandard.createContextFor(MixinPreProcessorStandard.java:241) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinInfo.createContextFor(MixinInfo.java:1144) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.apply(MixinApplicatorStandard.java:267) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.applyMixins(TargetClassContext.java:353) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.apply(MixinTransformer.java:724) [OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.applyMixins(MixinTransformer.java:703) [OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:509) [OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.Proxy.transform(Proxy.java:72) [OneConfig%20(1.8.9-forge).jar:?]
+	at net.minecraft.launchwrapper.LaunchClassLoader.runTransformers(LaunchClassLoader.java:279) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.LaunchClassLoader.findClass(LaunchClassLoader.java:176) [launchwrapper-1.12.jar:?]
+	at java.lang.ClassLoader.loadClass(Unknown Source) [?:1.8.0_442-internal]
+	at java.lang.ClassLoader.loadClass(Unknown Source) [?:1.8.0_442-internal]
+	at net.minecraft.client.main.Main.main(SourceFile:41) [Main.class:?]
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_442-internal]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source) ~[?:1.8.0_442-internal]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source) ~[?:1.8.0_442-internal]
+	at java.lang.reflect.Method.invoke(Unknown Source) ~[?:1.8.0_442-internal]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: org.spongepowered.asm.mixin.throwables.MixinApplyError: Mixin [mixins.baritone.json:MixinMinecraft] from phase [DEFAULT] in config [mixins.baritone.json] FAILED during APPLY
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at org.spongepowered.asm.mixin.transformer.MixinTransformer.handleMixinError(MixinTransformer.java:779)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at org.spongepowered.asm.mixin.transformer.MixinTransformer.handleMixinApplyError(MixinTransformer.java:732)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:513)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at org.spongepowered.asm.mixin.transformer.Proxy.transform(Proxy.java:72)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at net.minecraft.launchwrapper.LaunchClassLoader.runTransformers(LaunchClassLoader.java:279)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at net.minecraft.launchwrapper.LaunchClassLoader.findClass(LaunchClassLoader.java:176)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at java.lang.ClassLoader.loadClass(Unknown Source)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at java.lang.ClassLoader.loadClass(Unknown Source)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at net.minecraft.client.main.Main.main(SourceFile:41)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at java.lang.reflect.Method.invoke(Unknown Source)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135)
+[19:30:47] [main/INFO]: [org.spongepowered.asm.mixin.transformer.MixinTransformer:transformClassBytes:519]: 	at net.minecraft.launchwrapper.Launch.main(Launch.java:28)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: Caused by: org.spongepowered.asm.mixin.transformer.throwables.InvalidMixinException: Shadow field thePlayer was not located in the target class net.minecraft.client.Minecraft. Using refmap mixins.baritone.refmap.json
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	at org.spongepowered.asm.mixin.transformer.MixinPreProcessorStandard.attachFields(MixinPreProcessorStandard.java:563)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	at org.spongepowered.asm.mixin.transformer.MixinPreProcessorStandard.attach(MixinPreProcessorStandard.java:263)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	at org.spongepowered.asm.mixin.transformer.MixinPreProcessorStandard.createContextFor(MixinPreProcessorStandard.java:241)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	at org.spongepowered.asm.mixin.transformer.MixinInfo.createContextFor(MixinInfo.java:1144)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.apply(MixinApplicatorStandard.java:267)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	at org.spongepowered.asm.mixin.transformer.TargetClassContext.applyMixins(TargetClassContext.java:353)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	at org.spongepowered.asm.mixin.transformer.MixinTransformer.apply(MixinTransformer.java:724)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	at org.spongepowered.asm.mixin.transformer.MixinTransformer.applyMixins(MixinTransformer.java:703)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:509)
+[19:30:47] [main/INFO]: [java.lang.Throwable:printStackTrace:-1]: 	... 12 more
+[19:30:47] [main/ERROR]: Unable to launch
+java.lang.reflect.InvocationTargetException
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_442-internal]
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source) ~[?:1.8.0_442-internal]
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source) ~[?:1.8.0_442-internal]
+	at java.lang.reflect.Method.invoke(Unknown Source) ~[?:1.8.0_442-internal]
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
+Caused by: java.lang.NoClassDefFoundError: net/minecraft/client/Minecraft
+	at net.minecraft.client.main.Main.main(SourceFile:41) ~[Main.class:?]
+	... 6 more
+Caused by: java.lang.ClassNotFoundException: net.minecraft.client.Minecraft
+	at net.minecraft.launchwrapper.LaunchClassLoader.findClass(LaunchClassLoader.java:191) ~[launchwrapper-1.12.jar:?]
+	at java.lang.ClassLoader.loadClass(Unknown Source) ~[?:1.8.0_442-internal]
+	at java.lang.ClassLoader.loadClass(Unknown Source) ~[?:1.8.0_442-internal]
+	at net.minecraft.client.main.Main.main(SourceFile:41) ~[Main.class:?]
+	... 6 more
+Caused by: org.spongepowered.asm.mixin.transformer.throwables.MixinTransformerError: An unexpected critical error was encountered
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:521) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.Proxy.transform(Proxy.java:72) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at net.minecraft.launchwrapper.LaunchClassLoader.runTransformers(LaunchClassLoader.java:279) ~[launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.LaunchClassLoader.findClass(LaunchClassLoader.java:176) ~[launchwrapper-1.12.jar:?]
+	at java.lang.ClassLoader.loadClass(Unknown Source) ~[?:1.8.0_442-internal]
+	at java.lang.ClassLoader.loadClass(Unknown Source) ~[?:1.8.0_442-internal]
+	at net.minecraft.client.main.Main.main(SourceFile:41) ~[Main.class:?]
+	... 6 more
+Caused by: org.spongepowered.asm.mixin.throwables.MixinApplyError: Mixin [mixins.baritone.json:MixinMinecraft] from phase [DEFAULT] in config [mixins.baritone.json] FAILED during APPLY
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.handleMixinError(MixinTransformer.java:779) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.handleMixinApplyError(MixinTransformer.java:732) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:513) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.Proxy.transform(Proxy.java:72) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at net.minecraft.launchwrapper.LaunchClassLoader.runTransformers(LaunchClassLoader.java:279) ~[launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.LaunchClassLoader.findClass(LaunchClassLoader.java:176) ~[launchwrapper-1.12.jar:?]
+	at java.lang.ClassLoader.loadClass(Unknown Source) ~[?:1.8.0_442-internal]
+	at java.lang.ClassLoader.loadClass(Unknown Source) ~[?:1.8.0_442-internal]
+	at net.minecraft.client.main.Main.main(SourceFile:41) ~[Main.class:?]
+	... 6 more
+Caused by: org.spongepowered.asm.mixin.transformer.throwables.InvalidMixinException: Shadow field thePlayer was not located in the target class net.minecraft.client.Minecraft. Using refmap mixins.baritone.refmap.json
+	at org.spongepowered.asm.mixin.transformer.MixinPreProcessorStandard.attachFields(MixinPreProcessorStandard.java:563) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinPreProcessorStandard.attach(MixinPreProcessorStandard.java:263) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinPreProcessorStandard.createContextFor(MixinPreProcessorStandard.java:241) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinInfo.createContextFor(MixinInfo.java:1144) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinApplicatorStandard.apply(MixinApplicatorStandard.java:267) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.TargetClassContext.applyMixins(TargetClassContext.java:353) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.apply(MixinTransformer.java:724) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.applyMixins(MixinTransformer.java:703) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.MixinTransformer.transformClassBytes(MixinTransformer.java:509) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at org.spongepowered.asm.mixin.transformer.Proxy.transform(Proxy.java:72) ~[OneConfig%20(1.8.9-forge).jar:?]
+	at net.minecraft.launchwrapper.LaunchClassLoader.runTransformers(LaunchClassLoader.java:279) ~[launchwrapper-1.12.jar:?]
+	at net.minecraft.launchwrapper.LaunchClassLoader.findClass(LaunchClassLoader.java:176) ~[launchwrapper-1.12.jar:?]
+	at java.lang.ClassLoader.loadClass(Unknown Source) ~[?:1.8.0_442-internal]
+	at java.lang.ClassLoader.loadClass(Unknown Source) ~[?:1.8.0_442-internal]
+	at net.minecraft.client.main.Main.main(SourceFile:41) ~[Main.class:?]
+	... 6 more
+Exception in thread "main" [19:30:47] [main/INFO]: [java.lang.ThreadGroup:uncaughtException:-1]: net.minecraftforge.fml.relauncher.FMLSecurityManager$ExitTrappedException
+[19:30:47] [main/INFO]: [java.lang.ThreadGroup:uncaughtException:-1]: 	at net.minecraftforge.fml.relauncher.FMLSecurityManager.checkPermission(FMLSecurityManager.java:30)
+[19:30:47] [main/INFO]: [java.lang.ThreadGroup:uncaughtException:-1]: 	at java.lang.SecurityManager.checkExit(Unknown Source)
+[19:30:47] [main/INFO]: [java.lang.ThreadGroup:uncaughtException:-1]: 	at java.lang.Runtime.exit(Unknown Source)
+[19:30:47] [main/INFO]: [java.lang.ThreadGroup:uncaughtException:-1]: 	at java.lang.System.exit(Unknown Source)
+[19:30:47] [main/INFO]: [java.lang.ThreadGroup:uncaughtException:-1]: 	at net.minecraft.launchwrapper.Launch.launch(Launch.java:138)
+[19:30:47] [main/INFO]: [java.lang.ThreadGroup:uncaughtException:-1]: 	at net.minecraft.launchwrapper.Launch.main(Launch.java:28)
+Java Exit code: 1

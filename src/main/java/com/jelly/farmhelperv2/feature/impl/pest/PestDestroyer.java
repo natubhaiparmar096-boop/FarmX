@@ -27,6 +27,7 @@ public class PestDestroyer implements IFeature {
     private final Clock killTimeout = new Clock();
     private final Clock sweepWaypointTimeout = new Clock();
     private final Clock trackerPulseCooldown = new Clock();
+    private final Clock acousticInjectionCooldown = new Clock();
 
     private final Queue<String> plotQueue = new LinkedList<>();
     private String currentPlot = null;
@@ -97,6 +98,7 @@ public class PestDestroyer implements IFeature {
         FlyPathFinderExecutor.getInstance().stop();
         PestBallsackShredder.reset();
         sweepWaypointTimeout.reset();
+        acousticInjectionCooldown.reset();
         PestSoundTracker.getInstance().clear();
         PestTrackerAbility.clear();
     }
@@ -206,14 +208,17 @@ public class PestDestroyer implements IFeature {
                     return;
                 }
 
-                // 3. Acoustic Radar check
-                double roofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
-                Vec3 soundWp = PestTargetTracker.getAcousticRadarWaypoint(plotBounds, 5000, roofY);
-                if (soundWp != null && plotNavigator != null) {
-                    plotNavigator.injectPriorityWaypoint(soundWp);
-                    state = State.SWEEP_WAYPOINTS;
-                    stateClock.schedule(50);
-                    return;
+                // 3. Acoustic Radar check (cooldown prevents infinite re-injection)
+                if (acousticInjectionCooldown.passed()) {
+                    double roofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
+                    Vec3 soundWp = PestTargetTracker.getAcousticRadarWaypoint(plotBounds, 3000, roofY);
+                    if (soundWp != null && plotNavigator != null) {
+                        plotNavigator.injectPriorityWaypoint(soundWp);
+                        acousticInjectionCooldown.schedule(8000);
+                        state = State.SWEEP_WAYPOINTS;
+                        stateClock.schedule(50);
+                        return;
+                    }
                 }
 
                 // 4. Vacuum Tracker Scent Pulse check
@@ -266,7 +271,7 @@ public class PestDestroyer implements IFeature {
                     PestCombatCoordinator.startVacuum();
                     stateClock.schedule(50);
                 } else if (FarmHelperConfig.pestAotvHops && distSq > 36.0 && PestCombatCoordinator.performAotvHop(approachVec)) {
-                    stateClock.schedule(200);
+                    stateClock.schedule(800);
                 } else {
                     if (!FlyPathFinderExecutor.getInstance().isRunning() || FlyPathFinderExecutor.getInstance().getState() == FlyPathFinderExecutor.State.FAILED) {
                         FlyPathFinderExecutor.getInstance().setSprinting(true);
@@ -339,14 +344,20 @@ public class PestDestroyer implements IFeature {
                 double defaultRoofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
                 Vec3 wp = plotNavigator != null ? plotNavigator.nextWaypoint(defaultRoofY) : null;
                 if (wp != null) {
-                    FlyPathFinderExecutor.getInstance().setSprinting(true);
-                    if (FarmHelperConfig.pestAotvHops && mc.thePlayer.getDistance(wp.xCoord, wp.yCoord, wp.zCoord) > 20.0) {
-                        PestCombatCoordinator.performAotvHop(wp);
+                    double wpDist = mc.thePlayer.getDistance(wp.xCoord, wp.yCoord, wp.zCoord);
+                    if (FarmHelperConfig.pestAotvHops && wpDist > 20.0 && PestCombatCoordinator.performAotvHop(wp)) {
+                        // AOTV hop succeeded - wait for teleport, don't also pathfind
+                        sweepWaypointTimeout.schedule(8000);
+                        state = State.SWEEPING;
+                        stateClock.schedule(800);
+                    } else {
+                        // Fly pathfind to waypoint
+                        FlyPathFinderExecutor.getInstance().setSprinting(true);
+                        FlyPathFinderExecutor.getInstance().findPath(wp, false, true);
+                        sweepWaypointTimeout.schedule(8000);
+                        state = State.SWEEPING;
+                        stateClock.schedule(200);
                     }
-                    FlyPathFinderExecutor.getInstance().findPath(wp, false, true);
-                    sweepWaypointTimeout.schedule(8000);
-                    state = State.SWEEPING;
-                    stateClock.schedule(100);
                 } else {
                     state = State.CHECK_NEXT_PLOT;
                     stateClock.schedule(150);
@@ -371,22 +382,14 @@ public class PestDestroyer implements IFeature {
                     return;
                 }
 
-                // Active acoustic/particle pulse during sweep
-                double swRoofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
-                Vec3 freshSound = PestTargetTracker.getAcousticRadarWaypoint(plotBounds, 4000, swRoofY);
-                if (freshSound != null && plotNavigator != null) {
-                    FlyPathFinderExecutor.getInstance().stop();
-                    plotNavigator.injectPriorityWaypoint(freshSound);
-                    state = State.SWEEP_WAYPOINTS;
-                    stateClock.schedule(50);
-                    return;
-                }
-
+                // When pathfinder finishes or times out, go to next waypoint
                 if (!FlyPathFinderExecutor.getInstance().isRunning() || sweepWaypointTimeout.passed()) {
-                    state = State.SWEEP_WAYPOINTS;
-                    stateClock.schedule(100);
+                    // After finishing a waypoint, go back to SCAN_PESTS to do a full check
+                    // (including acoustic radar with cooldown) before next waypoint
+                    state = State.SCAN_PESTS;
+                    stateClock.schedule(200);
                 } else {
-                    stateClock.schedule(100);
+                    stateClock.schedule(150);
                 }
                 break;
 

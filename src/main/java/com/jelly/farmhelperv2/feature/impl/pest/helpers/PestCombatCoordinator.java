@@ -102,7 +102,7 @@ public final class PestCombatCoordinator {
 
         // Right click AOTV
         KeyBindUtils.rightClick();
-        aotvCooldown.schedule(200);
+        aotvCooldown.schedule(1500);
 
         // Swap back to vacuum
         int vacSlot = PestLoadoutHelper.findVacuumSlot();

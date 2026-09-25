@@ -76,10 +76,17 @@ public final class PestSoundTracker {
 
     private boolean isPestSound(String name) {
         String lower = name.toLowerCase();
-        return lower.startsWith("mob.silverfish.") ||
-                lower.startsWith("mob.bat.") ||
-                lower.contains("silverfish") ||
-                lower.contains("bat");
+        // Only match specific pest interaction sounds, NOT ambient bat/silverfish idle sounds
+        // mob.silverfish.hit = pest being damaged (confirms location)
+        // mob.silverfish.say = pest actively moving nearby (good signal)
+        // mob.silverfish.step = pest walking (good signal)
+        // Exclude mob.bat.* entirely - bats are common ambient mobs, not pest-specific
+        if (lower.equals("mob.silverfish.hit") ||
+                lower.equals("mob.silverfish.say") ||
+                lower.equals("mob.silverfish.step")) {
+            return true;
+        }
+        return false;
     }
 
     private void pruneExpiredSignals(long maxAgeMs) {

@@ -74,6 +74,7 @@ public final class PestManager {
                 if (reentryCooldown.passed() && !PestDestroyer.getInstance().isRunning() && !PestReturnManager.isReturning()) {
                     if (MacroHandler.getInstance().isMacroToggled() || FarmHelperConfig.manualPestMode) {
                         PestLifecycleManager.start(plot);
+                        reentryCooldown.schedule(30_000);
                     }
                 }
             }
