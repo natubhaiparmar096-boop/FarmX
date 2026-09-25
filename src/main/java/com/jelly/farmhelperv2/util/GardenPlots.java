@@ -10,7 +10,10 @@ import net.minecraft.util.Vec3;
  */
 public final class GardenPlots {
     public static final int PLOT_SIZE = 96;
-    public static final int PLOT_OFFSET = 48;
+    // Fakepixel garden spans world X/Z 0-479 (480 blocks = 5×96).
+    // Barn (plot 0) center is at (240,240). PLOT_OFFSET=-192 so that:
+    //   gridIndex(0)=-2, gridIndex(192)=0 (Barn), gridIndex(479)=2
+    public static final int PLOT_OFFSET = -192;
 
     private static final int[][] PLOT_LAYOUT = {
             {21, 13,  9, 14, 22},
@@ -43,7 +46,11 @@ public final class GardenPlots {
         String digits = plot.replaceAll("\\D", "");
         if (digits.isEmpty()) return null;
         try {
-            return boundsForPlot(Integer.parseInt(digits));
+            int n = Integer.parseInt(digits);
+            if (n < 0 || n > 24) {
+                return null; // reject out-of-range numbers (e.g. "73" from bad tablist parse)
+            }
+            return boundsForPlot(n);
         } catch (NumberFormatException ignored) {
             return null;
         }

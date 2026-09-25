@@ -46,31 +46,34 @@ public class PlotUtils {
         if (!plotsContent.isEmpty() && FarmHelper.gson.fromJson(plotsContent, JsonElement.class).isJsonObject())
             plotsJson = FarmHelper.gson.fromJson(plotsContent, JsonObject.class);
 
-        PLOTS.get(21).addAll(getChunks(-15, -10, -15, -10)).setName(plotsJson.has("21") ? plotsJson.get("21").getAsString() : "").setNumber(21);
-        PLOTS.get(13).addAll(getChunks(-9, -4, -15, -10)).setName(plotsJson.has("13") ? plotsJson.get("13").getAsString() : "").setNumber(13);
-        PLOTS.get(9).addAll(getChunks(-3, 2, -15, -10)).setName(plotsJson.has("9") ? plotsJson.get("9").getAsString() : "").setNumber(9);
-        PLOTS.get(14).addAll(getChunks(3, 8, -15, -10)).setName(plotsJson.has("14") ? plotsJson.get("14").getAsString() : "").setNumber(14);
-        PLOTS.get(22).addAll(getChunks(9, 14, -15, -10)).setName(plotsJson.has("22") ? plotsJson.get("22").getAsString() : "").setNumber(22);
-        PLOTS.get(15).addAll(getChunks(-15, -10, -9, -4)).setName(plotsJson.has("15") ? plotsJson.get("15").getAsString() : "").setNumber(15);
-        PLOTS.get(5).addAll(getChunks(-9, -4, -9, -4)).setName(plotsJson.has("5") ? plotsJson.get("5").getAsString() : "").setNumber(5);
-        PLOTS.get(1).addAll(getChunks(-3, 2, -9, -4)).setName(plotsJson.has("1") ? plotsJson.get("1").getAsString() : "").setNumber(1);
-        PLOTS.get(6).addAll(getChunks(3, 8, -9, -4)).setName(plotsJson.has("6") ? plotsJson.get("6").getAsString() : "").setNumber(6);
-        PLOTS.get(16).addAll(getChunks(9, 14, -9, -4)).setName(plotsJson.has("16") ? plotsJson.get("16").getAsString() : "").setNumber(16);
-        PLOTS.get(10).addAll(getChunks(-15, -10, -3, 2)).setName(plotsJson.has("10") ? plotsJson.get("10").getAsString() : "").setNumber(10);
-        PLOTS.get(2).addAll(getChunks(-9, -4, -3, 2)).setName(plotsJson.has("2") ? plotsJson.get("2").getAsString() : "").setNumber(2);
-        PLOTS.get(0).addAll(getChunks(-3, 2, -3, 2)).setName("Barn").setNumber(0); // BARN
-        PLOTS.get(3).addAll(getChunks(3, 8, -3, 2)).setName(plotsJson.has("3") ? plotsJson.get("3").getAsString() : "").setNumber(3);
-        PLOTS.get(11).addAll(getChunks(9, 14, -3, 2)).setName(plotsJson.has("11") ? plotsJson.get("11").getAsString() : "").setNumber(11);
-        PLOTS.get(17).addAll(getChunks(-15, -10, 3, 8)).setName(plotsJson.has("17") ? plotsJson.get("17").getAsString() : "").setNumber(17);
-        PLOTS.get(7).addAll(getChunks(-9, -4, 3, 8)).setName(plotsJson.has("7") ? plotsJson.get("7").getAsString() : "").setNumber(7);
-        PLOTS.get(4).addAll(getChunks(-3, 2, 3, 8)).setName(plotsJson.has("4") ? plotsJson.get("4").getAsString() : "").setNumber(4);
-        PLOTS.get(8).addAll(getChunks(3, 8, 3, 8)).setName(plotsJson.has("8") ? plotsJson.get("8").getAsString() : "").setNumber(8);
-        PLOTS.get(18).addAll(getChunks(9, 14, 3, 8)).setName(plotsJson.has("18") ? plotsJson.get("18").getAsString() : "").setNumber(18);
-        PLOTS.get(23).addAll(getChunks(-15, -10, 9, 14)).setName(plotsJson.has("23") ? plotsJson.get("23").getAsString() : "").setNumber(23);
-        PLOTS.get(19).addAll(getChunks(-9, -4, 9, 14)).setName(plotsJson.has("19") ? plotsJson.get("19").getAsString() : "").setNumber(19);
-        PLOTS.get(12).addAll(getChunks(-3, 2, 9, 14)).setName(plotsJson.has("12") ? plotsJson.get("12").getAsString() : "").setNumber(12);
-        PLOTS.get(20).addAll(getChunks(3, 8, 9, 14)).setName(plotsJson.has("20") ? plotsJson.get("20").getAsString() : "").setNumber(20);
-        PLOTS.get(24).addAll(getChunks(9, 14, 9, 14)).setName(plotsJson.has("24") ? plotsJson.get("24").getAsString() : "").setNumber(24);
+        // Fakepixel garden: world 0-479, chunks 0-29 (6 chunks per plot = 96 blocks).
+        // Grid: col 0=chunkX 0-5, col 1=6-11, col 2=12-17, col 3=18-23, col 4=24-29
+        //       row 0=chunkZ 0-5, row 1=6-11, row 2=12-17, row 3=18-23, row 4=24-29
+        PLOTS.get(21).addAll(getChunks(0,  5,  0,  5)).setName(plotsJson.has("21") ? plotsJson.get("21").getAsString() : "").setNumber(21);
+        PLOTS.get(13).addAll(getChunks(6,  11, 0,  5)).setName(plotsJson.has("13") ? plotsJson.get("13").getAsString() : "").setNumber(13);
+        PLOTS.get(9) .addAll(getChunks(12, 17, 0,  5)).setName(plotsJson.has("9")  ? plotsJson.get("9").getAsString()  : "").setNumber(9);
+        PLOTS.get(14).addAll(getChunks(18, 23, 0,  5)).setName(plotsJson.has("14") ? plotsJson.get("14").getAsString() : "").setNumber(14);
+        PLOTS.get(22).addAll(getChunks(24, 29, 0,  5)).setName(plotsJson.has("22") ? plotsJson.get("22").getAsString() : "").setNumber(22);
+        PLOTS.get(15).addAll(getChunks(0,  5,  6,  11)).setName(plotsJson.has("15") ? plotsJson.get("15").getAsString() : "").setNumber(15);
+        PLOTS.get(5) .addAll(getChunks(6,  11, 6,  11)).setName(plotsJson.has("5")  ? plotsJson.get("5").getAsString()  : "").setNumber(5);
+        PLOTS.get(1) .addAll(getChunks(12, 17, 6,  11)).setName(plotsJson.has("1")  ? plotsJson.get("1").getAsString()  : "").setNumber(1);
+        PLOTS.get(6) .addAll(getChunks(18, 23, 6,  11)).setName(plotsJson.has("6")  ? plotsJson.get("6").getAsString()  : "").setNumber(6);
+        PLOTS.get(16).addAll(getChunks(24, 29, 6,  11)).setName(plotsJson.has("16") ? plotsJson.get("16").getAsString() : "").setNumber(16);
+        PLOTS.get(10).addAll(getChunks(0,  5,  12, 17)).setName(plotsJson.has("10") ? plotsJson.get("10").getAsString() : "").setNumber(10);
+        PLOTS.get(2) .addAll(getChunks(6,  11, 12, 17)).setName(plotsJson.has("2")  ? plotsJson.get("2").getAsString()  : "").setNumber(2);
+        PLOTS.get(0) .addAll(getChunks(12, 17, 12, 17)).setName("Barn").setNumber(0); // BARN
+        PLOTS.get(3) .addAll(getChunks(18, 23, 12, 17)).setName(plotsJson.has("3")  ? plotsJson.get("3").getAsString()  : "").setNumber(3);
+        PLOTS.get(11).addAll(getChunks(24, 29, 12, 17)).setName(plotsJson.has("11") ? plotsJson.get("11").getAsString() : "").setNumber(11);
+        PLOTS.get(17).addAll(getChunks(0,  5,  18, 23)).setName(plotsJson.has("17") ? plotsJson.get("17").getAsString() : "").setNumber(17);
+        PLOTS.get(7) .addAll(getChunks(6,  11, 18, 23)).setName(plotsJson.has("7")  ? plotsJson.get("7").getAsString()  : "").setNumber(7);
+        PLOTS.get(4) .addAll(getChunks(12, 17, 18, 23)).setName(plotsJson.has("4")  ? plotsJson.get("4").getAsString()  : "").setNumber(4);
+        PLOTS.get(8) .addAll(getChunks(18, 23, 18, 23)).setName(plotsJson.has("8")  ? plotsJson.get("8").getAsString()  : "").setNumber(8);
+        PLOTS.get(18).addAll(getChunks(24, 29, 18, 23)).setName(plotsJson.has("18") ? plotsJson.get("18").getAsString() : "").setNumber(18);
+        PLOTS.get(23).addAll(getChunks(0,  5,  24, 29)).setName(plotsJson.has("23") ? plotsJson.get("23").getAsString() : "").setNumber(23);
+        PLOTS.get(19).addAll(getChunks(6,  11, 24, 29)).setName(plotsJson.has("19") ? plotsJson.get("19").getAsString() : "").setNumber(19);
+        PLOTS.get(12).addAll(getChunks(12, 17, 24, 29)).setName(plotsJson.has("12") ? plotsJson.get("12").getAsString() : "").setNumber(12);
+        PLOTS.get(20).addAll(getChunks(18, 23, 24, 29)).setName(plotsJson.has("20") ? plotsJson.get("20").getAsString() : "").setNumber(20);
+        PLOTS.get(24).addAll(getChunks(24, 29, 24, 29)).setName(plotsJson.has("24") ? plotsJson.get("24").getAsString() : "").setNumber(24);
     }
 
     public static List<Tuple<Integer, Integer>> getPlotChunksBasedOnLocation(BlockPos pos) {
