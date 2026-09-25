@@ -141,7 +141,7 @@ public class PestDestroyer implements IFeature {
         plotNavigator = new PestPlotNavigator(currentPlot);
         sweepCount = 0;
         state = State.TELEPORT_TO_PLOT;
-        stateClock.schedule(100);
+        stateClock.schedule(1000);
     }
 
     @SubscribeEvent

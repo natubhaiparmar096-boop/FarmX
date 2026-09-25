@@ -52,19 +52,17 @@ public final class PestLifecycleManager {
 
         switch (stage) {
             case PRE_SETHOME:
-                // Checkpoint current farm position with /sethome
-                mc.thePlayer.sendChatMessage("/sethome");
-                stage = Stage.WAIT_SETHOME;
-                stageClock.schedule(800);
-                break;
-
-            case WAIT_SETHOME:
-                // Pause farming macro
+                // Stop movement and pause farming macro before setting home checkpoint
                 if (MacroHandler.getInstance().isMacroToggled() && !MacroHandler.getInstance().isCurrentMacroPaused()) {
                     MacroHandler.getInstance().pauseMacro();
                 }
                 KeyBindUtils.stopMovement();
+                mc.thePlayer.sendChatMessage("/sethome");
+                stage = Stage.WAIT_SETHOME;
+                stageClock.schedule(1500);
+                break;
 
+            case WAIT_SETHOME:
                 // Equip vacuum
                 int vacSlot = PestLoadoutHelper.findVacuumSlot();
                 if (vacSlot >= 0) {
