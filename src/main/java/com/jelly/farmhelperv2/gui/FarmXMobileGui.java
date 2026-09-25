@@ -220,7 +220,6 @@ public class FarmXMobileGui extends GuiScreen {
     private static final int ID_PEST_HUD = 615;
     private static final int ID_PEST_START_NOW = 616;
     private static final int ID_PEST_STOP_NOW = 617;
-    private static final int ID_PEST_RETURN_CMD = 618;
 
     @Override
     public void initGui() {
@@ -368,7 +367,6 @@ public class FarmXMobileGui extends GuiScreen {
                 btn(ID_PEST_TAB, cx, y, 200, on("Trigger on Tablist", FarmHelperConfig.pestTriggerOnTabThreshold)); y += g;
                 pair(ID_PEST_THRESH_M, ID_PEST_THRESH_P, y, "Pest Threshold: " + FarmHelperConfig.pestThreshold); y += g;
                 btn(ID_PEST_MANUAL, cx, y, 200, on("Manual Pest Mode", FarmHelperConfig.manualPestMode)); y += g;
-                btn(ID_PEST_RETURN_CMD, cx, y, 200, "Return Cmd: " + FarmHelperConfig.pestReturnCommand); y += g;
                 btn(ID_PEST_SHREDDER, cx, y, 200, on("Ballsack Shredder", FarmHelperConfig.pestBallsackShredder)); y += g;
                 pair(ID_PEST_WARPS_M, ID_PEST_WARPS_P, y, "Shredder Warps: " + FarmHelperConfig.pestBallsackWarps); y += g;
                 btn(ID_PEST_START_NOW, this.width / 2 - 105, y, half, "Start Pest Macro");
@@ -741,14 +739,6 @@ public class FarmXMobileGui extends GuiScreen {
             case ID_PEST_THRESH_M: adjI(() -> FarmHelperConfig.pestThreshold, v -> FarmHelperConfig.pestThreshold = v, -1, 1, 8); break;
             case ID_PEST_THRESH_P: adjI(() -> FarmHelperConfig.pestThreshold, v -> FarmHelperConfig.pestThreshold = v, 1, 1, 8); break;
             case ID_PEST_MANUAL: FarmHelperConfig.manualPestMode = !FarmHelperConfig.manualPestMode; button.displayString = on("Manual Pest Mode", FarmHelperConfig.manualPestMode); break;
-            case ID_PEST_RETURN_CMD:
-                if ("/home".equalsIgnoreCase(FarmHelperConfig.pestReturnCommand)) {
-                    FarmHelperConfig.pestReturnCommand = "/warp garden";
-                } else {
-                    FarmHelperConfig.pestReturnCommand = "/home";
-                }
-                button.displayString = "Return Cmd: " + FarmHelperConfig.pestReturnCommand;
-                break;
             case ID_PEST_SHREDDER: FarmHelperConfig.pestBallsackShredder = !FarmHelperConfig.pestBallsackShredder; button.displayString = on("Ballsack Shredder", FarmHelperConfig.pestBallsackShredder); break;
             case ID_PEST_WARPS_M: adjI(() -> FarmHelperConfig.pestBallsackWarps, v -> FarmHelperConfig.pestBallsackWarps = v, -1, 1, 10); break;
             case ID_PEST_WARPS_P: adjI(() -> FarmHelperConfig.pestBallsackWarps, v -> FarmHelperConfig.pestBallsackWarps = v, 1, 1, 10); break;
