@@ -60,7 +60,7 @@ public final class PestTrackerTrail {
         if (dir == null || origin == null) return null;
 
         double targetX = origin.xCoord + dir.xCoord * distance;
-        double targetZ = origin.posZ + dir.zCoord * distance;
+        double targetZ = origin.zCoord + dir.zCoord * distance;
 
         if (bounds != null) {
             targetX = bounds.clampX(targetX, 6.0);
