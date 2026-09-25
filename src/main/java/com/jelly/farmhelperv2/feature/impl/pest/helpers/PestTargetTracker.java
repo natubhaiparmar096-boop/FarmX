@@ -48,12 +48,26 @@ public final class PestTargetTracker {
         List<Entity> list = new ArrayList<>();
         List<Entity> allEntities = mc.theWorld.loadedEntityList;
 
+        List<Entity> livingPests = new ArrayList<>();
+        for (Entity entity : allEntities) {
+            if (entity == null || entity.isDead || entity == mc.thePlayer) continue;
+            if (entity.posY < 50) continue;
+            if (entity instanceof EntitySilverfish || entity instanceof EntityBat) {
+                livingPests.add(entity);
+            }
+        }
+
         for (Entity entity : allEntities) {
             if (entity == null || entity.isDead || entity == mc.thePlayer) continue;
             if (entity.posY < 50) continue;
 
-            if (isPestEntity(entity, allEntities)) {
+            if (entity instanceof EntitySilverfish || entity instanceof EntityBat) {
                 list.add(entity);
+            } else if (entity instanceof EntityArmorStand) {
+                boolean nearLiving = livingPests.stream().anyMatch(lp -> lp.getDistanceSqToEntity(entity) <= 9.0);
+                if (!nearLiving && isPestEntity(entity, allEntities)) {
+                    list.add(entity);
+                }
             }
         }
         return list;

@@ -17,10 +17,10 @@ public final class PestTabSnapshot {
     private static final Pattern COOLDOWN_PATTERN =
             Pattern.compile("(?i)Cooldown:\\s*\\(?(READY|MAX\\s*PESTS?|(?:(\\d+)m)?\\s*(?:(\\d+)s)?)\\)?");
     private static final Pattern INFESTED_PLOTS_PATTERN =
-            Pattern.compile("(?i)Plots?:\\s*(.+)");
-    // Extracts only the leading integer from each comma-split plot token (e.g. "7 (3 pests)" → "7")
+            Pattern.compile("(?i)(?:Infested )?Plots?:\\s*(.+)");
+    // Extracts plot number regardless of prefix (e.g. "Plot 7", "Plot - 7", "Plot #7", "7", "7 (2 pests)")
     private static final Pattern PLOT_NUMBER_EXTRACT =
-            Pattern.compile("^\\s*(\\d{1,2})\\b");
+            Pattern.compile("(?i)(?:Plot\\s*[-#]?\\s*)?(\\d{1,2})");
     private static final Pattern BONUS_PATTERN =
             Pattern.compile("(?i)Bonus:\\s*\\(?(ACTIVE|INACTIVE)\\)?");
 
@@ -91,13 +91,15 @@ public final class PestTabSnapshot {
 
             Matcher plotsMatcher = INFESTED_PLOTS_PATTERN.matcher(clean);
             if (plotsMatcher.find()) {
-                for (String part : plotsMatcher.group(1).split(",")) {
-                    // Extract only the leading plot number — avoid smashing "7 (3 pests)" → "73"
-                    Matcher plotNumMatcher = PLOT_NUMBER_EXTRACT.matcher(part);
-                    if (plotNumMatcher.find()) {
-                        int plotNum = parseInt(plotNumMatcher.group(1));
-                        if (plotNum >= 0 && plotNum <= 24) {
-                            infestedPlots.add(String.valueOf(plotNum));
+                String rawGroup = plotsMatcher.group(1).trim();
+                if (!rawGroup.toLowerCase().contains("none")) {
+                    for (String part : rawGroup.split(",")) {
+                        Matcher plotNumMatcher = PLOT_NUMBER_EXTRACT.matcher(part.trim());
+                        if (plotNumMatcher.find()) {
+                            int plotNum = parseInt(plotNumMatcher.group(1));
+                            if (plotNum >= 0 && plotNum <= 24) {
+                                infestedPlots.add(String.valueOf(plotNum));
+                            }
                         }
                     }
                 }

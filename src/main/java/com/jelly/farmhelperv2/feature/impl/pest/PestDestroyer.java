@@ -188,12 +188,20 @@ public class PestDestroyer implements IFeature {
                     FlyPathFinderExecutor.getInstance().stop();
                     state = State.APPROACH_PEST;
                     stateClock.schedule(50);
-                } else if (plotNavigator != null && plotNavigator.hasNextWaypoint()) {
+                    return;
+                }
+                PestTabSnapshot scanTab = PestTabSnapshot.read();
+                if (scanTab.getAliveCount() == 0) {
+                    state = State.FINISH;
+                    stateClock.schedule(50);
+                    return;
+                }
+                if (plotNavigator != null && plotNavigator.hasNextWaypoint()) {
                     state = State.SWEEP_WAYPOINTS;
                     stateClock.schedule(50);
                 } else {
                     state = State.CHECK_NEXT_PLOT;
-                    stateClock.schedule(200);
+                    stateClock.schedule(150);
                 }
                 break;
 
@@ -227,11 +235,18 @@ public class PestDestroyer implements IFeature {
                 if (currentTarget == null || currentTarget.isDead || killTimeout.passed()) {
                     if (currentTarget != null) {
                         killedEntities.add(currentTarget);
+                        if (mc.theWorld != null) {
+                            for (Entity e : mc.theWorld.loadedEntityList) {
+                                if (e != null && e.getDistanceSqToEntity(currentTarget) <= 16.0) {
+                                    killedEntities.add(e);
+                                }
+                            }
+                        }
                     }
                     PestCombatCoordinator.stopVacuum();
                     currentTarget = null;
                     state = State.SCAN_PESTS;
-                    stateClock.schedule(200);
+                    stateClock.schedule(150);
                     return;
                 }
                 double currentDistSq = mc.thePlayer.getDistanceSqToEntity(currentTarget);
@@ -249,20 +264,16 @@ public class PestDestroyer implements IFeature {
             case SWEEP_WAYPOINTS:
                 Vec3 wp = plotNavigator.nextWaypoint(mc.thePlayer.posY);
                 if (wp != null) {
+                    double flightY = Math.max(74.0, mc.thePlayer.posY + 2.0);
+                    Vec3 sweepWp = new Vec3(wp.xCoord, flightY, wp.zCoord);
                     FlyPathFinderExecutor.getInstance().setSprinting(true);
-                    FlyPathFinderExecutor.getInstance().findPath(wp, false, true);
-                    sweepWaypointTimeout.schedule(12000);
+                    FlyPathFinderExecutor.getInstance().findPath(sweepWp, false, true);
+                    sweepWaypointTimeout.schedule(10000);
                     state = State.SWEEPING;
                     stateClock.schedule(100);
                 } else {
-                    sweepCount++;
-                    if (sweepCount < 2) {
-                        plotNavigator.reset();
-                        state = State.SCAN_PESTS;
-                    } else {
-                        state = State.CHECK_NEXT_PLOT;
-                    }
-                    stateClock.schedule(500);
+                    state = State.CHECK_NEXT_PLOT;
+                    stateClock.schedule(200);
                 }
                 break;
 
@@ -271,6 +282,13 @@ public class PestDestroyer implements IFeature {
                 if (currentTarget != null) {
                     FlyPathFinderExecutor.getInstance().stop();
                     state = State.APPROACH_PEST;
+                    stateClock.schedule(50);
+                    return;
+                }
+                PestTabSnapshot sweepTab = PestTabSnapshot.read();
+                if (sweepTab.getAliveCount() == 0) {
+                    FlyPathFinderExecutor.getInstance().stop();
+                    state = State.FINISH;
                     stateClock.schedule(50);
                     return;
                 }
@@ -283,6 +301,19 @@ public class PestDestroyer implements IFeature {
                 break;
 
             case CHECK_NEXT_PLOT:
+                PestTabSnapshot checkTab = PestTabSnapshot.read();
+                if (checkTab.getAliveCount() == 0) {
+                    state = State.FINISH;
+                    stateClock.schedule(50);
+                    return;
+                }
+                Set<String> currentlyInfested = checkTab.getInfestedPlots();
+                for (String p : currentlyInfested) {
+                    String norm = PestPlotId.normalize(p);
+                    if (!plotQueue.contains(norm) && !PestPlotId.equals(norm, currentPlot)) {
+                        plotQueue.add(norm);
+                    }
+                }
                 if (!plotQueue.isEmpty()) {
                     currentPlot = plotQueue.poll();
                     plotNavigator = new PestPlotNavigator(currentPlot);
