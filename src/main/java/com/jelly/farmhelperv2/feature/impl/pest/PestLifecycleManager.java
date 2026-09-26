@@ -2,6 +2,7 @@ package com.jelly.farmhelperv2.feature.impl.pest;
 
 import com.jelly.farmhelperv2.config.FarmHelperConfig;
 import com.jelly.farmhelperv2.feature.impl.pest.helpers.AutoPestExchangeManager;
+import com.jelly.farmhelperv2.feature.impl.pest.helpers.PestCommandScheduler;
 import com.jelly.farmhelperv2.feature.impl.pest.helpers.PestExchangeManager;
 import com.jelly.farmhelperv2.feature.impl.pest.helpers.PestLoadoutHelper;
 import com.jelly.farmhelperv2.feature.impl.pest.helpers.PestPetManager;
@@ -16,10 +17,13 @@ public final class PestLifecycleManager {
     private static Stage stage = Stage.IDLE;
     private static final Clock stageClock = new Clock();
     private static String targetPlot = null;
+    private static int pauseAttempts = 0;
+    private static final int MAX_PAUSE_ATTEMPTS = 6;
 
     public enum Stage {
         IDLE,
         PRE_PAUSE,
+        SAVE_HOME,
         SWAP_HUNTING_PET,
         WAIT_PET_HUNT,
         START_CLEANING,
@@ -61,10 +65,30 @@ public final class PestLifecycleManager {
                 // Stop movement and pause farming macro
                 if (MacroHandler.getInstance().isMacroToggled() && !MacroHandler.getInstance().isCurrentMacroPaused()) {
                     MacroHandler.getInstance().pauseMacro();
+                    pauseAttempts++;
+                    if (pauseAttempts >= MAX_PAUSE_ATTEMPTS) {
+                        LogUtils.sendWarning("[Pest] Macro pause timeout, proceeding anyway.");
+                    } else {
+                        stageClock.schedule(500);
+                        return;
+                    }
                 }
+                pauseAttempts = 0;
                 KeyBindUtils.stopMovement();
-                stage = Stage.SWAP_HUNTING_PET;
+                stage = Stage.SAVE_HOME;
                 stageClock.schedule(300);
+                break;
+
+            case SAVE_HOME:
+                // Save current farming position before leaving for pest hunting
+                if (!PestCommandScheduler.canSend()) {
+                    stageClock.schedule(200);
+                    return;
+                }
+                PestCommandScheduler.send("/sethome");
+                LogUtils.sendDebug("[Pest] Saved home position with /sethome.");
+                stage = Stage.SWAP_HUNTING_PET;
+                stageClock.schedule(1500);
                 break;
 
             case SWAP_HUNTING_PET:

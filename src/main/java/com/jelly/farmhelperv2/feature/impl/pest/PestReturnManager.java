@@ -63,7 +63,11 @@ public final class PestReturnManager {
 
         switch (state) {
             case WARP_GARDEN:
-                mc.thePlayer.sendChatMessage("/warp garden");
+                if (!com.jelly.farmhelperv2.feature.impl.pest.helpers.PestCommandScheduler.canSend()) {
+                    stateClock.schedule(200);
+                    return;
+                }
+                com.jelly.farmhelperv2.feature.impl.pest.helpers.PestCommandScheduler.send("/warp garden");
                 state = State.WAIT_WARP;
                 stateClock.schedule(2500);
                 break;

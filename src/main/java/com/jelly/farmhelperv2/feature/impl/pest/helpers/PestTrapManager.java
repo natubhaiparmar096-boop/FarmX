@@ -28,7 +28,7 @@ public final class PestTrapManager {
         String plot = FarmHelperConfig.pestTrapsPlot;
         GardenPlots.Bounds bounds = GardenPlots.boundsForPlot(plot);
         if (bounds != null) {
-            mc.thePlayer.sendChatMessage("/plottp " + PestPlotId.normalize(plot));
+            PestCommandScheduler.send("/plottp " + PestPlotId.normalize(plot));
         }
         clock.schedule(3000);
     }

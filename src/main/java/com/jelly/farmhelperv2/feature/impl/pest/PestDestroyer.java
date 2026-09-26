@@ -35,6 +35,7 @@ public class PestDestroyer implements IFeature {
     private Entity currentTarget = null;
     private final Set<Entity> killedEntities = new HashSet<>();
     private int plotRetryAttempts = 0;
+    private int teleportRetries = 0;
 
     public enum State {
         IDLE,
@@ -129,6 +130,7 @@ public class PestDestroyer implements IFeature {
         plotQueue.clear();
         killedEntities.clear();
         plotRetryAttempts = 0;
+        teleportRetries = 0;
 
         Set<String> infested = PestTabSnapshot.read().getInfestedPlots();
         if (PestPlotId.isUsable(initialPlot)) {
@@ -187,13 +189,29 @@ public class PestDestroyer implements IFeature {
                     stateClock.schedule(200);
                     return;
                 }
+                if (!PestCommandScheduler.canSend()) {
+                    stateClock.schedule(200);
+                    return;
+                }
                 String tpArg = "0".equals(currentPlot) ? "barn" : currentPlot;
-                mc.thePlayer.sendChatMessage("/plottp " + tpArg);
+                PestCommandScheduler.send("/plottp " + tpArg);
                 state = State.WAIT_TELEPORT;
                 stateClock.schedule(2500);
                 break;
 
             case WAIT_TELEPORT:
+                // Verify teleport succeeded by checking if player is in the target plot
+                if (plotBounds != null && !plotBounds.contains(mc.thePlayer.posX, mc.thePlayer.posZ, 5.0)) {
+                    if (teleportRetries < 2) {
+                        teleportRetries++;
+                        LogUtils.sendWarning("[Pest] Teleport verification failed, retrying (" + teleportRetries + "/2)...");
+                        state = State.TELEPORT_TO_PLOT;
+                        stateClock.schedule(1500);
+                        return;
+                    }
+                    LogUtils.sendWarning("[Pest] Teleport may have failed after retries, continuing...");
+                }
+                teleportRetries = 0;
                 PestLoadoutHelper.equipSlot(PestLoadoutHelper.findVacuumSlot());
                 if (PestBallsackShredder.isConfiguredForPlot(currentPlot)) {
                     state = State.BALLSACK_SHREDDER;

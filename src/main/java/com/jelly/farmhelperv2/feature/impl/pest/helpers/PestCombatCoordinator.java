@@ -7,6 +7,7 @@ import com.jelly.farmhelperv2.util.helper.Clock;
 import com.jelly.farmhelperv2.util.helper.Rotation;
 import com.jelly.farmhelperv2.util.helper.RotationConfiguration;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.Vec3;
@@ -75,7 +76,10 @@ public final class PestCombatCoordinator {
     }
 
     public static void stopVacuum() {
-        KeyBindUtils.stopMovement();
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.gameSettings != null) {
+            KeyBinding.setKeyBindState(mc.gameSettings.keyBindUseItem.getKeyCode(), false);
+        }
     }
 
     public static boolean performAotvHop(Vec3 targetPos) {

@@ -29,6 +29,7 @@ public final class PestPetManager {
     private String targetPetName = null;
     private String targetRarity = null;
     private Runnable callback = null;
+    private int sendRetries = 0;
 
     public enum State {
         IDLE,
@@ -83,8 +84,9 @@ public final class PestPetManager {
         this.callback = onComplete;
         this.active = true;
         this.state = State.SEND_COMMAND;
+        this.sendRetries = 0;
         this.stateClock.schedule(100);
-        this.timeoutClock.schedule(4000);
+        this.timeoutClock.schedule(10000);
         LogUtils.sendDebug("[PetSwapper] Starting pet swap to " + this.targetPetName + " (" + (rarity != null ? rarity : "ANY") + ")...");
     }
 
@@ -94,6 +96,7 @@ public final class PestPetManager {
         targetPetName = null;
         targetRarity = null;
         callback = null;
+        sendRetries = 0;
     }
 
     public void onTick() {
@@ -109,9 +112,13 @@ public final class PestPetManager {
 
         switch (state) {
             case SEND_COMMAND:
-                mc.thePlayer.sendChatMessage("/pets");
+                if (!PestCommandScheduler.canSend()) {
+                    stateClock.schedule(200);
+                    return;
+                }
+                PestCommandScheduler.send("/pets");
                 state = State.WAIT_GUI;
-                stateClock.schedule(500);
+                stateClock.schedule(FarmHelperConfig.petCommandDelay);
                 break;
 
             case WAIT_GUI:
@@ -127,7 +134,15 @@ public final class PestPetManager {
                         return;
                     }
                 }
-                stateClock.schedule(100);
+                // GUI didn't open — retry /pets up to 2 times
+                if (sendRetries < 2) {
+                    sendRetries++;
+                    LogUtils.sendWarning("[PetSwapper] Pets GUI did not open, retrying (" + sendRetries + "/2)...");
+                    state = State.SEND_COMMAND;
+                    stateClock.schedule(500);
+                } else {
+                    stateClock.schedule(100);
+                }
                 break;
 
             case CLICK_PET:

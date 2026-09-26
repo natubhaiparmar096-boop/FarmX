@@ -58,7 +58,11 @@ public final class PestExchangeManager {
 
         switch (state) {
             case TELEPORT_TO_BARN:
-                mc.thePlayer.sendChatMessage("/plottp barn");
+                if (!PestCommandScheduler.canSend()) {
+                    stateClock.schedule(200);
+                    return;
+                }
+                PestCommandScheduler.send("/plottp barn");
                 state = State.WAIT_TELEPORT;
                 stateClock.schedule(2500);
                 break;

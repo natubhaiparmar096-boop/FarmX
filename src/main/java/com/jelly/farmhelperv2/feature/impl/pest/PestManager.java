@@ -101,13 +101,25 @@ public final class PestManager {
 
         // Check tablist threshold if enabled
         if (FarmHelperConfig.enablePestDestroyer && FarmHelperConfig.pestTriggerOnTabThreshold) {
+            if (!tabCheckClock.isScheduled()) {
+                tabCheckClock.schedule(2000);
+            }
             if (tabCheckClock.passed()) {
                 tabCheckClock.schedule(2000);
                 PestTabSnapshot snapshot = PestTabSnapshot.read();
                 if (snapshot.getAliveCount() >= FarmHelperConfig.pestThreshold) {
                     if (reentryCooldown.passed() && !PestDestroyer.getInstance().isRunning() && !PestReturnManager.isReturning() && PestLifecycleManager.getStage() == PestLifecycleManager.Stage.IDLE) {
                         if (MacroHandler.getInstance().isMacroToggled() || FarmHelperConfig.manualPestMode) {
-                            String firstPlot = snapshot.getInfestedPlots().isEmpty() ? null : snapshot.getInfestedPlots().iterator().next();
+                            String firstPlot;
+                            if (!snapshot.getInfestedPlots().isEmpty()) {
+                                firstPlot = snapshot.getInfestedPlots().iterator().next();
+                            } else {
+                                // Fallback: use current plot (player is likely farming in the infested plot)
+                                com.jelly.farmhelperv2.util.PlotUtils.Plot curPlot =
+                                        com.jelly.farmhelperv2.util.PlotUtils.getPlotNumberBasedOnLocation();
+                                firstPlot = (curPlot != null && curPlot.number != null)
+                                        ? String.valueOf(curPlot.number) : null;
+                            }
                             PestLifecycleManager.start(firstPlot);
                             reentryCooldown.schedule(30_000);
                         }

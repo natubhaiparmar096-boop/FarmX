@@ -1180,6 +1180,9 @@ public class FarmHelperConfig extends Config {
     @Text(name = "Hunting Pet", category = PEST_DESTROYER, subcategory = "Pet Swapper", description = "Pet equipped during pest hunting (e.g. Hedgehog)")
     public static String pestHuntingPet = "Hedgehog";
 
+    @Number(name = "Pet Command Delay (ms)", category = PEST_DESTROYER, subcategory = "Pet Swapper", description = "Delay after sending /pets command before checking GUI", min = 500, max = 5000)
+    public static int petCommandDelay = 1500;
+
     @Switch(name = "Acoustic Pest Radar", category = PEST_DESTROYER, subcategory = "Detection", description = "Triangulate pest locations from server sound packets")
     public static boolean pestAcousticRadar = true;
 
