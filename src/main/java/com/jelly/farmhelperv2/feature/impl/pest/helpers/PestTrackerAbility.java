@@ -27,7 +27,7 @@ public final class PestTrackerAbility {
 
         long now = System.currentTimeMillis();
         if (now < nextUseAt) return false;
-        nextUseAt = now + 1200L;
+        nextUseAt = now + 800L;
 
         int vacSlot = PestLoadoutHelper.findVacuumSlot();
         if (vacSlot >= 0) {
@@ -80,6 +80,25 @@ public final class PestTrackerAbility {
 
     public static boolean hasFreshTrail(long maxAgeMs) {
         return TRAIL.isFresh(maxAgeMs);
+    }
+
+    public static int getParticleCount() {
+        return TRAIL.getParticleCount();
+    }
+
+    /**
+     * Returns the furthest particle position from the pulse origin.
+     * This is the particle closest to the pest.
+     */
+    public static Vec3 getFurthestParticlePos(double targetY) {
+        return TRAIL.getFurthestParticleFromOrigin(targetY);
+    }
+
+    /**
+     * Returns the last chronological particle position.
+     */
+    public static Vec3 getLastParticlePos(double targetY) {
+        return TRAIL.getLastParticle(targetY);
     }
 
     public static Vec3 getProjectedWaypoint(double distance, GardenPlots.Bounds bounds, double targetY) {

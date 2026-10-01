@@ -69,4 +69,51 @@ public final class PestTrackerTrail {
 
         return new Vec3(targetX, targetY, targetZ);
     }
+
+    /**
+     * Returns the number of captured particle points (excluding the origin).
+     */
+    public int getParticleCount() {
+        return Math.max(0, points.size() - 1);
+    }
+
+    /**
+     * Returns the particle position furthest from the pulse origin.
+     * This particle is the one closest to the pest, since the trail
+     * goes from the player toward the pest.
+     *
+     * @param targetY the Y coordinate to use for the returned position
+     * @return the furthest particle position, or null if no particles captured
+     */
+    public Vec3 getFurthestParticleFromOrigin(double targetY) {
+        if (points.size() < 2) return null;
+        Vec3 origin = points.get(0);
+        Vec3 best = null;
+        double bestDistSq = 0;
+        synchronized (points) {
+            for (int i = 1; i < points.size(); i++) {
+                Vec3 p = points.get(i);
+                double dSq = (p.xCoord - origin.xCoord) * (p.xCoord - origin.xCoord)
+                        + (p.zCoord - origin.zCoord) * (p.zCoord - origin.zCoord);
+                if (dSq > bestDistSq) {
+                    bestDistSq = dSq;
+                    best = p;
+                }
+            }
+        }
+        if (best == null) return null;
+        return new Vec3(best.xCoord, targetY, best.zCoord);
+    }
+
+    /**
+     * Returns the last captured particle position (chronologically).
+     *
+     * @param targetY the Y coordinate to use for the returned position
+     * @return the last particle position, or null if no particles captured
+     */
+    public Vec3 getLastParticle(double targetY) {
+        if (points.size() < 2) return null;
+        Vec3 last = points.get(points.size() - 1);
+        return new Vec3(last.xCoord, targetY, last.zCoord);
+    }
 }

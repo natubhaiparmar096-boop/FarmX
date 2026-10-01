@@ -36,6 +36,8 @@ public class PestDestroyer implements IFeature {
     private final Set<Entity> killedEntities = new HashSet<>();
     private int plotRetryAttempts = 0;
     private int teleportRetries = 0;
+    private int trailFollowAttempts = 0;
+    private static final int MAX_TRAIL_ATTEMPTS = 10;
 
     public enum State {
         IDLE,
@@ -43,6 +45,8 @@ public class PestDestroyer implements IFeature {
         WAIT_TELEPORT,
         BALLSACK_SHREDDER,
         SCAN_PESTS,
+        FOLLOW_TRAIL,
+        WAIT_TRAIL_PARTICLES,
         APPROACH_PEST,
         KILL_PEST,
         REPOSITION_PEST,
@@ -131,6 +135,7 @@ public class PestDestroyer implements IFeature {
         killedEntities.clear();
         plotRetryAttempts = 0;
         teleportRetries = 0;
+        trailFollowAttempts = 0;
 
         Set<String> infested = PestTabSnapshot.read().getInfestedPlots();
         if (PestPlotId.isUsable(initialPlot)) {
@@ -236,6 +241,7 @@ public class PestDestroyer implements IFeature {
                 if (currentTarget != null) {
                     FlyPathFinderExecutor.getInstance().stop();
                     state = State.APPROACH_PEST;
+                    trailFollowAttempts = 0;
                     stateClock.schedule(50);
                     return;
                 }
@@ -248,42 +254,112 @@ public class PestDestroyer implements IFeature {
                     return;
                 }
 
-                double roofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
+                // 3. PRIMARY: Pulse vacuum tracker and follow particle trail
+                //    This is the main pest-finding method — left-click vacuum
+                //    generates particles that trail toward the nearest pest.
+                if (trailFollowAttempts < MAX_TRAIL_ATTEMPTS) {
+                    PestTrackerAbility.triggerPulse();
+                    state = State.WAIT_TRAIL_PARTICLES;
+                    stateClock.schedule(600); // Wait for particles to spawn
+                    return;
+                }
 
-                // 3. Acoustic Radar check (cooldown prevents infinite re-injection)
+                // 4. FALLBACK: Acoustic Radar check
+                double roofY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
                 if (acousticInjectionCooldown.passed()) {
                     Vec3 soundWp = PestTargetTracker.getAcousticRadarWaypoint(plotBounds, 3000, roofY);
                     if (soundWp != null && plotNavigator != null) {
                         plotNavigator.injectPriorityWaypoint(soundWp);
                         acousticInjectionCooldown.schedule(8000);
+                        trailFollowAttempts = 0; // Reset trail attempts after acoustic fallback
                         state = State.SWEEP_WAYPOINTS;
                         stateClock.schedule(50);
                         return;
                     }
                 }
 
-                // 4. Vacuum Tracker Scent Pulse check
-                if (trackerPulseCooldown.passed()) {
-                    PestTrackerAbility.triggerPulse();
-                    trackerPulseCooldown.schedule(1500);
-                }
-                if (PestTrackerAbility.hasFreshTrail(1200)) {
-                    Vec3 projected = PestTrackerAbility.getProjectedWaypoint(45.0, plotBounds, roofY);
-                    if (projected != null && plotNavigator != null) {
-                        plotNavigator.injectPriorityWaypoint(projected);
-                        state = State.SWEEP_WAYPOINTS;
-                        stateClock.schedule(50);
-                        return;
-                    }
-                }
-
-                // 5. Normal sweep waypoints
+                // 5. LAST RESORT: Normal sweep waypoints
                 if (plotNavigator != null && plotNavigator.hasNextWaypoint()) {
+                    trailFollowAttempts = 0;
                     state = State.SWEEP_WAYPOINTS;
                     stateClock.schedule(50);
                 } else {
                     state = State.CHECK_NEXT_PLOT;
                     stateClock.schedule(150);
+                }
+                break;
+
+            case WAIT_TRAIL_PARTICLES:
+                // Check if a pest entity appeared while we were waiting
+                currentTarget = PestTargetTracker.findClosestPest(plotBounds, killedEntities);
+                if (currentTarget != null) {
+                    FlyPathFinderExecutor.getInstance().stop();
+                    state = State.APPROACH_PEST;
+                    trailFollowAttempts = 0;
+                    stateClock.schedule(50);
+                    return;
+                }
+
+                // Check if we got particles from the pulse
+                if (PestTrackerAbility.hasFreshTrail(3000)) {
+                    double wpY = plotNavigator != null ? plotNavigator.calculateRoofClearanceY(mc.thePlayer.posY) : Math.max(78.0, mc.thePlayer.posY);
+                    // Fly to the FURTHEST particle — it's the one closest to the pest
+                    Vec3 particleTarget = PestTrackerAbility.getFurthestParticlePos(wpY);
+                    if (particleTarget == null) {
+                        // Fallback: project a short distance in trail direction
+                        particleTarget = PestTrackerAbility.getProjectedWaypoint(18.0, plotBounds, wpY);
+                    }
+                    if (particleTarget != null) {
+                        trailFollowAttempts++;
+                        LogUtils.sendDebug("[Pest] Following particle trail → (" +
+                                String.format("%.1f, %.1f, %.1f", particleTarget.xCoord, particleTarget.yCoord, particleTarget.zCoord) +
+                                ") [attempt " + trailFollowAttempts + "/" + MAX_TRAIL_ATTEMPTS + ", " +
+                                PestTrackerAbility.getParticleCount() + " particles]");
+                        state = State.FOLLOW_TRAIL;
+                        FlyPathFinderExecutor.getInstance().setSprinting(true);
+                        FlyPathFinderExecutor.getInstance().findPath(particleTarget, false, true);
+                        sweepWaypointTimeout.schedule(5000);
+                        stateClock.schedule(200);
+                        return;
+                    }
+                }
+
+                // No particles received — pulse might have failed, go back and try again
+                trailFollowAttempts++;
+                LogUtils.sendDebug("[Pest] No particles received from pulse, retrying... [attempt " +
+                        trailFollowAttempts + "/" + MAX_TRAIL_ATTEMPTS + "]");
+                state = State.SCAN_PESTS;
+                stateClock.schedule(300);
+                break;
+
+            case FOLLOW_TRAIL:
+                // Continuously check for pest entities while flying toward particle position
+                currentTarget = PestTargetTracker.findClosestPest(plotBounds, killedEntities);
+                if (currentTarget != null) {
+                    FlyPathFinderExecutor.getInstance().stop();
+                    state = State.APPROACH_PEST;
+                    trailFollowAttempts = 0;
+                    stateClock.schedule(50);
+                    return;
+                }
+
+                // Check tablist: maybe all pests were killed by other players
+                PestTabSnapshot trailTab = PestTabSnapshot.read();
+                if (trailTab.getAliveCount() == 0) {
+                    FlyPathFinderExecutor.getInstance().stop();
+                    state = State.FINISH;
+                    stateClock.schedule(50);
+                    return;
+                }
+
+                // When we arrive at the particle position (or timeout), pulse again
+                if (!FlyPathFinderExecutor.getInstance().isRunning() || sweepWaypointTimeout.passed()) {
+                    FlyPathFinderExecutor.getInstance().stop();
+                    // Go back to SCAN_PESTS which will pulse again and continue the loop
+                    state = State.SCAN_PESTS;
+                    stateClock.schedule(200);
+                } else {
+                    stateClock.schedule(100);
                 }
                 break;
 
